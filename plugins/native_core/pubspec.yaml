@@ -1,0 +1,22 @@
+name: native_core
+description: Native pieces of Melody Keeeys - miniaudio FFI engine and global key hooks.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.13.5
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      linux:
+        pluginClass: NativeCorePlugin
+      macos:
+        pluginClass: NativeCorePlugin
+      windows:
+        pluginClass: NativeCorePluginCApi

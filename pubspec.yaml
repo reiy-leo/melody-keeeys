@@ -1,0 +1,75 @@
+name: melody_keeeys
+description: "Melody Keeeys (旋律按键) - cross-platform keyboard sound effects tray app."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Native core (miniaudio FFI + global key hooks), local plugin.
+  native_core:
+    path: plugins/native_core
+
+  # Audio FFI helpers
+  ffi: ^2.2.0
+
+  # Tray & windows
+  tray_manager: ^0.7.0
+  window_manager: ^0.5.2
+  desktop_multi_window: ^0.3.1
+
+  # System integration
+  shared_preferences: ^2.5.0
+  path_provider: ^2.1.5
+  launch_at_startup: ^0.5.1
+  hotkey_manager: ^0.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/sounds/
+    - assets/sounds/cherry_mx_blue/
+    - assets/sounds/gateron_oil_king/
+    - assets/sounds/holy_panda/
+    - assets/sounds/ibm_model_m/
+    - assets/sounds/kailh_box_white/
+    - assets/sounds/topre_electrostatic/
+    - assets/sounds/bubble_pop/
+    - assets/sounds/scifi_laser/
+    - assets/sounds/typewriter_1930s/
+    - assets/sounds/silent_red/
+    - assets/icons/
+
+  fonts:
+    - family: Space Grotesk
+      fonts:
+        - asset: assets/fonts/space_grotesk_400.ttf
+          weight: 400
+        - asset: assets/fonts/space_grotesk_500.ttf
+          weight: 500
+        - asset: assets/fonts/space_grotesk_600.ttf
+          weight: 600
+        - asset: assets/fonts/space_grotesk_700.ttf
+          weight: 700
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/plus_jakarta_sans_400.ttf
+          weight: 400
+        - asset: assets/fonts/plus_jakarta_sans_500.ttf
+          weight: 500
+        - asset: assets/fonts/plus_jakarta_sans_600.ttf
+          weight: 600
+        - asset: assets/fonts/plus_jakarta_sans_700.ttf
+          weight: 700

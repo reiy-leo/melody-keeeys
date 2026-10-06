@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-surface-variant": "#cac4d4", "outline-variant": "#494552", "on-tertiary-container": "#00394f", "on-tertiary-fixed-variant": "#004c69", "secondary-fixed": "#ffd8e7", "background": "#13121b", "primary-fixed-dim": "#cebdff", "on-primary-fixed": "#21005e", "primary-container": "#a78bfa", "on-tertiary-fixed": "#001e2c", "primary": "#cebdff", "outline": "#948e9d", "tertiary-fixed-dim": "#7bd0ff", "tertiary-container": "#00a8e2", "surface-variant": "#35343e", "tertiary-fixed": "#c4e7ff", "on-error": "#690005", "on-surface": "#e5e0ee", "on-secondary-fixed-variant": "#85145a", "surface-container-low": "#1c1a24", "secondary": "#ffafd3", "surface-container-high": "#2a2933", "surface-tint": "#cebdff", "inverse-primary": "#674bb5", "tertiary": "#7bd0ff", "surface-bright": "#3a3842", "on-primary-fixed-variant": "#4f319c", "surface": "#13121b", "on-secondary-fixed": "#3d0026", "primary-fixed": "#e8ddff", "surface-dim": "#13121b", "secondary-container": "#85145a", "error-container": "#93000a", "on-secondary-container": "#ff93c8", "on-secondary": "#620040", "inverse-surface": "#e5e0ee", "on-error-container": "#ffdad6", "on-tertiary": "#00354a", "surface-container-lowest": "#0e0d16", "surface-container": "#201e28", "inverse-on-surface": "#312f39", "on-background": "#e5e0ee", "surface-container-highest": "#35343e", "error": "#ffb4ab", "on-primary-container": "#3c1989", "secondary-fixed-dim": "#ffafd3", "on-primary": "#381385" }, "borderRadius": { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, "spacing": { "gutter-compact": "0.5rem", "space-lg": "1.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-xs": "0.25rem", "margin": "1.5rem", "space-sm": "0.5rem", "space-xl": "2rem", "margin-compact": "0.75rem" }, "fontFamily": { "title-lg": ["Plus Jakarta Sans"], "display-lg": ["Space Grotesk"], "headline-md": ["Space Grotesk"], "headline-sm": ["Space Grotesk"], "title-md": ["Plus Jakarta Sans"], "display-md": ["Space Grotesk"], "body-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "headline-lg": ["Space Grotesk"], "label-sm": ["Space Grotesk"], "label-md": ["Space Grotesk"], "label-lg": ["Space Grotesk"] }, "fontSize": { "title-lg": ["16px", { "lineHeight": "22px", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "title-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "display-md": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-sm": ["9px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "700" }], "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased select-none"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between p-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm px-space-sm pt-space-xs"><div class="w-3 h-3 rounded-full bg-error cursor-pointer"></div><div class="w-3 h-3 rounded-full bg-[#f59e0b] cursor-pointer"></div><div class="w-3 h-3 rounded-full bg-[#10b981] cursor-pointer"></div></div><div class="flex items-center gap-space-sm px-space-sm"><div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shadow-[0_4px_12px_rgba(0,0,0,0.3)]"><span class="material-symbols-outlined text-[20px]">keyboard</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface leading-none">KeySound</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-primary mt-1">Studio Pro</span></div></div><nav class="flex flex-col gap-space-xs px-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="sound-effects" href="#"><span class="material-symbols-outlined text-[18px]">graphic_eq</span><span class="font-label-lg text-label-lg">Sound Effects</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-full transition-all bg-primary-container text-on-primary-container font-headline-sm" data-path="general-settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-label-lg text-label-lg">General</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="menu-bar-behavior" href="#"><span class="material-symbols-outlined text-[18px]">dock_to_bottom</span><span class="font-label-lg text-label-lg">Menu Bar</span></a></nav></div><div class="flex flex-col gap-space-sm bg-surface-container p-space-md rounded-DEFAULT"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Engine Status</span><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span><span class="font-label-sm text-label-sm text-tertiary">Active</span></div></div><div class="flex items-center justify-between pt-space-xs"><span class="font-body-sm text-body-sm text-on-surface-variant">v2.4.0 Engine</span><a class="font-label-md text-label-md text-primary hover:text-on-surface transition-colors" data-path="about-and-status" href="#">About</a></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-between px-margin shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-md text-label-md text-on-surface-variant">Actuation: 0.1ms</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-tertiary">volume_up</span><span class="font-label-md text-label-md">85 dB</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 px-margin pb-margin bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Content Area Wrapper -->
+<div class="flex flex-col gap-space-xl pb-space-xl">
+<!-- Top Meta Context Bar (Material 3 Expressive Sub-Bar) -->
+<div class="flex flex-wrap items-center justify-between gap-space-md bg-surface-container-low p-space-md rounded-xl shadow-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">tune</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">系统底层与核心配置</span>
+<span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded-full bg-surface-container-highest text-tertiary">Realtime RingBuffer</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">配置低延迟驱动路由、启动调度守护进程以及全局工作流屏蔽规则</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-space-xs bg-surface-container px-space-md py-space-xs rounded-full">
+<span class="font-label-md text-label-md text-outline">守护进程 PID:</span>
+<span class="font-label-md text-label-md text-primary font-mono">81920</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-primary text-on-primary font-label-md text-label-md transition-transform active:scale-95 shadow-sm" id="btn-save-meta">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+<span>立即应用配置</span>
+</button>
+</div>
+</div>
+<!-- 12-Column Responsive Bento Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- COLUMN 1: System Engine & Trigger Acoustics (7 Cols) -->
+<div class="xl:col-span-7 flex flex-col gap-space-lg">
+<!-- Section 1.1: System Engine & Latency Monitor Card -->
+<div class="flex flex-col bg-surface-container rounded-xl p-space-lg shadow-md relative overflow-hidden">
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[22px]">speed</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">底层驱动 &amp; 平台调度</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-high rounded-full">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary">Realtime Lock</span>
+</div>
+</div>
+<!-- Latency Gauge & Ring-Buffer Visualization -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm p-space-md bg-surface-container-low rounded-DEFAULT mb-space-lg">
+<div class="flex flex-col gap-space-xs p-space-sm bg-surface-container rounded-DEFAULT">
+<span class="font-label-sm text-label-sm uppercase text-outline">端到端延迟 (Hardware)</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-md text-display-md text-tertiary leading-none font-bold">1.2</span>
+<span class="font-label-md text-label-md text-on-surface-variant">ms</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">CoreAudio I/O Jitter &lt;0.04ms</span>
+</div>
+<div class="flex flex-col gap-space-xs p-space-sm bg-surface-container rounded-DEFAULT">
+<span class="font-label-sm text-label-sm uppercase text-outline">缓冲区块尺寸 (Buffer)</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-md text-display-md text-on-surface leading-none font-bold">64</span>
+<span class="font-label-md text-label-md text-on-surface-variant">samples</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">@ 96.0 kHz 32-bit Float</span>
+</div>
+<div class="flex flex-col gap-space-xs p-space-sm bg-surface-container rounded-DEFAULT">
+<span class="font-label-sm text-label-sm uppercase text-outline">CPU 瞬态占空比</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-md text-display-md text-secondary leading-none font-bold">0.4</span>
+<span class="font-label-md text-label-md text-on-surface-variant">%</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">SIMD Neon/AVX 加速</span>
+</div>
+</div>
+<!-- Startup Behavior Switches (M3 Style Pills) -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-colors hover:bg-surface-bright/40">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">power_settings_new</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">开机自动启动 (Launch at Login)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">系统登录后自动注册 LaunchDaemon 后台低能耗引擎守护进程</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="toggle-startup" type="checkbox"/>
+<div class="w-12 h-7 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface peer-checked:after:bg-on-primary-container peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-outline after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-colors hover:bg-surface-bright/40">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">启动时以托盘菜单静默运行</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">跳过主配置中心窗口弹窗，仅在系统顶部菜单栏驻留微型 HUD</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="toggle-tray" type="checkbox"/>
+<div class="w-12 h-7 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface peer-checked:after:bg-on-primary-container peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-outline after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Section 1.2: Cross-Platform Audio Engine Selection -->
+<div class="flex flex-col bg-surface-container rounded-xl p-space-lg shadow-md">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-tertiary text-[22px]">developer_board</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">跨平台底层音频引擎通道</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase text-outline">Low-overhead HAL</span>
+</div>
+<!-- Engine Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm" id="engine-selector">
+<!-- macOS CoreAudio (Active) -->
+<div class="engine-card active cursor-pointer flex flex-col justify-between p-space-md rounded-DEFAULT bg-primary-container/20 text-on-surface transition-all transform active:scale-95 shadow-sm relative overflow-hidden" data-engine="coreaudio">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-sm text-headline-sm text-primary">macOS</span>
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-title-md text-title-md font-bold">CoreAudio HAL</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">硬件 Direct-DMA 输出</span>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary font-mono">1.2ms 活跃中</span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+</div>
+</div>
+<!-- Windows WASAPI Exclusive -->
+<div class="engine-card cursor-pointer flex flex-col justify-between p-space-md rounded-DEFAULT bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all transform active:scale-95" data-engine="wasapi">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Windows</span>
+<span class="material-symbols-outlined text-outline text-[20px]">radio_button_unchecked</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-title-md text-title-md font-bold text-on-surface">WASAPI Exclusive</span>
+<span class="font-body-sm text-body-sm">独占直通模式规避系统混音</span>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline font-mono">2.4ms 可用</span>
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+</div>
+</div>
+<!-- Linux PipeWire Pulse -->
+<div class="engine-card cursor-pointer flex flex-col justify-between p-space-md rounded-DEFAULT bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all transform active:scale-95" data-engine="pipewire">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Linux</span>
+<span class="material-symbols-outlined text-outline text-[20px]">radio_button_unchecked</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-title-md text-title-md font-bold text-on-surface">ALSA / PipeWire</span>
+<span class="font-body-sm text-body-sm">Pulse 实时内核通道直通</span>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline font-mono">1.8ms 待命</span>
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 1.3: Anti-Ghosting & Key Acoustics Response -->
+<div class="flex flex-col bg-surface-container rounded-xl p-space-lg shadow-md">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px]">instant_mix</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">触发防冲突与按键响应</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase text-outline">Acoustic Suppression</span>
+</div>
+<div class="flex flex-col gap-space-lg">
+<!-- Suppression Slider -->
+<div class="flex flex-col gap-space-sm p-space-md rounded-DEFAULT bg-surface-container-low">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Anti-Ghosting 连击重叠音效抑制时间窗口</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">过滤高频打字过程中的同频声波积聚与爆音失真</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-highest px-space-md py-space-xs rounded-full">
+<span class="font-headline-sm text-headline-sm text-primary font-mono" id="slider-val">35</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ms</span>
+</div>
+</div>
+<!-- Custom Styled Range Slider -->
+<div class="relative flex items-center w-full mt-space-sm">
+<input class="w-full h-2 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary" id="anti-ghosting-range" max="100" min="10" type="range" value="35"/>
+</div>
+<div class="flex justify-between items-center text-outline">
+<span class="font-label-sm text-label-sm">10ms (极度灵敏·瞬态原生)</span>
+<span class="font-label-sm text-label-sm text-primary">35ms (推荐·自然回弹)</span>
+<span class="font-label-sm text-label-sm">100ms (强力过滤·低频防粘连)</span>
+</div>
+</div>
+<!-- Modifier Long-Press Switch -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-colors hover:bg-surface-bright/40">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">repeat</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">修饰键长按连发声音 (Modifier Auto-Repeat)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">长按 Shift / Control / Command 等修饰键时持续循环触发轻触行程音</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="toggle-modifier-repeat" type="checkbox"/>
+<div class="w-12 h-7 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface peer-checked:after:bg-on-secondary-container peer-checked:bg-secondary-container after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-outline after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: Intelligent App Blacklist & Global Shortcuts (5 Cols) -->
+<div class="xl:col-span-5 flex flex-col gap-space-lg">
+<!-- Section 2.1: Intelligent App Blacklist / Exclusion List -->
+<div class="flex flex-col bg-surface-container rounded-xl p-space-lg shadow-md">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-error text-[22px]">do_not_disturb_on</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">智能静音与防干扰应用列表</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">目标进程获得操作系统焦点时自动切断声效输出</span>
+</div>
+</div>
+</div>
+<!-- Add Application Button Action (M3 Pill style) -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded-DEFAULT mb-space-md">
+<span class="font-label-md text-label-md text-outline px-space-xs">已配置 3 个智能隔离上下文</span>
+<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-highest text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md transition-all active:scale-95 shadow-sm" id="btn-add-app">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>添加排除应用</span>
+</button>
+</div>
+<!-- Blacklist App Item Mosaic -->
+<div class="flex flex-col gap-space-xs" id="blacklist-container">
+<!-- Zoom / Tencent Meeting -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-transform hover:-translate-y-0.5">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[22px]">video_camera_front</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Zoom &amp; 腾讯会议</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-tertiary/10 text-tertiary">会议免扰</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline font-mono">us.zoom.xos / com.tencent.meeting</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-surface-variant transition-colors" title="移除规则">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Competitive Gaming Mode (CS:GO / Valorant) -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-transform hover:-translate-y-0.5">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">sports_esports</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface font-semibold">CS2 &amp; Valorant</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary">全屏游戏纯净</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline font-mono">cs2.exe / valorant-win64.exe</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-surface-variant transition-colors" title="移除规则">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Logic Pro / Cubase DAW Host -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-transform hover:-translate-y-0.5">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">piano</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Logic Pro &amp; Cubase 13</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">DAW 独占直通</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline font-mono">com.apple.logic10 / cubase.bin</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-surface-variant transition-colors" title="移除规则">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2.2: Global Hotkeys Settings -->
+<div class="flex flex-col bg-surface-container rounded-xl p-space-lg shadow-md">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[22px]">keyboard_command_key</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">全局热键映射 (Global Shortcuts)</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase text-outline">System Wide</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Hotkey 1: Mute/Unmute -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">全局静音 / 恢复输出</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">随时一键切断物理击键声波</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<kbd class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant font-mono font-bold text-label-md shadow-sm">⌥ Option</kbd>
+<span class="text-outline text-label-sm">+</span>
+<kbd class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant font-mono font-bold text-label-md shadow-sm">⇧ Shift</kbd>
+<span class="text-outline text-label-sm">+</span>
+<kbd class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-mono font-bold text-label-md shadow-sm">K</kbd>
+</div>
+</div>
+<!-- Hotkey 2: Next Sound Profile -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">快速轮换下一个按键声效包</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">在已加载的轴体音效配置中瞬时轮换</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<kbd class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant font-mono font-bold text-label-md shadow-sm">⌥ Option</kbd>
+<span class="text-outline text-label-sm">+</span>
+<kbd class="px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant font-mono font-bold text-label-md shadow-sm">⇧ Shift</kbd>
+<span class="text-outline text-label-sm">+</span>
+<kbd class="px-space-sm py-1 rounded bg-surface-container-highest text-primary font-mono font-bold text-label-md shadow-sm">]</kbd>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Bottom Acoustic Test Bench & Preset Reset Action Bar -->
+<div class="flex flex-col lg:flex-row items-center justify-between gap-space-md p-space-lg bg-surface-container-low rounded-xl shadow-lg relative overflow-hidden">
+<!-- Visualizer & Key Trigger Interactive Test Zone -->
+<div class="flex items-center gap-space-lg w-full lg:w-auto">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary text-[20px]">graphic_eq</span>
+<span class="font-title-md text-title-md text-on-surface">声学测试跳线 (Acoustic Trigger Test)</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">在此区域敲击键盘或点击按键预览当前时间抑制与驱动响应</span>
+</div>
+<!-- Interactive Virtual Keycap -->
+<button class="relative group px-space-lg py-space-sm rounded-DEFAULT bg-surface-container-highest hover:bg-surface-bright text-on-surface font-headline-sm text-headline-sm shadow-md transition-all active:scale-95 flex items-center gap-space-sm" id="test-keycap">
+<span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform text-[20px]">touch_app</span>
+<span>敲击测试 (Space)</span>
+<span class="absolute bottom-0 left-0 right-0 h-1 bg-secondary/40 rounded-b-DEFAULT"></span>
+</button>
+<!-- Dynamic Mini-Equalizer Visualizer Pill -->
+<div class="hidden sm:flex items-center gap-1 h-8 px-space-md rounded-full bg-surface-container" id="visualizer-pill">
+<span class="w-1 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="w-1 h-4 rounded-full bg-tertiary animate-pulse"></span>
+<span class="w-1 h-6 rounded-full bg-secondary animate-pulse"></span>
+<span class="w-1 h-3 rounded-full bg-primary animate-pulse"></span>
+<span class="w-1 h-5 rounded-full bg-tertiary animate-pulse"></span>
+</div>
+</div>
+<!-- Action Buttons (Reset & Diagnostic) -->
+<div class="flex items-center gap-space-sm w-full lg:w-auto justify-end">
+<button class="flex items-center gap-space-xs px-space-md py-space-sm rounded-full bg-surface-container-highest text-on-surface-variant hover:text-on-surface hover:bg-surface-bright transition-all font-label-md text-label-md active:scale-95" id="btn-run-diag">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>延迟自检诊断</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-surface-container text-error hover:bg-error-container hover:text-on-error-container transition-all font-label-md text-label-md active:scale-95" id="btn-reset-preset">
+<span class="material-symbols-outlined text-[18px]">restore</span>
+<span>恢复默认出厂设置</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Slider Interactivity
+    const slider = document.getElementById('anti-ghosting-range');
+    const sliderVal = document.getElementById('slider-val');
+    if (slider && sliderVal) {
+      slider.addEventListener('input', (e) => {
+        sliderVal.textContent = e.target.value;
+      });
+    }
+
+    // Engine Selection Switcher
+    const engineCards = document.querySelectorAll('.engine-card');
+    engineCards.forEach(card => {
+      card.addEventListener('click', () => {
+        engineCards.forEach(c => {
+          c.classList.remove('bg-primary-container/20', 'shadow-sm');
+          c.classList.add('bg-surface-container-low');
+          const title = c.querySelector('.font-headline-sm');
+          if (title) {
+            title.classList.remove('text-primary');
+            title.classList.add('text-on-surface');
+          }
+          const icon = c.querySelector('.material-symbols-outlined');
+          if (icon) {
+            icon.textContent = 'radio_button_unchecked';
+            icon.classList.remove('text-primary');
+            icon.classList.add('text-outline');
+          }
+          const badge = c.querySelector('.mt-space-md span:first-child');
+          if (badge) {
+            badge.classList.remove('text-tertiary');
+            badge.classList.add('text-outline');
+          }
+        });
+
+        // Activate Current Card
+        card.classList.remove('bg-surface-container-low');
+        card.classList.add('bg-primary-container/20', 'shadow-sm');
+        const activeTitle = card.querySelector('.font-headline-sm');
+        if (activeTitle) {
+          activeTitle.classList.remove('text-on-surface');
+          activeTitle.classList.add('text-primary');
+        }
+        const activeIcon = card.querySelector('.material-symbols-outlined');
+        if (activeIcon) {
+          activeIcon.textContent = 'check_circle';
+          activeIcon.classList.remove('text-outline');
+          activeIcon.classList.add('text-primary');
+        }
+        const activeBadge = card.querySelector('.mt-space-md span:first-child');
+        if (activeBadge) {
+          activeBadge.classList.remove('text-outline');
+          activeBadge.classList.add('text-tertiary');
+        }
+      });
+    });
+
+    // Test Keycap Click & Spacebar Acoustic Feedback
+    const testKeycap = document.getElementById('test-keycap');
+    const visualizerPill = document.getElementById('visualizer-pill');
+
+    function triggerFeedback() {
+      if (!testKeycap) return;
+      testKeycap.classList.add('scale-90', 'bg-primary-container');
+      if (visualizerPill) {
+        visualizerPill.classList.remove('opacity-40');
+        visualizerPill.classList.add('opacity-100');
+      }
+      setTimeout(() => {
+        testKeycap.classList.remove('scale-90', 'bg-primary-container');
+      }, 90);
+    }
+
+    if (testKeycap) {
+      testKeycap.addEventListener('click', triggerFeedback);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        triggerFeedback();
+      }
+    });
+
+    // Save and Reset Feedback
+    const btnSave = document.getElementById('btn-save-meta');
+    if (btnSave) {
+      btnSave.addEventListener('click', () => {
+        const originalText = btnSave.innerHTML;
+        btnSave.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">autorenew</span><span>正在重载声学管线...</span>';
+        setTimeout(() => {
+          btnSave.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>驱动已热重载</span>';
+          setTimeout(() => {
+            btnSave.innerHTML = originalText;
+          }, 1400);
+        }, 500);
+      });
+    }
+
+    const btnReset = document.getElementById('btn-reset-preset');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        if (confirm('确认将底层声学引擎与调度策略重置为默认值吗？')) {
+          if (slider && sliderVal) {
+            slider.value = 35;
+            sliderVal.textContent = '35';
+          }
+          const startupCheck = document.getElementById('toggle-startup');
+          const trayCheck = document.getElementById('toggle-tray');
+          const modCheck = document.getElementById('toggle-modifier-repeat');
+          if (startupCheck) startupCheck.checked = true;
+          if (trayCheck) trayCheck.checked = true;
+          if (modCheck) modCheck.checked = false;
+        }
+      });
+    }
+
+    // Add App Mock Action
+    const btnAddApp = document.getElementById('btn-add-app');
+    if (btnAddApp) {
+      btnAddApp.addEventListener('click', () => {
+        const blacklist = document.getElementById('blacklist-container');
+        if (!blacklist) return;
+        const appName = prompt('输入要排除的应用进程名称 (例如: Discord.app / slack.exe):', 'Discord.app');
+        if (appName) {
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high transition-transform hover:-translate-y-0.5';
+          div.innerHTML = `
+            <div class="flex items-center gap-space-md">
+              <div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[22px]">apps</span>
+              </div>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-space-xs">
+                  <span class="font-title-md text-title-md text-on-surface font-semibold">${appName}</span>
+                  <span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">用户排除项</span>
+                </div>
+                <span class="font-body-sm text-body-sm text-outline font-mono">pid.isolated.${Date.now().toString().slice(-4)}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-space-xs">
+              <button onclick="this.closest('.flex.items-center.justify-between').remove()" class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-surface-variant transition-colors" title="移除规则">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+          `;
+          blacklist.appendChild(div);
+        }
+      });
+    }
+  })();
+</script></main></div></body></html>

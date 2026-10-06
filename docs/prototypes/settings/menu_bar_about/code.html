@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-surface-variant": "#cac4d4", "outline-variant": "#494552", "on-tertiary-container": "#00394f", "on-tertiary-fixed-variant": "#004c69", "secondary-fixed": "#ffd8e7", "background": "#13121b", "primary-fixed-dim": "#cebdff", "on-primary-fixed": "#21005e", "primary-container": "#a78bfa", "on-tertiary-fixed": "#001e2c", "primary": "#cebdff", "outline": "#948e9d", "tertiary-fixed-dim": "#7bd0ff", "tertiary-container": "#00a8e2", "surface-variant": "#35343e", "tertiary-fixed": "#c4e7ff", "on-error": "#690005", "on-surface": "#e5e0ee", "on-secondary-fixed-variant": "#85145a", "surface-container-low": "#1c1a24", "secondary": "#ffafd3", "surface-container-high": "#2a2933", "surface-tint": "#cebdff", "inverse-primary": "#674bb5", "tertiary": "#7bd0ff", "surface-bright": "#3a3842", "on-primary-fixed-variant": "#4f319c", "surface": "#13121b", "on-secondary-fixed": "#3d0026", "primary-fixed": "#e8ddff", "surface-dim": "#13121b", "secondary-container": "#85145a", "error-container": "#93000a", "on-secondary-container": "#ff93c8", "on-secondary": "#620040", "inverse-surface": "#e5e0ee", "on-error-container": "#ffdad6", "on-tertiary": "#00354a", "surface-container-lowest": "#0e0d16", "surface-container": "#201e28", "inverse-on-surface": "#312f39", "on-background": "#e5e0ee", "surface-container-highest": "#35343e", "error": "#ffb4ab", "on-primary-container": "#3c1989", "secondary-fixed-dim": "#ffafd3", "on-primary": "#381385" }, "borderRadius": { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, "spacing": { "gutter-compact": "0.5rem", "space-lg": "1.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-xs": "0.25rem", "margin": "1.5rem", "space-sm": "0.5rem", "space-xl": "2rem", "margin-compact": "0.75rem" }, "fontFamily": { "title-lg": ["Plus Jakarta Sans"], "display-lg": ["Space Grotesk"], "headline-md": ["Space Grotesk"], "headline-sm": ["Space Grotesk"], "title-md": ["Plus Jakarta Sans"], "display-md": ["Space Grotesk"], "body-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "headline-lg": ["Space Grotesk"], "label-sm": ["Space Grotesk"], "label-md": ["Space Grotesk"], "label-lg": ["Space Grotesk"] }, "fontSize": { "title-lg": ["16px", { "lineHeight": "22px", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "title-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "display-md": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-sm": ["11px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-sm": ["9px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "700" }], "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased select-none"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between p-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm px-space-sm pt-space-xs"><div class="w-3 h-3 rounded-full bg-error cursor-pointer"></div><div class="w-3 h-3 rounded-full bg-[#f59e0b] cursor-pointer"></div><div class="w-3 h-3 rounded-full bg-[#10b981] cursor-pointer"></div></div><div class="flex items-center gap-space-sm px-space-sm"><div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shadow-[0_4px_12px_rgba(0,0,0,0.3)]"><span class="material-symbols-outlined text-[20px]">keyboard</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface leading-none">KeySound</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-primary mt-1">Studio Pro</span></div></div><nav class="flex flex-col gap-space-xs px-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="sound-effects" href="#"><span class="material-symbols-outlined text-[18px]">graphic_eq</span><span class="font-label-lg text-label-lg">Sound Effects</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="general-settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-label-lg text-label-lg">General</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-full transition-all bg-primary-container text-on-primary-container font-headline-sm" data-path="menu-bar-behavior" href="#"><span class="material-symbols-outlined text-[18px]">dock_to_bottom</span><span class="font-label-lg text-label-lg">Menu Bar</span></a></nav></div><div class="flex flex-col gap-space-sm bg-surface-container p-space-md rounded-DEFAULT"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Engine Status</span><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span><span class="font-label-sm text-label-sm text-tertiary">Active</span></div></div><div class="flex items-center justify-between pt-space-xs"><span class="font-body-sm text-body-sm text-on-surface-variant">v2.4.0 Engine</span><a class="font-label-md text-label-md text-primary hover:text-on-surface transition-colors" data-path="about-and-status" href="#">About</a></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-between px-margin shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-md text-label-md text-on-surface-variant">Actuation: 0.1ms</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-tertiary">volume_up</span><span class="font-label-md text-label-md">85 dB</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 px-margin pb-margin bg-surface min-h-screen"><div class="flex flex-col w-full">
+<div class="flex flex-col gap-space-lg w-full max-w-[1440px] mx-auto pb-space-xl">
+<!-- Top Context & Quick Status Bar -->
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-md bg-surface-container-low p-space-lg rounded-lg shadow-sm relative overflow-hidden">
+<div class="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-primary-container/10 via-secondary/5 to-transparent pointer-events-none"></div>
+<div class="flex items-center gap-space-md z-10">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary shadow-inner">
+<span class="material-symbols-outlined text-[26px]">dock_to_bottom</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Menu Bar &amp; Tray Ecosystem</span>
+<span class="px-space-sm py-space-xs rounded-full bg-primary-container/20 text-primary font-label-sm text-label-sm uppercase tracking-wider">M3 Expressive</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant">Configure floating HUD actuation, icon resonance physics, and real-time tray micro-interactions.</span>
+</div>
+</div>
+<!-- Live Menubar Mockup Badge -->
+<div class="z-10 flex items-center gap-space-md bg-surface-container-high/90 px-space-lg py-space-sm rounded-full shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5)]">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Active Status Mock</span>
+<div class="flex items-center gap-space-sm px-space-md py-space-xs bg-surface-container-lowest rounded-full">
+<!-- Live Preview Mini Icon in Menu Bar -->
+<div class="flex items-center gap-1 text-primary transition-transform duration-100" id="tray-live-preview">
+<span class="material-symbols-outlined text-[16px]">keyboard</span>
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-headline-md tracking-tight">Holy Panda 67g</span>
+</div>
+</div>
+</div>
+<!-- Main Asymmetric Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- LEFT 7 COLS: Settings, Customization & Visual Modes -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Card 1: Click & Gesture Behavior -->
+<div class="flex flex-col bg-surface-container rounded-lg p-space-lg gap-space-lg shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px]">touch_app</span>
+<span class="font-title-lg text-title-lg text-on-surface">Click &amp; Gesture Binding</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-space-sm py-space-xs rounded-full">Native Hook</span>
+</div>
+<!-- Left Click Modes: 2 Options Pill Grid -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface">Left-Click Action (Primary Actuation)</span>
+<span class="font-label-sm text-label-sm text-primary">Instant Response</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<!-- Option A (Active by default) -->
+<button class="group relative flex flex-col text-left p-space-md rounded-DEFAULT bg-primary text-on-primary transition-all duration-200 shadow-md" id="btn-left-cycle" onclick="selectLeftClick('cycle')">
+<div class="flex items-center justify-between w-full">
+<span class="material-symbols-outlined text-[20px]">swap_horizontal_circle</span>
+<span class="w-2.5 h-2.5 rounded-full bg-on-primary ring-2 ring-primary"></span>
+</div>
+<span class="font-headline-sm text-headline-sm mt-space-sm">Cycle Next Sound</span>
+<span class="font-body-sm text-body-sm opacity-90 mt-space-xs">Instantly toggle sound profile without invoking UI. Fast &amp; tactile.</span>
+</button>
+<!-- Option B -->
+<button class="group relative flex flex-col text-left p-space-md rounded-DEFAULT bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all duration-200" id="btn-left-popover" onclick="selectLeftClick('popover')">
+<div class="flex items-center justify-between w-full">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+<span class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+</div>
+<span class="font-headline-sm text-headline-sm mt-space-sm">Show Tray Popover</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Summons compact floating mixer with sliders, dampeners, and presets.</span>
+</button>
+</div>
+</div>
+<!-- Right Click Action Description -->
+<div class="flex items-center justify-between p-space-md bg-surface-container-low rounded-DEFAULT">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">contextual_token</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Right-Click Context Anchor</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Spawns full Acoustic Quick Panel &amp; hardware calibration settings dialog.</span>
+</div>
+</div>
+<span class="font-label-md text-label-md px-space-md py-space-xs bg-surface-container-highest text-tertiary rounded-full font-headline-sm">Context Menu</span>
+</div>
+<!-- Continuous Toggles: Wheel Volume & Dynamic Keystroke Bounce -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<!-- Toggle 1: Scroll to adjust volume -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-low hover:bg-surface-container-high/60 transition-colors">
+<div class="flex items-center gap-space-md">
+<span class="material-symbols-outlined text-primary text-[20px]">slow_motion_video</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Scroll Wheel Volume Micro-tuning</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hover cursor over menu icon and scroll to fine-tune decibels (±1 dB increments).</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="toggle-wheel" type="checkbox"/>
+<div class="w-[52px] h-[32px] bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[20px] peer-checked:after:border-surface peer-checked:after:bg-on-primary-container peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-outline after:rounded-full after:h-[24px] after:w-[24px] after:transition-all"></div>
+</label>
+</div>
+<!-- Toggle 2: Reactive Keystroke Icon Bounce -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-low hover:bg-surface-container-high/60 transition-colors">
+<div class="flex items-center gap-space-md">
+<span class="material-symbols-outlined text-secondary text-[20px]">graphic_eq</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Reactive Keystroke Oscillation</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dynamic icon scaling and spring breathing rhythm synced to typing velocity.</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="toggle-bounce" type="checkbox"/>
+<div class="w-[52px] h-[32px] bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[20px] peer-checked:after:border-surface peer-checked:after:bg-on-primary-container peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-outline after:rounded-full after:h-[24px] after:w-[24px] after:transition-all"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Card 2: Menubar Icon Appearance Selector -->
+<div class="flex flex-col bg-surface-container rounded-lg p-space-lg gap-space-lg shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-tertiary text-[22px]">palette</span>
+<span class="font-title-lg text-title-lg text-on-surface">Menu Bar Visual Matrix</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider uppercase">3 Preset Stems</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Style Option 1: Default Capsule -->
+<div class="cursor-pointer group flex flex-col items-center justify-between p-space-lg rounded-DEFAULT bg-surface-container-high ring-2 ring-primary text-center transition-all duration-200" id="style-capsule" onclick="selectIconStyle('capsule')">
+<div class="h-16 flex items-center justify-center">
+<!-- Visual Icon Rep: Capsule -->
+<div class="w-14 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+<div class="w-8 h-4 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[12px]">keyboard</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col mt-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Minimal Capsule</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Sleek keycap bezel with switch emblem</span>
+</div>
+<div class="mt-space-md px-space-sm py-space-xs rounded-full bg-primary text-on-primary font-label-sm text-label-sm">Active</div>
+</div>
+<!-- Style Option 2: Dynamic Audio Spectrum -->
+<div class="cursor-pointer group flex flex-col items-center justify-between p-space-lg rounded-DEFAULT bg-surface-container-low hover:bg-surface-container-high text-center transition-all duration-200" id="style-spectrum" onclick="selectIconStyle('spectrum')">
+<div class="h-16 flex items-center justify-center">
+<div class="flex items-end gap-1 h-6 px-3 py-1 bg-surface-container-lowest rounded-full">
+<span class="w-1 h-2 rounded-full bg-tertiary animate-bounce" style="animation-delay: 0.1s"></span>
+<span class="w-1 h-5 rounded-full bg-secondary animate-bounce" style="animation-delay: 0.25s"></span>
+<span class="w-1 h-3 rounded-full bg-primary animate-bounce" style="animation-delay: 0.15s"></span>
+<span class="w-1 h-4 rounded-full bg-tertiary animate-bounce" style="animation-delay: 0.3s"></span>
+</div>
+</div>
+<div class="flex flex-col mt-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Audio Spectrum</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Multi-frequency responsive wave equalizer</span>
+</div>
+<div class="mt-space-md px-space-sm py-space-xs rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Select</div>
+</div>
+<!-- Style Option 3: Haptic Dot -->
+<div class="cursor-pointer group flex flex-col items-center justify-between p-space-lg rounded-DEFAULT bg-surface-container-low hover:bg-surface-container-high text-center transition-all duration-200" id="style-dot" onclick="selectIconStyle('dot')">
+<div class="h-16 flex items-center justify-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center gap-1.5 shadow-inner">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(255,175,211,0.7)]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(206,189,255,0.7)]"></div>
+</div>
+</div>
+<div class="flex flex-col mt-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Haptic Dot</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Dual-point chromatic luminescence</span>
+</div>
+<div class="mt-space-md px-space-sm py-space-xs rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Select</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT 5 COLS: Sandbox & Realtime Typist Telemetry -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Live Acoustic Typing Testing Sandbox -->
+<div class="flex flex-col bg-surface-container rounded-lg p-space-lg gap-space-md shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[22px]">keyboard_alt</span>
+<span class="font-title-lg text-title-lg text-on-surface">Instant Key Sandbox</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-space-xs rounded-full bg-surface-container-lowest text-tertiary">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>
+<span class="font-label-sm text-label-sm uppercase">Realtime DSP</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Type anywhere in the interactive text zone below to evaluate tray feedback latency and resonant bottom-out sound envelopes.
+          </p>
+<!-- Interactive Input Pad -->
+<div class="relative w-full rounded-DEFAULT bg-surface-container-lowest p-space-md flex flex-col gap-space-sm shadow-inner focus-within:ring-2 focus-within:ring-primary/40 transition-all">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase text-outline">Switch Profile: Holy Panda 67g (Lube 205g0)</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-headline-md tracking-wider" id="key-last-stroke">Actuation: Ready</span>
+</div>
+<textarea class="w-full bg-transparent text-on-surface placeholder:text-outline-variant font-body-md text-body-md resize-none focus:outline-none" id="live-typing-sandbox" placeholder="Click here &amp; hit your mechanical switches to test tray acoustics..." rows="3"></textarea>
+<!-- Realtime Audio Waveform Visualizer Bar -->
+<div class="flex items-center gap-1 h-6 w-full pt-2">
+<div class="text-xs text-outline-variant font-label-sm uppercase mr-2">Acoustic:</div>
+<div class="flex-1 flex items-center justify-between gap-1 h-full" id="wave-bars">
+<span class="w-1.5 bg-primary/40 rounded-full h-2 transition-all duration-75"></span>
+<span class="w-1.5 bg-primary/60 rounded-full h-3 transition-all duration-75"></span>
+<span class="w-1.5 bg-primary rounded-full h-1.5 transition-all duration-75"></span>
+<span class="w-1.5 bg-secondary rounded-full h-4 transition-all duration-75"></span>
+<span class="w-1.5 bg-secondary/80 rounded-full h-2 transition-all duration-75"></span>
+<span class="w-1.5 bg-tertiary rounded-full h-5 transition-all duration-75"></span>
+<span class="w-1.5 bg-tertiary/70 rounded-full h-2.5 transition-all duration-75"></span>
+<span class="w-1.5 bg-primary rounded-full h-1.5 transition-all duration-75"></span>
+<span class="w-1.5 bg-primary/80 rounded-full h-3 transition-all duration-75"></span>
+<span class="w-1.5 bg-secondary rounded-full h-4 transition-all duration-75"></span>
+<span class="w-1.5 bg-tertiary rounded-full h-2 transition-all duration-75"></span>
+<span class="w-1.5 bg-primary/50 rounded-full h-1 transition-all duration-75"></span>
+</div>
+</div>
+</div>
+<!-- Typing Telemetry Dashboard -->
+<div class="flex flex-col gap-space-md pt-space-xs">
+<div class="grid grid-cols-2 gap-space-md">
+<!-- Total Strokes Today -->
+<div class="flex flex-col p-space-md bg-surface-container-low rounded-DEFAULT">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Today Strokes</span>
+<div class="flex items-baseline gap-space-xs mt-space-xs">
+<span class="font-display-md text-display-md text-on-surface font-headline-lg tracking-tight" id="counter-strokes">1,842</span>
+<span class="font-label-sm text-label-sm text-tertiary">+14% vs avg</span>
+</div>
+</div>
+<!-- Speed WPM -->
+<div class="flex flex-col p-space-md bg-surface-container-low rounded-DEFAULT">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Acoustic Tempo</span>
+<div class="flex items-baseline gap-space-xs mt-space-xs">
+<span class="font-display-md text-display-md text-secondary font-headline-lg tracking-tight" id="counter-wpm">88</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">WPM Peak</span>
+</div>
+</div>
+</div>
+<!-- Typing Frequency Sparkline (Inline SVG) -->
+<div class="flex flex-col p-space-md bg-surface-container-low rounded-DEFAULT gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Daily Keystroke Velocity</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">09:00 - 18:00</span>
+</div>
+<div class="w-full h-14 pt-1">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 300 60">
+<defs>
+<lineargradient id="velocity-grad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#cebdff" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#cebdff" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,45 Q20,38 40,48 T80,30 T120,40 T160,18 T200,28 T240,12 T280,32 T300,22 L300,60 L0,60 Z" fill="url(#velocity-grad)"></path>
+<path class="text-primary" d="M0,45 Q20,38 40,48 T80,30 T120,40 T160,18 T200,28 T240,12 T280,32 T300,22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+<circle class="fill-secondary ring-2 ring-surface" cx="240" cy="12" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<!-- Heatmap Micro Matrix of Most Triggered Stems -->
+<div class="flex flex-col p-space-md bg-surface-container-low rounded-DEFAULT gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Actuation Stem Heatmap</span>
+<div class="grid grid-cols-6 gap-1.5 text-center">
+<div class="flex flex-col items-center justify-center p-1.5 bg-primary/25 rounded-md">
+<span class="font-label-md text-label-md text-primary font-bold">Space</span>
+<span class="text-[9px] text-on-surface-variant font-label-sm">412</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 bg-primary/20 rounded-md">
+<span class="font-label-md text-label-md text-primary font-bold">E</span>
+<span class="text-[9px] text-on-surface-variant font-label-sm">288</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 bg-primary/15 rounded-md">
+<span class="font-label-md text-label-md text-on-surface font-bold">T</span>
+<span class="text-[9px] text-on-surface-variant font-label-sm">194</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 bg-secondary/20 rounded-md">
+<span class="font-label-md text-label-md text-secondary font-bold">A</span>
+<span class="text-[9px] text-on-surface-variant font-label-sm">176</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 bg-tertiary/20 rounded-md">
+<span class="font-label-md text-label-md text-tertiary font-bold">Enter</span>
+<span class="text-[9px] text-on-surface-variant font-label-sm">142</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 bg-surface-container-highest rounded-md">
+<span class="font-label-md text-label-md text-on-surface-variant font-bold">Bksp</span>
+<span class="text-[9px] text-outline font-label-sm">98</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Wide Bottom Engine Banner: About KeySound Architecture -->
+<div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-lg bg-surface-container-high p-space-lg rounded-lg shadow-md">
+<div class="flex items-start md:items-center gap-space-lg">
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-container to-secondary-container flex items-center justify-center text-on-primary-container shadow-lg flex-shrink-0">
+<span class="material-symbols-outlined text-[30px]">memory</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface">KeySound for Desktop</span>
+<span class="px-space-sm py-space-xs rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm font-headline-sm">v1.4.2 Production Stable</span>
+<span class="px-space-sm py-space-xs rounded-full bg-secondary-container/40 text-secondary font-label-sm text-label-sm">Native C++ Audio FFI</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant mt-1">
+            Engineered with a Flutter desktop shell and zero-copy C++ DirectSound/CoreAudio pipelines, achieving ultralow 0.1ms actuation latency.
+          </span>
+</div>
+</div>
+<!-- Action Links -->
+<div class="flex items-center gap-space-md flex-shrink-0 self-end md:self-center">
+<a class="flex items-center gap-space-xs px-space-md py-space-sm rounded-full bg-surface-container hover:bg-surface-bright text-on-surface transition-colors" href="https://github.com" target="_blank">
+<span class="material-symbols-outlined text-[18px]">code</span>
+<span class="font-label-lg text-label-lg">GitHub Source</span>
+</a>
+<button class="flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-primary text-on-primary font-headline-sm hover:brightness-105 active:scale-95 transition-all shadow-md">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span class="font-label-lg text-label-lg">Keybinding Docs</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function selectLeftClick(mode) {
+    const cycleBtn = document.getElementById('btn-left-cycle');
+    const popoverBtn = document.getElementById('btn-left-popover');
+    
+    if (mode === 'cycle') {
+      cycleBtn.className = 'group relative flex flex-col text-left p-space-md rounded-DEFAULT bg-primary text-on-primary transition-all duration-200 shadow-md';
+      cycleBtn.querySelector('span.rounded-full').className = 'w-2.5 h-2.5 rounded-full bg-on-primary ring-2 ring-primary';
+      
+      popoverBtn.className = 'group relative flex flex-col text-left p-space-md rounded-DEFAULT bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all duration-200';
+      popoverBtn.querySelector('span.rounded-full').className = 'w-2.5 h-2.5 rounded-full bg-outline-variant';
+    } else {
+      popoverBtn.className = 'group relative flex flex-col text-left p-space-md rounded-DEFAULT bg-primary text-on-primary transition-all duration-200 shadow-md';
+      popoverBtn.querySelector('span.rounded-full').className = 'w-2.5 h-2.5 rounded-full bg-on-primary ring-2 ring-primary';
+      
+      cycleBtn.className = 'group relative flex flex-col text-left p-space-md rounded-DEFAULT bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all duration-200';
+      cycleBtn.querySelector('span.rounded-full').className = 'w-2.5 h-2.5 rounded-full bg-outline-variant';
+    }
+  }
+
+  function selectIconStyle(styleName) {
+    const styles = ['capsule', 'spectrum', 'dot'];
+    const preview = document.getElementById('tray-live-preview');
+    
+    styles.forEach(s => {
+      const el = document.getElementById('style-' + s);
+      const badge = el.querySelector('div:last-child');
+      if (s === styleName) {
+        el.className = 'cursor-pointer group flex flex-col items-center justify-between p-space-lg rounded-DEFAULT bg-surface-container-high ring-2 ring-primary text-center transition-all duration-200';
+        badge.className = 'mt-space-md px-space-sm py-space-xs rounded-full bg-primary text-on-primary font-label-sm text-label-sm';
+        badge.innerText = 'Active';
+      } else {
+        el.className = 'cursor-pointer group flex flex-col items-center justify-between p-space-lg rounded-DEFAULT bg-surface-container-low hover:bg-surface-container-high text-center transition-all duration-200';
+        badge.className = 'mt-space-md px-space-sm py-space-xs rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm';
+        badge.innerText = 'Select';
+      }
+    });
+
+    // Update Top Menubar Preview Icon
+    if (styleName === 'capsule') {
+      preview.innerHTML = '<span class="material-symbols-outlined text-[16px]">keyboard</span><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>';
+    } else if (styleName === 'spectrum') {
+      preview.innerHTML = '<div class="flex items-end gap-0.5 h-3"><span class="w-0.5 h-1.5 bg-tertiary"></span><span class="w-0.5 h-3 bg-secondary"></span><span class="w-0.5 h-2 bg-primary"></span></div>';
+    } else if (styleName === 'dot') {
+      preview.innerHTML = '<div class="w-2 h-2 rounded-full bg-secondary"></div><div class="w-2 h-2 rounded-full bg-primary"></div>';
+    }
+  }
+
+  // Realtime Sandbox Typist Simulator
+  const sandbox = document.getElementById('live-typing-sandbox');
+  const strokeCounter = document.getElementById('counter-strokes');
+  const wpmCounter = document.getElementById('counter-wpm');
+  const lastKeyLabel = document.getElementById('key-last-stroke');
+  const trayIcon = document.getElementById('tray-live-preview');
+  const bounceCheck = document.getElementById('toggle-bounce');
+  const waveBars = document.getElementById('wave-bars').children;
+
+  let currentStrokes = 1842;
+
+  sandbox.addEventListener('keydown', (e) => {
+    currentStrokes++;
+    strokeCounter.textContent = currentStrokes.toLocaleString();
+    lastKeyLabel.textContent = `KEY: "${e.key.toUpperCase()}" (LATENCY 0.12ms)`;
+
+    // Tray Icon reactive bounce
+    if (bounceCheck.checked) {
+      trayIcon.classList.add('scale-125');
+      setTimeout(() => trayIcon.classList.remove('scale-125'), 120);
+    }
+
+    // Dynamic Waveform bars animation on press
+    Array.from(waveBars).forEach(bar => {
+      const randomH = Math.floor(Math.random() * 18) + 6;
+      bar.style.height = randomH + 'px';
+      setTimeout(() => {
+        bar.style.height = '';
+      }, 150);
+    });
+  });
+</script></main></div></body></html>
