@@ -51,6 +51,11 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 - **FFI 符号**：`ae_*` 用 `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定，防止死代码剥离（dlsym 找不到符号的教训见 git log）。
 - **CocoaPods 不收 pod 根之外的源文件**：共享 C 源码放 `plugins/native_core/macos/Classes/src/`。
 - **托盘 API**：tray_manager ≥0.6 是 nativeapi 风格（`TrayIcon.create()` / `Menu.create()` / `MenuItem.createWithLabelAndType`），旧的 `trayManager.setContextMenu(Menu(items:...))` 已废弃不可用。
+- **托盘三个致命坑**（2026-10-07 踩过，别再踩）：
+  1. nativeapi 的 `ImageAsset.fromAsset` 只认 release 布局路径；托盘图标一律走 `TrayService._resolvedAssetFile()`（debug/release/三平台候选路径 + 回退链），失败时**保留当前图标**（nativeapi 对 null icon 会显示应用默认图标）。
+  2. `ContextMenuTrigger` 默认是左键弹菜单，必须显式 `setContextMenuTrigger(ContextMenuTrigger.rightClicked)`，否则左键的 ClickedEvent 不派发（左键轮换失效）。
+  3. Menu/MenuItem 的 Dart 局部变量 GC 后 Finalizer 释放 native 句柄 → 右键菜单悬空无反应。TrayService 用字段持有 `_menu`/`_menuItems`。
+  验证点击可用 System Events：`osascript -e 'tell app "System Events" to tell process "melody_keeeys" to click menu bar item 1 of menu bar 2'`，点击后读 plist 的 activePackId 是否轮换。
 - 桌面多窗口：HUD 的窗口通信用 `WindowController.invokeMethod`（main→HUD 方法名 `hudState`，HUD→main 方法名 `hudCommand`）；启动日志里一行 benign 的 desktop_multi_window "Failed to send message" 可忽略。
 - macOS 权限：CGEventTap 需辅助功能授权（设置页有引导横幅）；entitlements 已关沙箱，Info.plist `LSUIElement=true`。
 
