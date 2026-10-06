@@ -67,11 +67,17 @@ public class NativeCorePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     case "startKeyHook":
       if tap != nil {
         result(true)
+      } else if !AXIsProcessTrusted() {
+        // On macOS 15+ tapCreate can succeed without accessibility (yet receive
+        // no events), which would make the hook status chip lie. Gate explicitly.
+        result(FlutterError(code: "hook_failed",
+                            message: "accessibility not granted",
+                            details: nil))
       } else if startTap() {
         result(true)
       } else {
         result(FlutterError(code: "hook_failed",
-                            message: "CGEventTap create failed (accessibility not granted?)",
+                            message: "CGEventTap create failed",
                             details: nil))
       }
     case "stopKeyHook":

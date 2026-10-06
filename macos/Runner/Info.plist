@@ -31,6 +31,9 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<!-- Impeller corrupts glyphs into noise on Intel Macs (UHD 630); force Skia. -->
+	<key>FLTEnableImpeller</key>
+	<false/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

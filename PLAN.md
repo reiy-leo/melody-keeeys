@@ -75,7 +75,7 @@
 
 | 平台 | 实现 | 权限 |
 |---|---|---|
-| macOS | `CGEventTap`（listen-only，监听 keyDown/keyUp，不拦截事件），Swift 放入 `macos/Runner` | 需要用户授予「辅助功能」权限；App 首次运行引导跳转系统设置（TCC），未授权时 UI 显示引导横幅 |
+| macOS | `CGEventTap`（listen-only，监听 keyDown/keyUp，不拦截事件），Swift 放入 `macos/Runner` | 需要用户授予「辅助功能」权限；App 首次运行引导跳转系统设置（TCC），未授权时 UI 显示引导横幅；授权绑定代码签名，须用开发证书签名（ad-hoc 下每次重建 cdhash 变化会使授权失效） |
 | Windows | `SetWindowsHookEx(WH_KEYBOARD_LL)` + 独立消息循环线程，过滤 `LLKHF_INJECTED` 防自触发 | 无需管理员 |
 | Linux | evdev 只读监听：读取 `/dev/input/event*`，静态扫描码表映射键码；X11 与 Wayland 会话通用 | 需把用户加入 `input` 组（一次性）；应用内提供权限检测、一键指引与重新检查 |
 

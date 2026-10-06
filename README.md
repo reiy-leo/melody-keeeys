@@ -26,7 +26,7 @@ flutter run -d linux     # Linux
 
 | 平台 | 要求 |
 |---|---|
-| macOS 10.15+ | 首次使用需在「系统设置 → 隐私与安全性 → 辅助功能」中勾选应用（应用内有一键引导） |
+| macOS 10.15+ | 首次使用需在「系统设置 → 隐私与安全性 → 辅助功能」中勾选应用（应用内有一键引导；应用用开发证书签名，辅助功能授权跨重新构建保持有效） |
 | Windows 10+ | 无需管理员权限 |
 | Linux | 需要 `libgtk-3-dev libx11-dev libxi-dev` 构建依赖；运行时需将用户加入 `input` 组（`sudo usermod -aG input $USER` 后重新登录） |
 
