@@ -57,7 +57,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
   3. Menu/MenuItem 的 Dart 局部变量 GC 后 Finalizer 释放 native 句柄 → 右键菜单悬空无反应。TrayService 用字段持有 `_menu`/`_menuItems`。
   验证点击可用 System Events：`osascript -e 'tell app "System Events" to tell process "melody_keeeys" to click menu bar item 1 of menu bar 2'`，点击后读 plist 的 activePackId 是否轮换。
 - 桌面多窗口：HUD 的窗口通信用 `WindowController.invokeMethod`（main→HUD 方法名 `hudState`，HUD→main 方法名 `hudCommand`）；启动日志里一行 benign 的 desktop_multi_window "Failed to send message" 可忽略。
-- macOS 权限：CGEventTap 需辅助功能授权（设置页有引导横幅）；entitlements 已关沙箱，Info.plist `LSUIElement=true`。
+- macOS 权限：CGEventTap 需辅助功能授权（设置页有引导横幅；横幅复查后授权成功要清空 `_permissionError` 并重试 `startHook()`——hook 只在启动时尝试一次，窗口重新聚焦也会自动复查）；entitlements 已关沙箱，Info.plist `LSUIElement=true`。
 
 ## 会话收尾清单（用户固定要求）
 

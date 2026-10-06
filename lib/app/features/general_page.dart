@@ -16,20 +16,38 @@ class GeneralPage extends StatefulWidget {
   State<GeneralPage> createState() => _GeneralPageState();
 }
 
-class _GeneralPageState extends State<GeneralPage> {
+class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
   final _focus = FocusNode();
   String? _permissionError;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Returning from System Settings after ticking the permission checkbox.
+    if (state == AppLifecycleState.resumed) _checkPermission();
   }
 
   Future<void> _checkPermission() async {
     final granted = await KeyHookChannel.instance.isPermissionGranted();
-    if (!granted && mounted) {
-      setState(() => _permissionError = _permissionMessage());
+    if (!mounted) return;
+    setState(() => _permissionError = granted ? null : _permissionMessage());
+    // The hook only gets one attempt at launch; retry once TCC is granted,
+    // otherwise the banner would clear but keys would still stay silent.
+    if (granted && !soundEngine.state.hookRunning) {
+      await soundEngine.startHook();
     }
   }
 
