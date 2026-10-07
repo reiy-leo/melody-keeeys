@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:window_manager/window_manager.dart';
@@ -13,6 +14,7 @@ import 'core/settings/settings_repository.dart';
 import 'core/system/hotkey_service.dart';
 import 'core/tray/tray_service.dart';
 import 'features/hud/hud_window.dart';
+import 'shared/debug_screenshot.dart';
 
 const _kMultiWindowArg = 'multi_window';
 
@@ -81,5 +83,15 @@ Future<void> main(List<String> args) async {
     }
   });
 
-  runApp(const SettingsApp());
+  runApp(
+    kDebugMode && _kScreenshotMode
+        ? const ScreenshotHost(child: SettingsApp())
+        : const SettingsApp(),
+  );
 }
+
+/// Set with `--dart-define=MELODY_SCREENSHOTS=true` (debug builds only):
+/// wraps the app so README screenshots can be rendered from Flutter's own
+/// tree without the macOS screen-recording permission.
+final bool _kScreenshotMode =
+    const bool.fromEnvironment('MELODY_SCREENSHOTS');

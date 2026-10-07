@@ -4,10 +4,32 @@
 
 > 实施计划见 [PLAN.md](PLAN.md)；Google Stitch 原型与设计系统归档在 [docs/prototypes/](docs/prototypes/)。
 
+## 截图
+
+设置窗口 · 通用页（引擎、热键、防冲突与测试跳线）：
+
+![通用页](docs/screenshots/01-general.png)
+
+设置窗口 · 音效页（22 个音效包列表 + 当前包五层音高微调 + DSP 引擎 + 交互试音台）：
+
+![音效页](docs/screenshots/02-sounds.png)
+
+设置窗口 · 菜单栏页（左键行为、菜单栏图标选择）：
+
+![菜单栏页](docs/screenshots/03-menubar.png)
+
+托盘面板 HUD（点击菜单栏图标弹出，当前音效包一目了然）：
+
+<img src="docs/screenshots/05-hud.png" width="340" alt="托盘面板 HUD">
+
+设置窗口 · 关于页（版本、技术栈与开源许可）：
+
+![关于页](docs/screenshots/04-about.png)
+
 ## 功能（当前进度）
 
-- **M1 音频内核** ✅ miniaudio + dart:ffi，22 个内置音效包 × 6 层采样（alpha/space/enter/modifier/nav/release），内存预解码、复音播放、音高抖动、音量补偿、三档延迟预设
-- **M2 全局监听与托盘** ✅ macOS CGEventTap / Windows WH_KEYBOARD_LL / Linux evdev；键码→5 层分类、Anti-Ghosting 抑制窗口、修饰键连发、松键音；托盘左键轮换音效（听觉确认）、右键菜单选择音效/设置/退出
+- **M1 音频内核** ✅ miniaudio + dart:ffi，22 个内置音效包 × 6 层采样（alpha/space/enter/modifier/nav/release），内存预解码、复音播放、音高抖动、音量补偿、三档延迟预设；全部为**真实录音素材**（[kbsim](https://github.com/tplai/kbsim) / [Tickeys](https://github.com/yingDev/Tickeys) / [Kenney](https://kenney.nl/assets/sci-fi-sounds) / Freesound CC0，授权见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)），统一响度归一化
+- **M2 全局监听与托盘** ✅ macOS CGEventTap / Windows WH_KEYBOARD_LL / Linux evdev；键码→5 层分类、Anti-Ghosting 抑制窗口、修饰键连发、松键音；托盘左键轮换音效（听觉确认）、右键菜单（首行显示当前音效）选择音效/设置/退出
 - **M3 设置窗口** ✅ 侧边栏四页（通用 / 音效 / 菜单栏 / 关于），设置持久化，开机自启，静默启动，全局热键（静音、轮换）
 - **主题** ✅ 浅色 / 深色 / 跟随系统三态，通用页切换即时生效，HUD 跟随；双色板 ThemeExtension（见 [DESIGN.md](DESIGN.md)）
 - **托盘图标** ✅ Lucide 图标 7 选 1（keyboard / keyboard-music / command / line-squiggle / gamepad-directional / tv / balloon，默认 keyboard-music），菜单栏页选择即时生效

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui' show FlutterView;
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -10,6 +11,7 @@ import '../../app/theme/app_tokens.dart';
 import '../../core/audio/audio_engine_ffi.dart';
 import '../../core/audio/sound_pack.dart';
 import '../../core/settings/settings_model.dart';
+import '../../shared/debug_screenshot.dart';
 
 const _hudSize = Size(340, 560);
 
@@ -81,13 +83,22 @@ Future<void> runHudWindow() async {
     previewEngine = null;
   }
 
-  runApp(HudApp(
+  final hud = HudApp(
     controller: controller,
     initialSettings: AppSettings.fromJson(
         (args['settings'] as Map<String, dynamic>?) ?? const {}),
     initialLatencyMs: (args['latencyMs'] as num?)?.toDouble(),
     previewEngine: previewEngine,
-  ));
+  );
+  // Debug screenshot mode: the HUD renders itself to a PNG on request
+  // (separate request file so it doesn't race the settings window).
+  runApp(kDebugMode && const bool.fromEnvironment('MELODY_SCREENSHOTS')
+      ? ScreenshotHost(
+          requestPath: '/tmp/melody_shot_hud_req',
+          outputPath: '/tmp/melody_shot_hud.png',
+          child: hud,
+        )
+      : hud);
 }
 
 class HudApp extends StatelessWidget {
