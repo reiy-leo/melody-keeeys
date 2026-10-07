@@ -152,24 +152,26 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 | 09 | Typewriter 1930s | 老式打字机 | Vintage Strike · 机械铃声 |
 | 10 | Silent Red | 消音红轴 | Silicone Dampened · 低分贝轻拍 |
 
-参考 [Tickeys](https://github.com/yingDev/Tickeys)（MIT）新增的 7 个（**自研合成近似音，未使用其音频素材**）：
+参考 [Tickeys](https://github.com/yingDev/Tickeys)（MIT）新增的 7 个——**直接使用其内置的真实音效素材**（非合成），经 `tool/import_tickeys_sounds.py` 按 Tickeys 的 `schemes.json` 映射到本项目 6 层结构；授权明细见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)：
 
-| # | 包名 | 中文名 | 合成配方要点 |
+| # | 包名 | 中文名 | 素材来源 |
 |---|---|---|---|
-| 11 | Bubble | 咕噜气泡 | 上升滑音 140→720Hz + 微弱触击 + 95ms 延迟回声 |
-| 12 | Typewriter | 经典打字机 | 中频击键噪声 + 低音闷响 + 2093Hz 字车铃（回车/空格加响） |
-| 13 | Mechanical | 机械键盘 | 中频 thock（重心约 690Hz），清晰触底 |
-| 14 | Sword | 利剑出鞘 | 金属下滑扫频 + 非谐泛音（1 / 1.73 / 3.1×），偏亮为特性 |
-| 15 | Cherry G80-3000 | 樱桃 G80-3000 | 清脆段落，重心约 640Hz |
-| 16 | Cherry G80-3494 | 樱桃 G80-3494 | 线性红轴闷响，低频体共鸣 |
-| 17 | Drum | 鼓点 | 165→52Hz 下坠鼓身 + 击打噪声 |
+| 11 | Bubble | 咕噜气泡 | Tickeys `bubble/`（Freesound: Glaneur de sons，CC BY 3.0） |
+| 12 | Typewriter | 经典打字机 | Tickeys `typewriter/`（MIT 仓库分发） |
+| 13 | Mechanical | 机械键盘 | Tickeys `mechanical/`（Freesound: jim-ph，**CC0**） |
+| 14 | Sword | 利剑出鞘 | Tickeys `sword/`（MIT 仓库分发） |
+| 15 | Cherry G80-3000 | 樱桃 G80-3000 | Tickeys `Cherry_G80_3000/`（MIT 仓库分发） |
+| 16 | Cherry G80-3494 | 樱桃 G80-3494 | Tickeys `Cherry_G80_3494/`（MIT 仓库分发） |
+| 17 | Drum | 鼓点 | Tickeys `drum/`（Freesound: Veiler，**CC0**） |
+
+各方案的按键映射（Tickeys schemes.json）：`36`=回车→enter 层、`49`=空格→space 层、`51`=退格→release 层，其余按键从变体池轮询映射到 alpha/modifier/nav。
 
 **素材获取策略**（M1 关键风险，三步走）：
-1. **开发期**：`tool/make_placeholder_sounds.py` 程序化合成 17 组风格化占位 WAV（滤波噪声脉冲 + 包络 + 谐振峰，按包调音色参数；bubble/typewriter/sword/drum 走专用合成内核），保证全流程先行。
-2. **发布前**：从 CC0 来源替换（kenney.nl 音效包、freesound.org CC0、Sonniss GDC 包），或自录机械键盘。
+1. **开发期**：原型 10 包由 `tool/make_placeholder_sounds.py` 程序化合成占位 WAV；Tickeys 7 包用真实素材（`tool/import_tickeys_sounds.py` 一次性导入）。
+2. **发布前**：原型 10 包从 CC0 来源替换（kenney.nl 音效包、freesound.org CC0、Sonniss GDC 包），或自录机械键盘；Tickeys 7 包若公开发布需保留 Bubble 的 CC BY 署名（其余满足 MIT 随附说明）。
 3. **兜底**：实现「导入自定义音效包」（Sound Effects 页原型已有入口），用户可自带素材。
 
-> 新增音效包的三处联动：`tool/make_placeholder_sounds.py` 的 `PACKS`、`sound_pack.dart` 的 `kBuiltinPacks`、`pubspec.yaml` 的资源条目；音频内容变更需提升 `sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`。
+> 新增音效包的三处联动：`sound_pack.dart` 的 `kBuiltinPacks`、`pubspec.yaml` 的资源条目、（占位包还需）`tool/make_placeholder_sounds.py` 的 `PACKS`；音频内容变更需提升 `sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`。
 
 ---
 

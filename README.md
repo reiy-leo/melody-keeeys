@@ -63,12 +63,12 @@ assets/sounds/         # 占位音效（tool/make_placeholder_sounds.py 生成�
 
 - **音频**：`plugins/native_core/macos/Classes/src/audio_engine.c`（miniaudio 单头库）编译为独立动态库，Dart 通过 `dart:ffi` 调用；槽位 = 包序号 × 6 + 层序号。
 - **键盘钩子**：原生层只上报 `{code, down, repeat, ts}`，分类与调参全部在 Dart（`lib/core/hooks/keymap_classifier.dart`）。
-- **音效素材**：当前为程序化合成的占位音（发布前替换为 CC0 录音或自录素材）。
+- **音效素材**：前 10 包为程序化合成占位音（发布前替换为 CC0 录音或自录素材）；11-17 包为 Tickeys 真实素材（授权与来源见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)）。
 
 ## 重新生成资产
 
 ```bash
-python3 tool/make_placeholder_sounds.py    # 占位音效（17 包 × 6 层）
+python3 tool/make_placeholder_sounds.py    # 占位音效（前 10 包；Tickeys 7 包用 import_tickeys_sounds.py）
 python3 tool/make_lucide_tray_icons.py     # Lucide 托盘图标（7 图标 × 3 变体）
 python3 tool/make_tray_icons.py            # 旧版自绘图标（about 页 256px 仍在用）
 ```

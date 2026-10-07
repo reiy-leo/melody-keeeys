@@ -18,7 +18,7 @@
 | `lib/core/system/` | `hotkey_service.dart` 全局热键（Option+Shift+K 静音 / Option+Shift+] 轮换） |
 | `lib/features/hud/` | 托盘 HUD 弹窗（desktop_multi_window 第二窗口，入口 `runHudWindow`，main args 首参 `multi_window`） |
 | `plugins/native_core/` | 本地插件。C 音频引擎在 `macos/Classes/src/`（**唯一副本**，Windows/Linux CMake 反向引用此路径）；`macos/Classes/NativeCorePlugin.swift` CGEventTap；`windows/` WH_KEYBOARD_LL；`linux/` evdev |
-| `assets/sounds/` | 102 个合成占位 WAV（17 包 × 6 层，发布前需替换真实素材）。新增包要同时改三处：`tool/make_placeholder_sounds.py` 的 PACKS、`sound_pack.dart` 的 kBuiltinPacks、`pubspec.yaml` 的资源目录；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
+| `assets/sounds/` | 102 个 WAV（17 包 × 6 层）：前 10 包为合成占位音（发布前需替换），11-17 包为 Tickeys 真实素材（授权见 `assets/sounds/CREDITS.md`，导入脚本 `tool/import_tickeys_sounds.py`）。新增包要同时改 `sound_pack.dart` 的 kBuiltinPacks + `pubspec.yaml` 资源目录（占位包另需改 `tool/make_placeholder_sounds.py` 的 PACKS）；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
 | `assets/icons/` | 托盘图标（`tool/make_lucide_tray_icons.py` 生成 Lucide 7 图标 ×3 变体）+ 旧版自绘图 |
 | `docs/prototypes/` | Google Stitch 原型图 + 原始设计系统（KeySound 字样仅供参考） |
 | `tool/` | 资产生成与冒烟测试脚本 |

@@ -130,7 +130,7 @@ class SoundEngine extends ChangeNotifier {
     await target.create(recursive: true);
     // Bump when the bundled WAVs change: a version change re-copies every
     // file so existing installs pick up regenerated samples.
-    const assetVersion = '3';
+    const assetVersion = '4';
     final manifest = File('${target.path}/.manifest');
     final upToDate = manifest.existsSync() &&
         manifest.readAsStringSync().startsWith('v$assetVersion ');
