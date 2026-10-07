@@ -15,7 +15,7 @@
 | 形态 | 常驻菜单栏/托盘的应用（无 Dock/任务栏常驻窗口），主窗口即设置窗口 |
 | 核心功能 | 全局键盘监听 → 按键分类映射 → 低延迟播放对应音效 |
 | 默认音效 | 10 个内置音效包（见 §5） |
-| 交互 | 左键托盘图标 = 轮换下一个音效（可在设置中改为弹出 HUD）；右键 = 上下文菜单 |
+| 交互 | 左键托盘图标 = 轮换下一个音效（可在设置中改为弹出 HUD，HUD 顶部有「正在使用：音效包」卡片）；右键 = 上下文菜单（首行固定显示「正在使用：当前音效包」，悬停 tooltip 同步显示） |
 | 设置窗口 | 侧边栏 4 项：通用、音效、菜单栏（侧边栏底部：关于） |
 | UI 语言 | 中文为主、英文术语混排（沿用原型的双语风格），文案做 i18n（zh-CN 默认 + en） |
 
@@ -75,7 +75,7 @@
 
 | 平台 | 实现 | 权限 |
 |---|---|---|
-| macOS | `CGEventTap`（listen-only，监听 keyDown/keyUp，不拦截事件），Swift 放入 `macos/Runner` | 需要用户授予「辅助功能」权限；App 首次运行引导跳转系统设置（TCC），未授权时 UI 显示引导横幅；授权绑定代码签名，须用开发证书签名（ad-hoc 下每次重建 cdhash 变化会使授权失效） |
+| macOS | `CGEventTap`（active tap，监听 keyDown/keyUp，事件原样透传不拦截）。**不用 listen-only**：listen-only 在近期 macOS 上额外要「输入监控」权限，且该 TCC 记录绑定签名、重建即失效，失效时 tap 创建"成功"但收不到任何事件 | 需要用户授予「辅助功能」权限；App 首次运行引导跳转系统设置（TCC），未授权时 UI 显示引导横幅；授权绑定代码签名，须用开发证书签名（ad-hoc 下每次重建 cdhash 变化会使授权失效） |
 | Windows | `SetWindowsHookEx(WH_KEYBOARD_LL)` + 独立消息循环线程，过滤 `LLKHF_INJECTED` 防自触发 | 无需管理员 |
 | Linux | evdev 只读监听：读取 `/dev/input/event*`，静态扫描码表映射键码；X11 与 Wayland 会话通用 | 需把用户加入 `input` 组（一次性）；应用内提供权限检测、一键指引与重新检查 |
 
@@ -219,7 +219,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 | R5 | FFI/C 构建跨三平台踩坑 | 中 | audio_engine.c 单文件 + 各平台 CMake/Xcode 标准接入；M1 即三平台 CI 编译验证 |
 | R6 | desktop_multi_window HUD 通信不稳 | 低 | 回退单窗口 `setAsFrameless()` 模式切换方案 |
 | R7 | 键击→出声端到端延迟超标 | 中 | MethodChannel 传码（微秒级）+ 内存预解码 + miniaudio 小 period；M1 建立延迟测量 |
-| R8 | 键盘钩子自触发/循环 | 低 | Windows 过滤 INJECTED 位；macOS listen-only；事件只消费不上报 |
+| R8 | 键盘钩子自触发/循环 | 低 | Windows 过滤 INJECTED 位；macOS active tap 事件原样透传（不消费）；事件只上报不拦截 |
 
 ---
 

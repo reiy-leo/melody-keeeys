@@ -41,6 +41,8 @@ Future<void> main(List<String> args) async {
 
   soundEngine = SoundEngine(SettingsRepository());
   await soundEngine.initialize();
+  // The HUD isolate loads its own preview engine from the extracted WAVs.
+  appLifecycle.soundDir = soundEngine.soundDir;
 
   launchAtStartup.setup(
     appName: 'Melody Keeeys',

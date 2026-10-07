@@ -65,7 +65,7 @@ class AppLifecycle with WindowListener {
       arguments: jsonEncode({
         'settings': state.settings.toJson(),
         'latencyMs': state.latencyMs,
-        'soundDir': _soundDir!,
+        if (_soundDir != null) 'soundDir': _soundDir,
       }),
       hiddenAtLaunch: true,
     );

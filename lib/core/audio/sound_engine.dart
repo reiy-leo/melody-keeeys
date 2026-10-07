@@ -168,6 +168,10 @@ class SoundEngine extends ChangeNotifier {
 
     final category = classify(event);
     if (category == KeyCategory.unknown) return;
+    if (kDebugMode) {
+      debugPrint('[melody] key code=${event.code} down=${event.isKeyDown} '
+          'repeat=${event.isRepeat} cat=${category.name}');
+    }
 
     if (event.isRepeat) {
       // OS auto-repeat: only modifiers with the auto-repeat option play.
@@ -218,7 +222,11 @@ class SoundEngine extends ChangeNotifier {
     final j = settings.pitchJitter;
     final jitter = j <= 0 ? 1.0 : 1.0 + (2 * _random.nextDouble() - 1) * j;
     final pitch = jitter * settings.layerPitch(layer.assetName);
-    ffi.play(layer, packIndex: _state.activePackIndex, gain: gain, pitch: pitch);
+    final ok = ffi.play(layer, packIndex: _state.activePackIndex, gain: gain, pitch: pitch);
+    if (kDebugMode && !ok) {
+      debugPrint('[melody] play FAILED layer=${layer.name} '
+          'pack=${_state.activePackIndex}');
+    }
   }
 
   // ---- Mutators used by UI / tray ----
@@ -304,9 +312,34 @@ class KeyHookChannel {
     }
   }
 
-  Future<void> openPermissionSettings() async {
+  /// macOS only: per-permission detail (accessibility + input monitoring).
+  /// Falls back to [isPermissionGranted] semantics when the native side does
+  /// not implement the method (older builds / other platforms).
+  Future<Map<String, bool>> permissionDetail() async {
     try {
-      await _method.invokeMethod('openPermissionSettings');
+      final raw = await _method.invokeMethod('permissionDetail');
+      if (raw is Map) {
+        return {
+          'accessibility': raw['accessibility'] as bool? ?? false,
+          'inputMonitoring': raw['inputMonitoring'] as bool? ?? false,
+        };
+      }
+    } on PlatformException {/* fall through */}
+    final granted = await isPermissionGranted();
+    return {'accessibility': granted, 'inputMonitoring': granted};
+  }
+
+  /// macOS only: trigger the system "监视输入" prompt and register the app in
+  /// the Input Monitoring pane.
+  Future<void> requestInputMonitoring() async {
+    try {
+      await _method.invokeMethod('requestInputMonitoring');
+    } on PlatformException {/* UI message only */}
+  }
+
+  Future<void> openPermissionSettings({String which = 'accessibility'}) async {
+    try {
+      await _method.invokeMethod('openPermissionSettings', which);
     } on PlatformException {/* UI message only */}
   }
 

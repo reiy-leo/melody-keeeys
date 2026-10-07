@@ -59,6 +59,9 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 - 桌面多窗口：HUD 的窗口通信用 `WindowController.invokeMethod`（main→HUD 方法名 `hudState`，HUD→main 方法名 `hudCommand`）；启动日志里一行 benign 的 desktop_multi_window "Failed to send message" 可忽略。
 - macOS 权限：CGEventTap 需辅助功能授权（设置页有引导横幅；横幅复查后授权成功要清空 `_permissionError` 并重试 `startHook()`——hook 只在启动时尝试一次，窗口重新聚焦也会自动复查）；entitlements 已关沙箱，Info.plist `LSUIElement=true`。
 - **辅助功能授权稳定性（2026-10-07 踩过）**：TCC 授权是绑定签名的——ad-hoc 签名（`CODE_SIGN_IDENTITY = "-"`）下存的是 cdhash，每次重新构建 cdhash 变化导致授权失效；且 macOS 15 无 AX 权限时 `CGEvent.tapCreate` 也会成功（收不到事件），曾让芯片假绿。现已改为用 Apple Development 证书签名（team `EHBQV2H8YV`，`CODE_SIGN_IDENTITY` 用证书 SHA-1 hash），授权绑定到证书身份，重建不再掉；`startKeyHook` 里显式用 `AXIsProcessTrusted()` 门控。改动签名配置后需手动删掉 TCC 里的旧 cdhash 记录（`tccutil reset Accessibility dev.melodykeeeys.melodyKeeeys`）并重新勾选一次。
+- **tap 必须是 active tap 不能是 listenOnly（2026-10-07 第二课）**：listen-only tap 在最近的 macOS 上要「输入监控」权限，且该 TCC 记录同样绑定签名、重建即失效，失效时 tap 创建"成功"但零事件（症状：所有键无声、引擎芯片假绿、无任何报错）。改为 `options: .defaultTap`（事件原样透传不拦截）后只依赖稳定的辅助功能授权。验证方法：debug 构建看 `[melody] key code=...` 日志是否随按键输出。
+- **桌面多窗口子窗口插件注册**：desktop_multi_window 的每个子窗口跑独立 Flutter engine，插件不会自动注册——必须在 `macos/Runner/MainFlutterWindow.swift` 里 `FlutterMultiWindowPlugin.setOnWindowCreatedCallback { RegisterGeneratedPlugins(registry: $0) }`，否则 HUD 里 window_manager 等全部 MissingPluginException（曾导致点托盘 HUD 完全弹不出来）。
+- **HUD soundDir 传递**：`main.dart` 里必须 `appLifecycle.soundDir = soundEngine.soundDir`（曾遗漏导致 HUD 预览引擎无采样、且 `_soundDir!` 空断言崩溃）。
 - **Impeller 渲染问题**：Intel Mac（UHD 630）上 Impeller 会渲染字形损坏（文字变噪点/沙子），Info.plist 里 `FLTEnableImpeller=false` 强制回 Skia。修改 plist 后必须重新构建才生效。
 
 ## 会话收尾清单（用户固定要求）

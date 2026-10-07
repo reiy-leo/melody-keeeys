@@ -49,7 +49,19 @@ public class NativeCorePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "isPermissionGranted":
+      // Active tap path: Accessibility is the gate. Input Monitoring is
+      // optional extra (reported via permissionDetail) — request it as a
+      // belt-and-braces path for future listen-only use / policy changes.
       result(AXIsProcessTrusted())
+    case "permissionDetail":
+      result([
+        "accessibility": AXIsProcessTrusted(),
+        "inputMonitoring": CGPreflightListenEventAccess(),
+      ])
+    case "requestInputMonitoring":
+      // Shows the system prompt (once per TCC record) and registers the app
+      // in 系统设置 → 隐私与安全性 → 输入监控.
+      result(CGRequestListenEventAccess())
     case "engineVersion":
       if let v = _ae_version() {
         result(String(cString: v))
@@ -57,8 +69,10 @@ public class NativeCorePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         result(FlutterError(code: "engine_missing", message: "ae_version not linked", details: nil))
       }
     case "openPermissionSettings":
+      let which = (call.arguments as? String) ?? "accessibility"
+      let anchor = which == "inputMonitoring" ? "Privacy_ListenEvent" : "Privacy_Accessibility"
       if let url = URL(
-        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+        string: "x-apple.systempreferences:com.apple.preference.security?\(anchor)") {
         NSWorkspace.shared.open(url)
         result(true)
       } else {
@@ -68,8 +82,9 @@ public class NativeCorePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
       if tap != nil {
         result(true)
       } else if !AXIsProcessTrusted() {
-        // On macOS 15+ tapCreate can succeed without accessibility (yet receive
-        // no events), which would make the hook status chip lie. Gate explicitly.
+        // The tap is created on the Accessibility grant alone (active tap,
+        // events passed through). Without it macOS may hand back a port that
+        // silently receives nothing, so treat it as required.
         result(FlutterError(code: "hook_failed",
                             message: "accessibility not granted",
                             details: nil))
@@ -97,10 +112,15 @@ public class NativeCorePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
       | (1 << CGEventType.flagsChanged.rawValue)
 
     let refcon = Unmanaged<NativeCorePlugin>.passUnretained(self).toOpaque()
+    // Active tap (not listen-only): every event is passed through unchanged —
+    // we never swallow anything — but this path is covered by the stable
+    // Accessibility grant. Listen-only taps additionally require Input
+    // Monitoring on recent macOS, whose TCC record breaks whenever the binary
+    // is re-signed, leaving a "running" tap that receives nothing.
     guard let tap = CGEvent.tapCreate(
       tap: .cgSessionEventTap,
       place: .headInsertEventTap,
-      options: .listenOnly,
+      options: .defaultTap,
       eventsOfInterest: eventMask,
       callback: { proxy, type, event, refcon in
         NativeCorePlugin.tapCallback(proxy, type, event, refcon)

@@ -19,6 +19,8 @@ class GeneralPage extends StatefulWidget {
 class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
   final _focus = FocusNode();
   String? _permissionError;
+  /// Which System Settings pane the banner's 打开设置 should open.
+  String _permissionPane = 'accessibility';
 
   @override
   void initState() {
@@ -41,9 +43,16 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
   }
 
   Future<void> _checkPermission() async {
-    final granted = await KeyHookChannel.instance.isPermissionGranted();
+    final detail = await KeyHookChannel.instance.permissionDetail();
+    final ax = detail['accessibility'] ?? false;
     if (!mounted) return;
-    setState(() => _permissionError = granted ? null : _permissionMessage());
+    // The tap is an active pass-through tap, which macOS covers with the
+    // Accessibility grant alone; Input Monitoring is not required.
+    final granted = Platform.isMacOS ? ax : await KeyHookChannel.instance.isPermissionGranted();
+    setState(() {
+      _permissionError = granted ? null : _permissionIssue();
+      _permissionPane = 'accessibility';
+    });
     // The hook only gets one attempt at launch; retry once TCC is granted,
     // otherwise the banner would clear but keys would still stay silent.
     if (granted && !soundEngine.state.hookRunning) {
@@ -51,7 +60,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
     }
   }
 
-  String? _permissionMessage() {
+  String? _permissionIssue() {
     if (Platform.isMacOS) {
       return '需要「辅助功能」权限才能监听全局键盘。请前往 系统设置 → 隐私与安全性 → 辅助功能，勾选 Melody Keeeys 后重试。';
     }
@@ -74,7 +83,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (_permissionError != null) _PermissionBanner(message: _permissionError!, onOpen: () async {
-                await KeyHookChannel.instance.openPermissionSettings();
+                await KeyHookChannel.instance.openPermissionSettings(which: _permissionPane);
               }, onRetry: _checkPermission),
               SectionCard(
                 icon: Icons.settings_input_component,

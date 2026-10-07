@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui' show Rect;
 
-import 'package:flutter/foundation.dart' show VoidCallback, debugPrint;
+import 'package:flutter/foundation.dart' show VoidCallback, debugPrint, kDebugMode;
 import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
 
@@ -97,6 +97,7 @@ class TrayService {
   }
 
   void _onTrayEvent(TrayIconEvent event) {
+    if (kDebugMode) debugPrint('[melody] tray event: ${event.runtimeType}');
     if (event is TrayIconClickedEvent) {
       if (soundEngine.state.settings.leftClickAction == TrayLeftClickAction.cycleNext) {
         soundEngine.cyclePack();
@@ -115,6 +116,8 @@ class TrayService {
     if (icon == null) return;
     final state = soundEngine.state;
     _applyIcon(state.settings.trayIcon);
+    final activePack = packById(state.settings.activePackId);
+    icon.setTooltip('Melody Keeeys · 旋律按键 — 正在使用：${activePack.name}');
     final signature =
         '${state.settings.activePackId}|${state.settings.engineEnabled}|${state.settings.leftClickAction}';
     if (signature == _lastMenuSignature) return;
@@ -135,6 +138,16 @@ class TrayService {
       }
       menu.addItem(item);
     }
+
+    // Headline: which pack is sounding right now.
+    final currentItem = MenuItem.createWithLabelAndType(
+        '正在使用：${activePack.name} · ${activePack.tag}', MenuItemType.normal);
+    if (currentItem != null) {
+      currentItem.isEnabled = false;
+      addItem(currentItem, null);
+    }
+
+    menu.addSeparator();
 
     for (var i = 0; i < kBuiltinPacks.length; i++) {
       final pack = kBuiltinPacks[i];

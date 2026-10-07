@@ -262,6 +262,14 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                       children: [
                         Row(
                           children: [
+                            Text('正在使用',
+                                style: AppText.labelMd
+                                    .copyWith(color: context.colors.success)),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
                             Flexible(
                               child: Text(pack.name,
                                   style: AppText.headlineMd,
