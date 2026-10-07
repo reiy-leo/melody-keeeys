@@ -71,6 +71,8 @@ Future<void> main(List<String> args) async {
             soundEngine.previewPack(payload['packId'] as String);
           case 'openSettings':
             await appLifecycle.showSettingsWindow();
+          case 'ready':
+            await appLifecycle.markHudReady();
         }
         return null;
       });

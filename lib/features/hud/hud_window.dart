@@ -143,6 +143,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
   AppSettings _settings = const AppSettings();
   double? _latencyMs;
   WindowController? _mainWindow;
+  bool _announced = false;
 
   @override
   void initState() {
@@ -170,6 +171,17 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
       return null;
     });
     _findMainWindow();
+    // Show only once positioned and the first frame is rendered: showing a
+    // hidden-booting engine flashes a black window at the default position.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _announceReady());
+  }
+
+  Future<void> _announceReady() async {
+    if (_announced) return;
+    _announced = true;
+    if (_mainWindow == null) await _findMainWindow();
+    await windowManager.show();
+    _command('ready');
   }
 
   /// Position under the menu bar (macOS) or above the taskbar tray icon,

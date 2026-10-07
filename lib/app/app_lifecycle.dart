@@ -15,6 +15,7 @@ class AppLifecycle with WindowListener {
   static final AppLifecycle instance = AppLifecycle._();
 
   WindowController? _hudController;
+  bool _hudReady = false;
   bool _quitting = false;
 
   /// Called by main() after the engine is ready.
@@ -42,28 +43,47 @@ class AppLifecycle with WindowListener {
   // ---- HUD window ----
 
   Future<void> showHud() async {
+    final existing = _hudController;
+    debugPrint('[melody] showHud: ${existing == null ? 'no controller, creating' : 'reusing ${existing.windowId}'}, ready=$_hudReady');
     final controller = _hudController ?? await _createHud();
-    // Position before showing so it never flashes at the default spot.
-    final bounds = TrayService.instance.bounds;
-    if (bounds != null) {
-      try {
-        await controller.invokeMethod('hudState', jsonEncode({
-          'kind': 'place',
-          'bounds': {
-            'x': bounds.left, 'y': bounds.top,
-            'w': bounds.width, 'h': bounds.height,
-          },
-        }));
-      } catch (_) {}
+    // The HUD shows itself once its engine is up ('ready'); showing it from
+    // here before that flashes a black window at the default position.
+    if (_hudReady) {
+      await _placeHud(controller);
+      await controller.show();
     }
-    await controller.show();
     await _pushStateToHud();
+  }
+
+  /// Called by the HUD isolate after its first frame; from then on the window
+  /// can be shown/hidden from this side safely.
+  Future<void> markHudReady() async {
+    debugPrint('[melody] HUD ready');
+    _hudReady = true;
+    await _pushStateToHud();
+  }
+
+  Future<void> _placeHud(WindowController controller) async {
+    final bounds = TrayService.instance.bounds;
+    if (bounds == null || bounds.isEmpty) return;
+    try {
+      await controller.invokeMethod('hudState', jsonEncode({
+        'kind': 'place',
+        'bounds': {
+          'x': bounds.left, 'y': bounds.top,
+          'w': bounds.width, 'h': bounds.height,
+        },
+      }));
+    } catch (e) {
+      debugPrint('[melody] place failed: $e');
+    }
   }
 
   Future<WindowController> _createHud() async {
     final state = soundEngine.state;
     final bounds = TrayService.instance.bounds;
     debugPrint('[melody] create HUD, tray bounds: $bounds');
+    _hudReady = false;
     final config = WindowConfiguration(
       arguments: jsonEncode({
         'settings': state.settings.toJson(),
@@ -99,9 +119,23 @@ class AppLifecycle with WindowListener {
         'settings': state.settings.toJson(),
         'latencyMs': state.latencyMs,
       }));
-    } catch (_) {
-      // HUD window closed; drop the stale controller.
-      _hudController = null;
+      // A successful push proves the HUD engine is up; treat it as ready even
+      // if the 'ready' message itself was lost.
+      _hudReady = true;
+    } catch (e) {
+      // Channel errors happen while the HUD engine is still booting; only
+      // drop the controller when the window is actually gone, otherwise a
+      // fresh window gets created on every click.
+      debugPrint('[melody] pushState failed: $e');
+      try {
+        final all = await WindowController.getAll();
+        final alive = all.any((w) => w.windowId == controller.windowId);
+        if (!alive) {
+          debugPrint('[melody] HUD window gone; dropping controller');
+          _hudController = null;
+          _hudReady = false;
+        }
+      } catch (_) {/* keep the controller */}
     }
   }
 
