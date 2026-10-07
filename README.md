@@ -58,17 +58,19 @@ lib/
     system/            # 全局热键
   features/hud/        # 托盘 HUD 弹窗
 plugins/native_core/   # 本地插件：C 音频引擎 + 三平台键盘钩子
-assets/sounds/         # 占位音效（tool/make_placeholder_sounds.py 生成）
+assets/sounds/         # 真实音效素材（17 包 × 6 层，导入脚本见 tool/，授权见 CREDITS.md）
 ```
 
 - **音频**：`plugins/native_core/macos/Classes/src/audio_engine.c`（miniaudio 单头库）编译为独立动态库，Dart 通过 `dart:ffi` 调用；槽位 = 包序号 × 6 + 层序号。
 - **键盘钩子**：原生层只上报 `{code, down, repeat, ts}`，分类与调参全部在 Dart（`lib/core/hooks/keymap_classifier.dart`）。
-- **音效素材**：前 10 包为程序化合成占位音（发布前替换为 CC0 录音或自录素材）；11-17 包为 Tickeys 真实素材（授权与来源见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)）。
+- **音效素材**：全部为真实录音（kbsim 机械键盘录音 / Kenney 科幻音效 / Tickeys 素材），已统一响度归一化；授权与来源见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)。
 
 ## 重新生成资产
 
 ```bash
-python3 tool/make_placeholder_sounds.py    # 占位音效（前 10 包；Tickeys 7 包用 import_tickeys_sounds.py）
+# 音效导入（一次性，需先克隆素材仓库，命令参数见 assets/sounds/CREDITS.md）
+python3 tool/import_real_sounds.py --kbsim <...> --kenney <...> --tickeys <...>
+python3 tool/import_tickeys_sounds.py <tickeys/data>
 python3 tool/make_lucide_tray_icons.py     # Lucide 托盘图标（7 图标 × 3 变体）
 python3 tool/make_tray_icons.py            # 旧版自绘图标（about 页 256px 仍在用）
 ```

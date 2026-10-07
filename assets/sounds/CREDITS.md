@@ -1,29 +1,61 @@
 # 音效素材来源与授权
 
-## 内置音效包
+所有 17 个内置音效包均使用**真实录音素材**（非合成），并已统一做响度归一化（RMS 对齐，峰值限幅）。
+
+## 01-10：原型音效包（真实录音）
 
 | # | 音效包 | 素材来源 | 授权 |
 |---|---|---|---|
-| 01–10 | 清脆青轴 / 麻将音 / 圣熊猫轴 / 弹簧经典 / 凯华白盒 / 静电容 / 水泡泡 / 电子镭射 / 老式打字机 / 消音红轴 | `tool/make_placeholder_sounds.py` 程序化合成（占位素材，发布前替换） | 本项目自有（CC0 意向） |
-| 11 | 咕噜气泡 Bubble | [Tickeys](https://github.com/yingDev/Tickeys) 内置素材（原始出处 Freesound，作者 [Glaneur de sons](https://freesound.org/people/Glaneur%20de%20sons/packs/6686/)） | CC BY 3.0（需署名） |
-| 12 | 经典打字机 Typewriter | Tickeys 内置素材（随 MIT 仓库分发） | MIT（Tickeys 项目仓库） |
-| 13 | 机械键盘 Mechanical | [Tickeys](https://github.com/yingDev/Tickeys) 内置素材（原始出处 Freesound，作者 [jim-ph](https://freesound.org/people/jim-ph/packs/12363/)） | **CC0（公共领域）** |
-| 14 | 利剑出鞘 Sword | Tickeys 内置素材（随 MIT 仓库分发） | MIT（Tickeys 项目仓库） |
-| 15 | 樱桃 G80-3000 | Tickeys 内置素材（随 MIT 仓库分发） | MIT（Tickeys 项目仓库） |
-| 16 | 樱桃 G80-3494 | Tickeys 内置素材（随 MIT 仓库分发） | MIT（Tickeys 项目仓库） |
-| 17 | 鼓点 Drum | [Tickeys](https://github.com/yingDev/Tickeys) 内置素材（原始出处 Freesound，作者 [Veiler](https://freesound.org/people/Veiler/packs/16053/)） | **CC0（公共领域）** |
+| 01 | 清脆青轴 Cherry MX Blue | [kbsim](https://github.com/tplai/kbsim) `mxblue/` | MIT (c) Thomas Lai |
+| 02 | 麻将音 Gateron Oil King | [kbsim](https://github.com/tplai/kbsim) `blackink/` | MIT (c) Thomas Lai |
+| 03 | 圣熊猫轴 Holy Panda | [kbsim](https://github.com/tplai/kbsim) `holypanda/` | MIT (c) Thomas Lai |
+| 04 | 弹簧经典 IBM Model M | [kbsim](https://github.com/tplai/kbsim) `buckling/` | MIT (c) Thomas Lai |
+| 05 | 凯华白盒 Kailh Box White | [kbsim](https://github.com/tplai/kbsim) `boxnavy/` | MIT (c) Thomas Lai |
+| 06 | 静电容 Topre Electrostatic | [kbsim](https://github.com/tplai/kbsim) `topre/` | MIT (c) Thomas Lai |
+| 07 | 水泡泡 Bubble Pop | [Tickeys](https://github.com/yingDev/Tickeys) `bubble/`（Freesound: Glaneur de sons） | CC BY 3.0（需署名） |
+| 08 | 电子镭射 Sci-Fi Laser | [Kenney Sci-Fi Sounds](https://kenney.nl/assets/sci-fi-sounds) | **CC0（公共领域）** |
+| 09 | 老式打字机 Typewriter 1930s | [Tickeys](https://github.com/yingDev/Tickeys) `typewriter/` | MIT（随仓库分发） |
+| 10 | 消音红轴 Silent Red | [kbsim](https://github.com/tplai/kbsim) `redink/` | MIT (c) Thomas Lai |
 
-Tickeys 项目本体：[github.com/yingDev/Tickeys](https://github.com/yingDev/Tickeys)，MIT License，© 2015 YingDev.com。
+## 11-17：Tickeys 效果包（真实录音）
 
-### 素材导入方式
+| # | 音效包 | 素材来源 | 授权 |
+|---|---|---|---|
+| 11 | 咕噜气泡 Bubble | Tickeys `bubble/`（Freesound: [Glaneur de sons](https://freesound.org/people/Glaneur%20de%20sons/packs/6686/)） | CC BY 3.0（需署名） |
+| 12 | 经典打字机 Typewriter | Tickeys `typewriter/` | MIT（随仓库分发） |
+| 13 | 机械键盘 Mechanical | Tickeys `mechanical/`（Freesound: [jim-ph](https://freesound.org/people/jim-ph/packs/12363/)） | **CC0（公共领域）** |
+| 14 | 利剑出鞘 Sword | Tickeys `sword/` | MIT（随仓库分发） |
+| 15 | 樱桃 G80-3000 | Tickeys `Cherry_G80_3000/` | MIT（随仓库分发） |
+| 16 | 樱桃 G80-3494 | Tickeys `Cherry_G80_3494/` | MIT（随仓库分发） |
+| 17 | 鼓点 Drum | Tickeys `drum/`（Freesound: [Veiler](https://freesound.org/people/Veiler/packs/16053/)） | **CC0（公共领域）** |
 
-7 个 Tickeys 音效由 `tool/import_tickeys_sounds.py` 一次性导入，把 Tickeys 的按键音频映射到本项目固定的 6 层结构（alpha/space/enter/modifier/nav/release）：
+## 第三方项目
+
+- [kbsim](https://github.com/tplai/kbsim) — MIT License, Copyright (c) Thomas Lai
+- [Tickeys](https://github.com/yingDev/Tickeys) — MIT License, Copyright (c) 2015 YingDev.com
+- [Kenney Sci-Fi Sounds](https://kenney.nl/assets/sci-fi-sounds) — CC0 1.0, Kenney (www.kenney.nl)
+
+## 导入方式
 
 ```bash
+# 克隆素材源
+git clone --depth 1 https://github.com/tplai/kbsim /tmp/kbsim
 git clone --depth 1 https://github.com/yingDev/Tickeys /tmp/tickeys
+curl -L -o /tmp/kenney_scifi.zip "https://kenney.nl/media/pages/assets/sci-fi-sounds/6b296f9ecf-1677589334/kenney_sci-fi-sounds.zip"
+unzip -q /tmp/kenney_scifi.zip -d /tmp/kenney_scifi
+
+# 01-10（kbsim 真实键盘录音 + Kenney 激光 + Tickeys 打字机/气泡）
+python3 tool/import_real_sounds.py \
+    --kbsim /tmp/kbsim/src/assets/audio \
+    --kenney /tmp/kenney_scifi/Audio \
+    --tickeys /tmp/tickeys/Tickeys.app/Contents/Resources/data
+
+# 11-17（Tickeys 效果包）
 python3 tool/import_tickeys_sounds.py /tmp/tickeys/Tickeys.app/Contents/Resources/data
 ```
 
-映射依据 Tickeys 的 `schemes.json`：`36`=回车、`49`=空格、`51`=退格，其余按键从变体池轮询。release 层由真实素材裁剪前 0.10s 并加 0.05s 淡出得到，保持同一素材质感。
+两个脚本都会把源素材转成 48 kHz 16-bit WAV、映射到本项目 6 层结构（alpha/space/enter/modifier/nav/release），并做响度归一化（RMS 目标 2500，峰值上限 32000）。release 层由真实素材裁剪前 0.10s + 0.05s 淡出得到。
 
-> 若后续公开发布：Bubble 素材为 CC BY 3.0，需在应用内「关于」页或文档中保留 "Glaneur de sons (Freesound)" 署名；其余 Tickeys 素材来自 MIT 仓库，随附本说明文件即可满足要求。详细逐文件授权记录见 Tickeys 仓库内的 `data/*/license.txt`。
+**新增/变更素材后**需提升 `lib/core/audio/sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`，已安装实例才会刷新 WAV。
+
+> 公开发布注意事项：Bubble / 咕噜气泡 / 水泡泡 使用了 CC BY 3.0 素材（Glaneur de sons，Freesound），需在应用内「关于」页或随附文档保留署名；kbsim 与 Tickeys 素材为 MIT，随附本说明文件即满足要求；Kenney 素材为 CC0，无强制要求（建议署名）。

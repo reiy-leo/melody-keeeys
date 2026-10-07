@@ -130,7 +130,7 @@ native/
 macos/ windows/ linux/          # flutter create 生成的宿主 + 各自 key_hook 原生代码
 assets/sounds/<pack_id>/alpha|space|enter|modifier|nav|release.{wav,ogg}
 assets/fonts/ assets/icons/
-tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
+tool/import_real_sounds.py      # 真实音效导入脚本（见 §5）
 ```
 
 ---
@@ -139,18 +139,18 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 
 原型的 10 个：
 
-| # | 包名 | 中文名 | 风格描述 |
+| # | 包名 | 中文名 | 素材（真实录音） |
 |---|---|---|---|
-| 01 | Cherry MX Blue | 清脆青轴 | Classic Clicky · 高频咔嗒 |
-| 02 | Gateron Oil King | 麻将音 | Deep Linear Thock · 深底共鸣 |
-| 03 | Holy Panda | 圣熊猫轴 | Punchy Clack · 圆润触底 |
-| 04 | IBM Model M | 弹簧经典 | Buckling Spring · 金属弹簧回响 |
-| 05 | Kailh Box White | 凯华白盒 | Click Bar · 明快金属脆响 |
-| 06 | Topre Electrostatic | 静电容 | Rubber Dome · 软弹枕音 |
-| 07 | Bubble Pop | 水泡泡 | Aqua Droplet · 水滴 Q 弹 |
-| 08 | Sci-Fi Laser | 电子镭射 | Synth Pew · 合成器音色 |
-| 09 | Typewriter 1930s | 老式打字机 | Vintage Strike · 机械铃声 |
-| 10 | Silent Red | 消音红轴 | Silicone Dampened · 低分贝轻拍 |
+| 01 | Cherry MX Blue | 清脆青轴 | kbsim `mxblue`（MIT） |
+| 02 | Gateron Oil King | 麻将音 | kbsim `blackink`（MIT） |
+| 03 | Holy Panda | 圣熊猫轴 | kbsim `holypanda`（MIT） |
+| 04 | IBM Model M | 弹簧经典 | kbsim `buckling`（MIT） |
+| 05 | Kailh Box White | 凯华白盒 | kbsim `boxnavy`（MIT） |
+| 06 | Topre Electrostatic | 静电容 | kbsim `topre`（MIT） |
+| 07 | Bubble Pop | 水泡泡 | Tickeys `bubble`（CC BY 3.0） |
+| 08 | Sci-Fi Laser | 电子镭射 | Kenney Sci-Fi Sounds（CC0） |
+| 09 | Typewriter 1930s | 老式打字机 | Tickeys `typewriter`（MIT） |
+| 10 | Silent Red | 消音红轴 | kbsim `redink`（MIT） |
 
 参考 [Tickeys](https://github.com/yingDev/Tickeys)（MIT）新增的 7 个——**直接使用其内置的真实音效素材**（非合成），经 `tool/import_tickeys_sounds.py` 按 Tickeys 的 `schemes.json` 映射到本项目 6 层结构；授权明细见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)：
 
@@ -166,12 +166,12 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 
 各方案的按键映射（Tickeys schemes.json）：`36`=回车→enter 层、`49`=空格→space 层、`51`=退格→release 层，其余按键从变体池轮询映射到 alpha/modifier/nav。
 
-**素材获取策略**（M1 关键风险，三步走）：
-1. **开发期**：原型 10 包由 `tool/make_placeholder_sounds.py` 程序化合成占位 WAV；Tickeys 7 包用真实素材（`tool/import_tickeys_sounds.py` 一次性导入）。
-2. **发布前**：原型 10 包从 CC0 来源替换（kenney.nl 音效包、freesound.org CC0、Sonniss GDC 包），或自录机械键盘；Tickeys 7 包若公开发布需保留 Bubble 的 CC BY 署名（其余满足 MIT 随附说明）。
+**素材获取策略**（已完成）：
+1. **现状**：17 包全部为真实录音素材——01-06/10 用 [kbsim](https://github.com/tplai/kbsim)（MIT）真实轴体录音，08 用 [Kenney Sci-Fi Sounds](https://kenney.nl/assets/sci-fi-sounds)（CC0），07/09/11-17 用 [Tickeys](https://github.com/yingDev/Tickeys) 内置素材；导入脚本 `tool/import_real_sounds.py` + `tool/import_tickeys_sounds.py`，统一响度归一化。授权明细见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)。
+2. **公开发布**：保留 Bubble 系（07/11）的 CC BY 3.0 署名即可；其余为 MIT/CC0，无附加要求。
 3. **兜底**：实现「导入自定义音效包」（Sound Effects 页原型已有入口），用户可自带素材。
 
-> 新增音效包的三处联动：`sound_pack.dart` 的 `kBuiltinPacks`、`pubspec.yaml` 的资源条目、（占位包还需）`tool/make_placeholder_sounds.py` 的 `PACKS`；音频内容变更需提升 `sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`。
+> 新增音效包的三处联动：`sound_pack.dart` 的 `kBuiltinPacks`、`pubspec.yaml` 的资源条目、导入脚本中的映射表；音频内容变更需提升 `sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`。
 
 ---
 
@@ -198,7 +198,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 
 ### M1 — 骨架与音频内核（可听）
 - flutter create 三平台脚手架；DESIGN.md 色板/字体/组件 token 化，主题就位
-- miniaudio FFI 接入三平台编译；占位音效脚本生成 17 包资源
+- miniaudio FFI 接入三平台编译；导入脚本生成 17 包真实音效资源
 - 应用内测试按钮播放 5 层采样；音量/音高/复音验证
 - 验收：三平台运行，点按钮即时出声（复音 10/s 不丢音，体感延迟 <30ms）
 
@@ -233,7 +233,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 | R1 | macOS 辅助功能权限不通过则核心功能失效 | 高 | 首启引导页 + 状态实时检测 + 「重新检查」按钮；文档说明 |
 | R2 | Linux 用户未加入 `input` 组则 evdev 无法读取键盘事件 | 中 | 应用内运行时检测 + 一键指引（`usermod -aG input $USER` 后重新登录）+ 重新检查按钮；未授权时 UI 明示且其余功能可用 |
 | R3 | Linux 托盘左右键不分（appindicator） | 中 | 菜单首项「切换下一个音效」；设置页注明平台差异 |
-| R4 | 17 组真实音效素材缺失 | 中 | 占位合成先行（M1），CC0/自录替换（M4 前），自定义包导入兜底 |
+| R4 | 音效素材授权风险 | 低 | 已全量替换为真实录音（kbsim MIT / Kenney CC0 / Tickeys MIT+CC0），Bubble 系署名待保留；自定义包导入兜底 |
 | R5 | FFI/C 构建跨三平台踩坑 | 中 | audio_engine.c 单文件 + 各平台 CMake/Xcode 标准接入；M1 即三平台 CI 编译验证 |
 | R6 | desktop_multi_window HUD 通信不稳 | 低 | 回退单窗口 `setAsFrameless()` 模式切换方案 |
 | R7 | 键击→出声端到端延迟超标 | 中 | MethodChannel 传码（微秒级）+ 内存预解码 + miniaudio 小 period；M1 建立延迟测量 |

@@ -18,7 +18,7 @@
 | `lib/core/system/` | `hotkey_service.dart` 全局热键（Option+Shift+K 静音 / Option+Shift+] 轮换） |
 | `lib/features/hud/` | 托盘 HUD 弹窗（desktop_multi_window 第二窗口，入口 `runHudWindow`，main args 首参 `multi_window`） |
 | `plugins/native_core/` | 本地插件。C 音频引擎在 `macos/Classes/src/`（**唯一副本**，Windows/Linux CMake 反向引用此路径）；`macos/Classes/NativeCorePlugin.swift` CGEventTap；`windows/` WH_KEYBOARD_LL；`linux/` evdev |
-| `assets/sounds/` | 102 个 WAV（17 包 × 6 层）：前 10 包为合成占位音（发布前需替换），11-17 包为 Tickeys 真实素材（授权见 `assets/sounds/CREDITS.md`，导入脚本 `tool/import_tickeys_sounds.py`）。新增包要同时改 `sound_pack.dart` 的 kBuiltinPacks + `pubspec.yaml` 资源目录（占位包另需改 `tool/make_placeholder_sounds.py` 的 PACKS）；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
+| `assets/sounds/` | 102 个 WAV（17 包 × 6 层，**全部为真实录音素材**，已统一响度归一化；授权与来源见 `assets/sounds/CREDITS.md`）。导入脚本：`tool/import_real_sounds.py`（01-10，kbsim/Kenney/Tickeys）+ `tool/import_tickeys_sounds.py`（11-17）。新增包要同时改 `sound_pack.dart` 的 kBuiltinPacks + `pubspec.yaml` 资源目录；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
 | `assets/icons/` | 托盘图标（`tool/make_lucide_tray_icons.py` 生成 Lucide 7 图标 ×3 变体）+ 旧版自绘图 |
 | `docs/prototypes/` | Google Stitch 原型图 + 原始设计系统（KeySound 字样仅供参考） |
 | `tool/` | 资产生成与冒烟测试脚本 |
@@ -39,7 +39,9 @@
 flutter pub get                      # 依赖
 flutter analyze                      # 提交前必须 0 issue
 flutter build macos --debug|--release
-python3 tool/make_placeholder_sounds.py   # 重新生成占位音效
+# 音效素材导入（一次性，需先克隆源仓库，详见 CREDITS.md）
+python3 tool/import_real_sounds.py --kbsim <kbsim/src/assets/audio> --kenney <kenney/Audio> --tickeys <tickeys/data>
+python3 tool/import_tickeys_sounds.py <tickeys/Tickeys.app/Contents/Resources/data>
 python3 tool/make_lucide_tray_icons.py    # 重新生成 Lucide 托盘图标
 python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页仍在用 tray_256.png）
 ```
