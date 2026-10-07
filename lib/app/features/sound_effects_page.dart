@@ -41,8 +41,8 @@ class SoundEffectsPage extends StatelessWidget {
                     flex: 2,
                     child: SectionCard(
                       icon: Icons.list_alt,
-                      title: 'Switch Profiles',
-                      badge: '${kBuiltinPacks.length} Loaded',
+                      title: '音效包列表',
+                      badge: '已加载 ${kBuiltinPacks.length} 个',
                       child: Column(
                         children: [
                           for (var i = 0; i < kBuiltinPacks.length; i++)
@@ -114,18 +114,22 @@ class _PackTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Flexible(
-                      child: Text(pack.name, style: AppText.titleMd, overflow: TextOverflow.ellipsis),
-                    ),
+                    // Chinese name leads and keeps its full width; the English
+                    // original is the part that yields when space runs short.
+                    Text(pack.name, style: AppText.titleMd),
                     const SizedBox(width: AppSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: context.colors.primaryContainer.withValues(alpha: 0.4),
-                        borderRadius: AppRadii.pill,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: context.colors.primaryContainer.withValues(alpha: 0.4),
+                          borderRadius: AppRadii.pill,
+                        ),
+                        child: Text(pack.nameEn,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.labelMd.copyWith(color: context.colors.primary)),
                       ),
-                      child: Text(pack.tag,
-                          style: AppText.labelMd.copyWith(color: context.colors.primary)),
                     ),
                   ],
                 ),
@@ -214,7 +218,7 @@ class _ActivePackDetail extends StatelessWidget {
         return SectionCard(
           icon: Icons.equalizer,
           title: pack.name,
-          badge: 'ACTIVE PRESET',
+          badge: '使用中',
           subtitle: pack.description,
           trailing: PillButton(
             label: '试听',
@@ -253,7 +257,7 @@ class _DspEngine extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       icon: Icons.tune,
-      title: 'DSP 声学主引擎',
+      title: '声学主引擎 DSP',
       trailing: GestureDetector(
         onTap: () => soundEngine.resetToDefaults(),
         child: Text('恢复默认', style: AppText.labelMd.copyWith(color: context.colors.outline)),
@@ -270,7 +274,7 @@ class _DspEngine extends StatelessWidget {
                 soundEngine.updateSettings(settings.copyWith(volumeDb: v)),
           ),
           AppSlider(
-            label: '音高抖动 Pitch Jitter',
+            label: '音高抖动',
             value: settings.pitchJitter,
             min: 0,
             max: 0.5,
@@ -371,7 +375,7 @@ class _SandboxState extends State<_Sandbox> {
             children: [
               Icon(Icons.keyboard, size: 18, color: context.colors.tertiary),
               const SizedBox(width: AppSpacing.sm),
-              Text('Interactive Sandbox & Target Output', style: AppText.titleLg),
+              Text('交互试音台', style: AppText.titleLg),
               const Spacer(),
               MetricChip(label: '本框敲击 $_count'),
             ],

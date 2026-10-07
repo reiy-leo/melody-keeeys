@@ -23,7 +23,7 @@ class MenuBarPage extends StatelessWidget {
               SectionCard(
                 icon: Icons.mouse,
                 title: '点击与手势绑定',
-                badge: 'NATIVE HOOK',
+                badge: '原生钩子',
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -48,7 +48,7 @@ class MenuBarPage extends StatelessWidget {
                         Expanded(
                           child: _LeftClickCard(
                             icon: Icons.layers,
-                            title: '显示托盘 HUD',
+                            title: '显示托盘面板',
                             subtitle: '弹出紧凑的悬浮调音面板：滑杆、音效包与预设。',
                             selected:
                                 settings.leftClickAction == TrayLeftClickAction.showHud,
@@ -63,7 +63,7 @@ class MenuBarPage extends StatelessWidget {
                       icon: Icons.menu,
                       title: '右键上下文菜单',
                       subtitle: '完整的音效包选择、快速面板与设置入口（系统级菜单）',
-                      trailing: MetricChip(label: 'Context Menu', color: context.colors.tertiary),
+                      trailing: MetricChip(label: '系统级菜单', color: context.colors.tertiary),
                     ),
                   ],
                 ),
@@ -72,7 +72,7 @@ class MenuBarPage extends StatelessWidget {
               SectionCard(
                 icon: Icons.palette,
                 title: '菜单栏图标',
-                badge: 'LUCIDE',
+                badge: 'Lucide 图标库',
                 subtitle: '从 Lucide 图标库中选择托盘/菜单栏图标',
                 child: Wrap(
                   spacing: AppSpacing.md,

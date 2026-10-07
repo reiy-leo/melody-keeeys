@@ -135,7 +135,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
               SectionCard(
                 icon: Icons.keyboard_command_key,
                 title: '全局热键映射',
-                badge: 'SYSTEM WIDE',
+                badge: '系统级',
                 child: Column(
                   children: [
                     SettingsRow(
@@ -157,11 +157,11 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
               SectionCard(
                 icon: Icons.bolt,
                 title: '触发防冲突与按键响应',
-                badge: 'ACOUSTIC SUPPRESSION',
+                badge: '声学抑制',
                 child: Column(
                   children: [
                     AppSlider(
-                      label: 'Anti-Ghosting 连击抑制窗口',
+                      label: '连击抑制窗口',
                       value: settings.antiGhostingMs.toDouble(),
                       min: 10,
                       max: 100,

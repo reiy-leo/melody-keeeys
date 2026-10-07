@@ -33,9 +33,9 @@ extension LatencyPresetX on LatencyPreset {
       };
 
   String get label => switch (this) {
-        LatencyPreset.ultra => 'Ultra (2ms)',
-        LatencyPreset.native => 'Native (5ms)',
-        LatencyPreset.safe => 'Safe (21ms)',
+        LatencyPreset.ultra => '极速 (2ms)',
+        LatencyPreset.native => '标准 (5ms)',
+        LatencyPreset.safe => '稳健 (21ms)',
       };
 }
 

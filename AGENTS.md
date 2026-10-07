@@ -47,6 +47,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 ## 代码约定与注意点
 
 - **颜色一律 `context.colors.xxx`**（ThemeExtension，浅/深双套在 `app_colors.dart`）；不要新增静态色常量。文字样式必须在 `buildAppTheme` 里绑定 `onSurface`（null color 会在浅色下变白字）。
+- **文案语言（用户固定要求）**：界面语言=中文——状态、按钮、徽章、滑杆标签、音效名称等所有用户可见文案一律中文；英文仅作辅助（音效包英文原名在中文名之后以弱化标签显示；品牌名 Melody Keeeys、快捷键 Option+Shift+K、技术名词如 miniaudio 保留原文）。数据模型 `SoundPack` 用 `name`（中文主名）+ `nameEn`（英文原名）+ `description`（纯中文）三字段；勿再用原型里的 `tag` 字段。布局上**中文名优先占位、英文名 Flexible 可截断**，否则中文名会被英文挤压（教训：`Row` 里先 Flexible 中文名会显示成"清..."）。
 - **设置改动**：`AppSettings` 加字段要同时改 `copyWith / toJson / fromJson` 三处；HUD 通过 `toJson` 接收状态，新字段自动跟随。
 - **FFI 符号**：`ae_*` 用 `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定，防止死代码剥离（dlsym 找不到符号的教训见 git log）。
 - **CocoaPods 不收 pod 根之外的源文件**：共享 C 源码放 `plugins/native_core/macos/Classes/src/`。

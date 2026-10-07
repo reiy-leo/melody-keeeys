@@ -261,7 +261,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                 const SizedBox(width: AppSpacing.sm),
                 Text('Melody Keeeys', style: AppText.titleLg),
                 const Spacer(),
-                Text('TRAY HUD', style: AppText.labelMd.copyWith(color: context.colors.outline)),
+                Text('托盘面板', style: AppText.labelMd.copyWith(color: context.colors.outline)),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -282,8 +282,8 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                   Expanded(
                     child: Text(
                       _settings.engineEnabled
-                          ? 'AUDIO ENGINE ACTIVE  ${_latencyMs?.toStringAsFixed(1) ?? '--'}ms'
-                          : 'AUDIO ENGINE MUTED',
+                          ? '音频引擎运行中  ${_latencyMs?.toStringAsFixed(1) ?? '--'}ms'
+                          : '音频引擎已静音',
                       style: AppText.labelMd.copyWith(color: context.colors.tertiary),
                     ),
                   ),
@@ -318,13 +318,11 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            Flexible(
-                              child: Text(pack.name,
-                                  style: AppText.headlineMd,
-                                  overflow: TextOverflow.ellipsis),
-                            ),
+                            Text(pack.name,
+                                style: AppText.headlineMd,
+                                overflow: TextOverflow.ellipsis),
                             const SizedBox(width: AppSpacing.sm),
-                            _TagChip(pack.tag),
+                            Flexible(child: _TagChip(pack.nameEn)),
                           ],
                         ),
                         Text(pack.description,
@@ -346,7 +344,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                       ),
                       icon: const Icon(Icons.graphic_eq, size: 14),
-                      label: const Text('Strike', style: AppText.labelMd),
+                      label: const Text('试听', style: AppText.labelMd),
                     ),
                   ),
                 ],
@@ -403,7 +401,10 @@ class _TagChip extends StatelessWidget {
         color: context.colors.primaryContainer.withValues(alpha: 0.5),
         borderRadius: AppRadii.pill,
       ),
-      child: Text(text, style: AppText.labelMd.copyWith(color: context.colors.primary)),
+      child: Text(text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppText.labelMd.copyWith(color: context.colors.primary)),
     );
   }
 }
@@ -446,13 +447,9 @@ class _HudPackRow extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  Flexible(
-                    child: Text(pack.name,
-                        style: AppText.titleMd,
-                        overflow: TextOverflow.ellipsis),
-                  ),
+                  Text(pack.name, style: AppText.titleMd),
                   const SizedBox(width: AppSpacing.sm),
-                  _TagChip(pack.tag),
+                  Flexible(child: _TagChip(pack.nameEn)),
                 ],
               ),
             ),

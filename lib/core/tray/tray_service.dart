@@ -141,7 +141,7 @@ class TrayService {
 
     // Headline: which pack is sounding right now.
     final currentItem = MenuItem.createWithLabelAndType(
-        '正在使用：${activePack.name} · ${activePack.tag}', MenuItemType.normal);
+        '正在使用：${activePack.name}', MenuItemType.normal);
     if (currentItem != null) {
       currentItem.isEnabled = false;
       addItem(currentItem, null);
@@ -152,7 +152,7 @@ class TrayService {
     for (var i = 0; i < kBuiltinPacks.length; i++) {
       final pack = kBuiltinPacks[i];
       final item = MenuItem.createWithLabelAndType(
-          '${i + 1}. ${pack.name} · ${pack.tag}', MenuItemType.checkbox);
+          '${i + 1}. ${pack.name}（${pack.nameEn}）', MenuItemType.checkbox);
       item?.state = pack.id == state.settings.activePackId
           ? MenuItemState.checked
           : MenuItemState.unchecked;
@@ -169,7 +169,7 @@ class TrayService {
     addItem(engineItem, soundEngine.toggleEngine);
 
     addItem(
-      MenuItem.createWithLabelAndType('快速面板 HUD', MenuItemType.normal),
+      MenuItem.createWithLabelAndType('打开托盘面板', MenuItemType.normal),
       appLifecycle.showHud,
     );
     addItem(
