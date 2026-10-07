@@ -17,8 +17,8 @@ extern "C" {
 #define AE_PRESET_SAFE   2
 
 /* Slot = packIndex * 6 + layerIndex (see audio_engine_ffi.dart).
- * Capacity must cover kBuiltinPacks.length * 6 = 102 today. */
-#define AE_MAX_SLOTS 128
+ * Capacity must cover kBuiltinPacks.length * 6 = 132 today. */
+#define AE_MAX_SLOTS 160
 
 struct audio_engine;
 

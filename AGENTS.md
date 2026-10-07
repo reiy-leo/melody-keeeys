@@ -11,14 +11,14 @@
 | 路径 | 内容 |
 |---|---|
 | `lib/app/` | 主题（`theme/app_colors.dart` 双色板 ThemeExtension、`theme/app_tokens.dart` 圆角/间距/字体）、`settings_app.dart` 设置窗口壳（全高侧边栏+右上状态芯片）、`features/` 四个设置页 |
-| `lib/core/audio/` | `audio_engine_ffi.dart`（miniaudio FFI 绑定，槽位=包序号×6+层序号）、`sound_pack.dart`（17 包元数据+5 层枚举）、`sound_engine.dart`（引擎控制器+KeyHookChannel） |
+| `lib/core/audio/` | `audio_engine_ffi.dart`（miniaudio FFI 绑定，槽位=包序号×6+层序号）、`sound_pack.dart`（22 包元数据+6 层枚举）、`sound_engine.dart`（引擎控制器+KeyHookChannel） |
 | `lib/core/hooks/` | `keymap_classifier.dart` 三平台键码表 → 5 层分类（改键位映射只动这里） |
 | `lib/core/tray/` | `tray_service.dart` 托盘（tray_manager 0.7 nativeapi TrayIcon API；图标=Lucide 7 选 1） |
 | `lib/core/settings/` | `settings_model.dart`（AppSettings+UiTheme+kTrayIcons）、`settings_repository.dart`（shared_preferences JSON） |
 | `lib/core/system/` | `hotkey_service.dart` 全局热键（Option+Shift+K 静音 / Option+Shift+] 轮换） |
 | `lib/features/hud/` | 托盘 HUD 弹窗（desktop_multi_window 第二窗口，入口 `runHudWindow`，main args 首参 `multi_window`） |
 | `plugins/native_core/` | 本地插件。C 音频引擎在 `macos/Classes/src/`（**唯一副本**，Windows/Linux CMake 反向引用此路径）；`macos/Classes/NativeCorePlugin.swift` CGEventTap；`windows/` WH_KEYBOARD_LL；`linux/` evdev |
-| `assets/sounds/` | 102 个 WAV（17 包 × 6 层，**全部为真实录音素材**，已统一响度归一化；授权与来源见 `assets/sounds/CREDITS.md`）。导入脚本：`tool/import_real_sounds.py`（01-10，kbsim/Kenney/Tickeys）+ `tool/import_tickeys_sounds.py`（11-17）。新增包要同时改 `sound_pack.dart` 的 kBuiltinPacks + `pubspec.yaml` 资源目录；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
+| `assets/sounds/` | 132 个 WAV（22 包 × 6 层，**全部为真实录音素材**，已统一响度归一化；授权与来源见 `assets/sounds/CREDITS.md`）。导入脚本：`tool/import_real_sounds.py`（01-10，kbsim/Kenney/Tickeys）+ `tool/import_tickeys_sounds.py`（11-22）。新增包要同时改 `sound_pack.dart` 的 kBuiltinPacks + `pubspec.yaml` 资源目录；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
 | `assets/icons/` | 托盘图标（`tool/make_lucide_tray_icons.py` 生成 Lucide 7 图标 ×3 变体）+ 旧版自绘图 |
 | `docs/prototypes/` | Google Stitch 原型图 + 原始设计系统（KeySound 字样仅供参考） |
 | `tool/` | 资产生成与冒烟测试脚本 |

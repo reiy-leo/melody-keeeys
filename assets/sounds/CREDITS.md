@@ -29,6 +29,18 @@
 | 16 | 樱桃 G80-3494 | Tickeys `Cherry_G80_3494/` | MIT（随仓库分发） |
 | 17 | 鼓点 Drum | Tickeys `drum/`（Freesound: [Veiler](https://freesound.org/people/Veiler/packs/16053/)） | **CC0（公共领域）** |
 
+## 18-22：拟音特效包（Freesound CC0 真实录音）
+
+由 `tool/import_foley_sounds.py` 从长录音中切分生成（每层选取不同的时间段，避免连击重复感；自动锚点定位 + 高通滤波 + 响度归一化）。
+
+| # | 音效包 | 素材来源（Freesound，均为 CC0 1.0） |
+|---|---|---|
+| 18 | 砂纸摩擦 Sandpaper | [#726831](https://freesound.org/s/726831/) 砂纸打磨录音（取 6-17s 摩擦段） |
+| 19 | 粉笔书写 Chalk | [#378400](https://freesound.org/s/378400/) 粉笔黑板书写（500Hz 高通滤除隆隆声） |
+| 20 | iPad 点触 iPad Tap | [#531501](https://freesound.org/s/531501/) 触屏点按拟音（锚定 8 个点按瞬态） |
+| 21 | 塑料袋揉搓 Plastic Bag | [#405014](https://freesound.org/s/405014/) 塑料袋揉搓（取 10-36s 高质感段） |
+| 22 | 吸管喝水 Straw Sip | [#699625](https://freesound.org/s/699625/) 吸管吮吸（取 4-23s 段） |
+
 ## 第三方项目
 
 - [kbsim](https://github.com/tplai/kbsim) — MIT License, Copyright (c) Thomas Lai
@@ -52,9 +64,12 @@ python3 tool/import_real_sounds.py \
 
 # 11-17（Tickeys 效果包）
 python3 tool/import_tickeys_sounds.py /tmp/tickeys/Tickeys.app/Contents/Resources/data
+
+# 18-22（拟音特效：从 Freesound 下载 mp3 到 /tmp/newfx，见下方链接）
+python3 tool/import_foley_sounds.py --src /tmp/newfx
 ```
 
-两个脚本都会把源素材转成 48 kHz 16-bit WAV、映射到本项目 6 层结构（alpha/space/enter/modifier/nav/release），并做响度归一化（RMS 目标 2500，峰值上限 32000）。release 层由真实素材裁剪前 0.10s + 0.05s 淡出得到。
+三个脚本都会把源素材转成 48 kHz 16-bit WAV、映射到本项目 6 层结构（alpha/space/enter/modifier/nav/release），并做响度归一化（RMS 目标 2500，峰值上限 32000）。release 层由真实素材裁剪前 0.10s + 0.05s 淡出得到。
 
 **新增/变更素材后**需提升 `lib/core/audio/sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`，已安装实例才会刷新 WAV。
 

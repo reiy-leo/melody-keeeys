@@ -151,6 +151,37 @@ const List<SoundPack> kBuiltinPacks = [
     nameEn: 'Drum',
     description: '下沉鼓声与鼓皮敲击，节拍感十足。',
   ),
+  // Foley set (CC0 recordings from Freesound, see assets/sounds/CREDITS.md).
+  SoundPack(
+    id: 'sandpaper',
+    name: '砂纸摩擦',
+    nameEn: 'Sandpaper',
+    description: '粗粝的沙沙摩擦声，颗粒感十足。',
+  ),
+  SoundPack(
+    id: 'chalk',
+    name: '粉笔书写',
+    nameEn: 'Chalk',
+    description: '粉笔划过黑板的细碎刮擦声。',
+  ),
+  SoundPack(
+    id: 'ipad_tap',
+    name: 'iPad 点触',
+    nameEn: 'iPad Tap',
+    description: '手指轻敲玻璃屏幕的清脆点按声。',
+  ),
+  SoundPack(
+    id: 'plastic_bag',
+    name: '塑料袋揉搓',
+    nameEn: 'Plastic Bag',
+    description: '塑料袋窸窣揉搓的皱褶声。',
+  ),
+  SoundPack(
+    id: 'straw_sip',
+    name: '吸管喝水',
+    nameEn: 'Straw Sip',
+    description: '吸管吮吸饮料的咕噜水声。',
+  ),
 ];
 
 SoundPack packById(String id) =>

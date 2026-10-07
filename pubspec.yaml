@@ -58,6 +58,11 @@ flutter:
     - assets/sounds/cherry_g80_3000/
     - assets/sounds/cherry_g80_3494/
     - assets/sounds/drum/
+    - assets/sounds/sandpaper/
+    - assets/sounds/chalk/
+    - assets/sounds/ipad_tap/
+    - assets/sounds/plastic_bag/
+    - assets/sounds/straw_sip/
     - assets/icons/
 
   fonts:
