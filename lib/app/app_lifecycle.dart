@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -61,11 +62,20 @@ class AppLifecycle with WindowListener {
 
   Future<WindowController> _createHud() async {
     final state = soundEngine.state;
+    final bounds = TrayService.instance.bounds;
+    debugPrint('[melody] create HUD, tray bounds: $bounds');
     final config = WindowConfiguration(
       arguments: jsonEncode({
         'settings': state.settings.toJson(),
         'latencyMs': state.latencyMs,
         if (_soundDir != null) 'soundDir': _soundDir,
+        if (bounds != null && !bounds.isEmpty)
+          'bounds': {
+            'x': bounds.left,
+            'y': bounds.top,
+            'w': bounds.width,
+            'h': bounds.height,
+          },
       }),
       hiddenAtLaunch: true,
     );

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui' show FlutterView;
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,32 @@ import '../../core/audio/sound_pack.dart';
 import '../../core/settings/settings_model.dart';
 
 const _hudSize = Size(340, 560);
+
+/// Top-left position for the HUD: centered under the tray icon (menu bar) or
+/// above it (taskbar on the bottom), in logical top-left-origin coordinates.
+Offset hudTopLeft(Map<String, dynamic> b, Size screen) {
+  final w = (b['w'] as num?)?.toDouble() ?? 0;
+  final h = (b['h'] as num?)?.toDouble() ?? 0;
+  final bx = (b['x'] as num?)?.toDouble() ?? 0;
+  final by = (b['y'] as num?)?.toDouble() ?? 0;
+  final trayOnBottom = by > screen.height / 2;
+  var x = bx + w / 2 - _hudSize.width / 2;
+  final maxX = screen.width - _hudSize.width - 8;
+  x = x.clamp(8.0, maxX > 8.0 ? maxX : 8.0);
+  final y = trayOnBottom
+      ? by - _hudSize.height - 6
+      // Menu bar icons report y≈-24 while the bar is auto-hidden; keep the
+      // HUD below the menu bar either way.
+      : (by + h + 6).clamp(30.0, screen.height - _hudSize.height - 8);
+  return Offset(x, y);
+}
+
+/// Logical screen size (the window's display, not the HUD window itself).
+Size _screenSize(FlutterView view) {
+  final dpr = view.devicePixelRatio;
+  if (dpr > 0) return view.display.size / dpr;
+  return view.physicalSize / (dpr > 0 ? dpr : 1.0);
+}
 
 /// Entry for the second window process created by desktop_multi_window.
 Future<void> runHudWindow() async {
@@ -25,6 +52,21 @@ Future<void> runHudWindow() async {
   final controller = await WindowController.fromCurrentEngine();
   final arguments = controller.arguments.isEmpty ? '{}' : controller.arguments;
   final args = jsonDecode(arguments) as Map<String, dynamic>;
+
+  // Position next to the tray icon before the first show. A later 'place'
+  // message from the main window would race the engine boot on first open.
+  final initialBounds = args['bounds'] as Map<String, dynamic>?;
+  if (initialBounds != null) {
+    try {
+      final view = WidgetsBinding.instance.platformDispatcher.views.first;
+      final pos = hudTopLeft(initialBounds, _screenSize(view));
+      await windowManager.setPosition(pos);
+      debugPrint('[melody-hud] initial position $pos '
+          '(bounds=$initialBounds screen=${_screenSize(view)})');
+    } catch (e) {
+      debugPrint('[melody-hud] initial position failed: $e');
+    }
+  }
 
   // Own preview engine instance for this isolate (shares the output device).
   AudioEngineFfi? previewEngine;
@@ -134,16 +176,10 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
   /// using the tray icon bounds sent from the main window.
   Future<void> _place(Map<String, dynamic> b) async {
     final view = WidgetsBinding.instance.platformDispatcher.views.first;
-    final screen = view.physicalSize / view.devicePixelRatio;
-    final w = (b['w'] as num).toDouble();
-    final h = (b['h'] as num).toDouble();
-    final trayOnBottom = (b['y'] as num).toDouble() > screen.height / 2;
-    var x = (b['x'] as num).toDouble() + w / 2 - _hudSize.width / 2;
-    x = x.clamp(8.0, screen.width - _hudSize.width - 8);
-    final y = trayOnBottom
-        ? (b['y'] as num).toDouble() - _hudSize.height - 6
-        : (b['y'] as num).toDouble() + h + 6;
-    await windowManager.setPosition(Offset(x, y));
+    final screen = _screenSize(view);
+    final pos = hudTopLeft(b, screen);
+    debugPrint('[melody-hud] place -> $pos (bounds=$b)');
+    await windowManager.setPosition(pos);
   }
 
   Future<void> _findMainWindow() async {

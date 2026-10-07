@@ -62,6 +62,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 - **tap 必须是 active tap 不能是 listenOnly（2026-10-07 第二课）**：listen-only tap 在最近的 macOS 上要「输入监控」权限，且该 TCC 记录同样绑定签名、重建即失效，失效时 tap 创建"成功"但零事件（症状：所有键无声、引擎芯片假绿、无任何报错）。改为 `options: .defaultTap`（事件原样透传不拦截）后只依赖稳定的辅助功能授权。验证方法：debug 构建看 `[melody] key code=...` 日志是否随按键输出。
 - **桌面多窗口子窗口插件注册**：desktop_multi_window 的每个子窗口跑独立 Flutter engine，插件不会自动注册——必须在 `macos/Runner/MainFlutterWindow.swift` 里 `FlutterMultiWindowPlugin.setOnWindowCreatedCallback { RegisterGeneratedPlugins(registry: $0) }`，否则 HUD 里 window_manager 等全部 MissingPluginException（曾导致点托盘 HUD 完全弹不出来）。
 - **HUD soundDir 传递**：`main.dart` 里必须 `appLifecycle.soundDir = soundEngine.soundDir`（曾遗漏导致 HUD 预览引擎无采样、且 `_soundDir!` 空断言崩溃）。
+- **HUD 定位**：托盘 bounds 随 `WindowConfiguration.arguments` 一起传给 HUD，在 `runHudWindow()` 启动时立即定位（首开时发 `place` 消息会与引擎启动竞态导致丢失，HUD 曾弹在屏幕中间）；屏幕尺寸必须用 `view.display.size / devicePixelRatio`，**不能用 `view.physicalSize`**（那是 HUD 自己窗口的尺寸，clamp 会全错）。`hudTopLeft()` 是纯函数，可单测。
 - **Impeller 渲染问题**：Intel Mac（UHD 630）上 Impeller 会渲染字形损坏（文字变噪点/沙子），Info.plist 里 `FLTEnableImpeller=false` 强制回 Skia。修改 plist 后必须重新构建才生效。
 
 ## 会话收尾清单（用户固定要求）
