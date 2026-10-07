@@ -127,22 +127,27 @@ class SoundEngine extends ChangeNotifier {
   }
 
   Future<void> _extractAssets(Directory target) async {
-    if (target.existsSync()) {
-      final manifest = File('${target.path}/.manifest');
-      if (manifest.existsSync()) return;
-    }
     await target.create(recursive: true);
+    // Bump when the bundled WAVs change: a version change re-copies every
+    // file so existing installs pick up regenerated samples.
+    const assetVersion = '3';
+    final manifest = File('${target.path}/.manifest');
+    final upToDate = manifest.existsSync() &&
+        manifest.readAsStringSync().startsWith('v$assetVersion ');
+    // Extract per file, not once per install: packs added by an update must
+    // land in the existing support directory too.
     for (final pack in kBuiltinPacks) {
       for (final layer in SoundLayer.values) {
         final asset = pack.assetPathFor(layer);
-        final data = await rootBundle.load('assets/$asset');
         final file = File('${target.path}/$asset');
+        if (upToDate && file.existsSync()) continue;
+        final data = await rootBundle.load('assets/$asset');
         await file.create(recursive: true);
         await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
       }
     }
-    await File('${target.path}/.manifest')
-        .writeAsString(DateTime.now().toIso8601String());
+    await manifest.writeAsString(
+        'v$assetVersion · ${kBuiltinPacks.length} packs · ${DateTime.now().toIso8601String()}');
   }
 
   Future<void> startHook() async {

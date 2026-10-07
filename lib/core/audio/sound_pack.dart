@@ -45,7 +45,8 @@ class SoundPack {
   String assetPathFor(SoundLayer layer) => 'sounds/$id/${layer.assetName}.wav';
 }
 
-/// The 10 built-in packs, ordered as in the prototype's Switch Profiles list.
+/// The 17 built-in packs: the prototype's original 10 plus 7 Tickeys-inspired
+/// effects (bubble/typewriter/mechanical/sword/cherry_g80_*/drum).
 const List<SoundPack> kBuiltinPacks = [
   SoundPack(
     id: 'cherry_mx_blue',
@@ -106,6 +107,49 @@ const List<SoundPack> kBuiltinPacks = [
     name: '消音红轴',
     nameEn: 'Silent Red',
     description: '硅胶消音垫，低分贝轻柔敲击。',
+  ),
+  // Tickeys-inspired set (synthesized approximations, not its audio assets).
+  SoundPack(
+    id: 'bubble',
+    name: '咕噜气泡',
+    nameEn: 'Bubble',
+    description: '上升水音与回声，清澈的咕噜冒泡质感。',
+  ),
+  SoundPack(
+    id: 'typewriter',
+    name: '经典打字机',
+    nameEn: 'Typewriter',
+    description: '击键闷响与字车铃声，怀旧打字机韵律。',
+  ),
+  SoundPack(
+    id: 'mechanical',
+    name: '机械键盘',
+    nameEn: 'Mechanical',
+    description: '干脆利落的通用机械轴敲击声。',
+  ),
+  SoundPack(
+    id: 'sword',
+    name: '利剑出鞘',
+    nameEn: 'Sword',
+    description: '金属下滑音与泛音共鸣，利落出鞘声。',
+  ),
+  SoundPack(
+    id: 'cherry_g80_3000',
+    name: '樱桃 G80-3000',
+    nameEn: 'Cherry G80-3000',
+    description: '经典樱桃机械手感，清脆扎实的段落声。',
+  ),
+  SoundPack(
+    id: 'cherry_g80_3494',
+    name: '樱桃 G80-3494',
+    nameEn: 'Cherry G80-3494',
+    description: '红轴线性触底，低沉顺滑的闷响。',
+  ),
+  SoundPack(
+    id: 'drum',
+    name: '鼓点',
+    nameEn: 'Drum',
+    description: '下沉鼓声与鼓皮敲击，节拍感十足。',
   ),
 ];
 

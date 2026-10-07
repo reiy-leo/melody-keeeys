@@ -14,7 +14,7 @@
 | 应用名 | **Melody Keeeys**（英文名，托盘/HUD/窗口标题展示用）；中文名 **旋律按键**（关于页、中文 UI 副标题） |
 | 形态 | 常驻菜单栏/托盘的应用（无 Dock/任务栏常驻窗口），主窗口即设置窗口 |
 | 核心功能 | 全局键盘监听 → 按键分类映射 → 低延迟播放对应音效 |
-| 默认音效 | 10 个内置音效包（见 §5） |
+| 默认音效 | 17 个内置音效包（见 §5） |
 | 交互 | 左键托盘图标 = 轮换下一个音效（可在设置中改为弹出 HUD，HUD 顶部有「正在使用：音效包」卡片）；右键 = 上下文菜单（首行固定显示「正在使用：当前音效包」，悬停 tooltip 同步显示） |
 | 设置窗口 | 侧边栏 4 项：通用、音效、菜单栏（侧边栏底部：关于） |
 | UI 语言 | **中文优先**：所有界面文案（状态、按钮、徽章、音效名称）一律中文；英文仅作辅助（音效包英文原名以弱化标签形式显示，品牌名与快捷键等专有名词保留原文）。文案结构上预留 i18n（zh-CN 默认 + en） |
@@ -135,25 +135,41 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 
 ---
 
-## 5. 内置 10 个音效包（沿用原型命名）
+## 5. 内置 17 个音效包（原型 10 个 + Tickeys 风格 7 个）
 
-| # | 包名 | 中文标签 | 风格描述 |
+原型的 10 个：
+
+| # | 包名 | 中文名 | 风格描述 |
 |---|---|---|---|
 | 01 | Cherry MX Blue | 清脆青轴 | Classic Clicky · 高频咔嗒 |
-| 02 | Gateron Oil King | 麻将音HIFI | Deep Linear Thock · 深底共鸣 |
-| 03 | Holy Panda | 肉感团子 | Punchy Clack · 圆润触底 |
-| 04 | IBM Model M | 机械铭牌 | Buckling Spring · 金属弹簧回响 |
-| 05 | Kailh Box White | 利落白轴 | Click Bar · 明快金属脆响 |
+| 02 | Gateron Oil King | 麻将音 | Deep Linear Thock · 深底共鸣 |
+| 03 | Holy Panda | 圣熊猫轴 | Punchy Clack · 圆润触底 |
+| 04 | IBM Model M | 弹簧经典 | Buckling Spring · 金属弹簧回响 |
+| 05 | Kailh Box White | 凯华白盒 | Click Bar · 明快金属脆响 |
 | 06 | Topre Electrostatic | 静电容 | Rubber Dome · 软弹枕音 |
 | 07 | Bubble Pop | 水泡泡 | Aqua Droplet · 水滴 Q 弹 |
 | 08 | Sci-Fi Laser | 电子镭射 | Synth Pew · 合成器音色 |
 | 09 | Typewriter 1930s | 老式打字机 | Vintage Strike · 机械铃声 |
 | 10 | Silent Red | 消音红轴 | Silicone Dampened · 低分贝轻拍 |
 
+参考 [Tickeys](https://github.com/yingDev/Tickeys)（MIT）新增的 7 个（**自研合成近似音，未使用其音频素材**）：
+
+| # | 包名 | 中文名 | 合成配方要点 |
+|---|---|---|---|
+| 11 | Bubble | 咕噜气泡 | 上升滑音 140→720Hz + 微弱触击 + 95ms 延迟回声 |
+| 12 | Typewriter | 经典打字机 | 中频击键噪声 + 低音闷响 + 2093Hz 字车铃（回车/空格加响） |
+| 13 | Mechanical | 机械键盘 | 中频 thock（重心约 690Hz），清晰触底 |
+| 14 | Sword | 利剑出鞘 | 金属下滑扫频 + 非谐泛音（1 / 1.73 / 3.1×），偏亮为特性 |
+| 15 | Cherry G80-3000 | 樱桃 G80-3000 | 清脆段落，重心约 640Hz |
+| 16 | Cherry G80-3494 | 樱桃 G80-3494 | 线性红轴闷响，低频体共鸣 |
+| 17 | Drum | 鼓点 | 165→52Hz 下坠鼓身 + 击打噪声 |
+
 **素材获取策略**（M1 关键风险，三步走）：
-1. **开发期**：`tool/make_placeholder_sounds.py` 程序化合成 10 组风格化占位 WAV（滤波噪声脉冲 + 包络 + 谐振峰，按包调音色参数），保证全流程先行。
+1. **开发期**：`tool/make_placeholder_sounds.py` 程序化合成 17 组风格化占位 WAV（滤波噪声脉冲 + 包络 + 谐振峰，按包调音色参数；bubble/typewriter/sword/drum 走专用合成内核），保证全流程先行。
 2. **发布前**：从 CC0 来源替换（kenney.nl 音效包、freesound.org CC0、Sonniss GDC 包），或自录机械键盘。
 3. **兜底**：实现「导入自定义音效包」（Sound Effects 页原型已有入口），用户可自带素材。
+
+> 新增音效包的三处联动：`tool/make_placeholder_sounds.py` 的 `PACKS`、`sound_pack.dart` 的 `kBuiltinPacks`、`pubspec.yaml` 的资源条目；音频内容变更需提升 `sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`。
 
 ---
 
@@ -161,7 +177,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 
 ### 托盘图标
 - **左键**（默认）：轮换到下一个音效包 + 播放新包 Alpha 层采样作为听觉确认 + 菜单勾选态更新。可在设置改为「弹出 HUD」。
-- **右键**：上下文菜单 = 10 个音效包（单选勾选态，选中即切换）＋ 分隔线 ＋「快速面板 HUD」＋「设置…」＋「退出」。
+- **右键**：上下文菜单 = 17 个音效包（单选勾选态，选中即切换）＋ 分隔线 ＋「快速面板 HUD」＋「设置…」＋「退出」。
 - Linux 差异：appindicator 下左右键可能无法区分（左键通常直接弹菜单）——菜单首项固定为「切换下一个音效」，保证行为可达。
 
 ### 托盘 HUD 弹窗（原型「TRAY HUD」，第二窗口）
@@ -180,7 +196,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 
 ### M1 — 骨架与音频内核（可听）
 - flutter create 三平台脚手架；DESIGN.md 色板/字体/组件 token 化，主题就位
-- miniaudio FFI 接入三平台编译；占位音效脚本生成 10 包资源
+- miniaudio FFI 接入三平台编译；占位音效脚本生成 17 包资源
 - 应用内测试按钮播放 5 层采样；音量/音高/复音验证
 - 验收：三平台运行，点按钮即时出声（复音 10/s 不丢音，体感延迟 <30ms）
 
@@ -191,7 +207,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 - 验收：真机全局打字出对应音效；托盘全交互可用；三平台一致
 
 ### M3 — 设置窗口与持久化（好用）
-- 四 Tab 设置页按原型实现；shared_preferences 持久化；10 包元数据
+- 四 Tab 设置页按原型实现；shared_preferences 持久化；17 包元数据
 - 开机自启、静默启动、全局热键（静音/轮换）
 - 导入自定义音效包；恢复默认
 - 验收：设置全项生效且重启保持；新用户 5 分钟内可完成首次配置
@@ -215,7 +231,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 | R1 | macOS 辅助功能权限不通过则核心功能失效 | 高 | 首启引导页 + 状态实时检测 + 「重新检查」按钮；文档说明 |
 | R2 | Linux 用户未加入 `input` 组则 evdev 无法读取键盘事件 | 中 | 应用内运行时检测 + 一键指引（`usermod -aG input $USER` 后重新登录）+ 重新检查按钮；未授权时 UI 明示且其余功能可用 |
 | R3 | Linux 托盘左右键不分（appindicator） | 中 | 菜单首项「切换下一个音效」；设置页注明平台差异 |
-| R4 | 10 组真实音效素材缺失 | 中 | 占位合成先行（M1），CC0/自录替换（M4 前），自定义包导入兜底 |
+| R4 | 17 组真实音效素材缺失 | 中 | 占位合成先行（M1），CC0/自录替换（M4 前），自定义包导入兜底 |
 | R5 | FFI/C 构建跨三平台踩坑 | 中 | audio_engine.c 单文件 + 各平台 CMake/Xcode 标准接入；M1 即三平台 CI 编译验证 |
 | R6 | desktop_multi_window HUD 通信不稳 | 低 | 回退单窗口 `setAsFrameless()` 模式切换方案 |
 | R7 | 键击→出声端到端延迟超标 | 中 | MethodChannel 传码（微秒级）+ 内存预解码 + miniaudio 小 period；M1 建立延迟测量 |
@@ -230,7 +246,7 @@ tool/make_placeholder_sounds.py # 合成占位音效脚本（见 §5）
 | 托盘 `tray_manager` 旧 Menu/TrayListener API | `tray_manager ^0.7.0`（基于 nativeapi 的 TrayIcon/Menu） | 0.6+ 重构为新 API，旧 API 已废弃 |
 | 状态管理 Riverpod | 全局单例 `SoundEngine extends ChangeNotifier` + `ListenableBuilder` | 单窗口状态源简单直接，减少一层依赖 |
 | 开机自启 `setAsLoginItemService` | `launch_at_startup` 0.5.x 的 `enable()/disable()` | 包 API 演进 |
-| miniaudio 槽位：仅加载当前音效包 | 启动时预解码全部 10 包（60 段 × ~0.15s ≈ 5MB） | 切换/试听零延迟，内存可忽略 |
+| miniaudio 槽位：仅加载当前音效包 | 启动时预解码全部 17 包（102 段 × ~0.15s ≈ 5MB） | 切换/试听零延迟，内存可忽略 |
 | `native/` 目录 | 移入 `plugins/native_core/macos/Classes/src/`（本地路径插件） | CocoaPods 拒收 pod 根之外的源文件；Windows/Linux CMake 改指同一路径，仍是单一副本 |
 | miniaudio engine_config.periods | 仅设 periodSizeInFrames（0.11.25 无 periods 字段） | API 演进；延迟预设仍映射 mixer 更新粒度 |
 | ae_* 符号 | `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定 | 死代码剥离会移除无人静态引用的 FFI 符号 |

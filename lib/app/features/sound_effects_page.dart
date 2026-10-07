@@ -17,7 +17,9 @@ class SoundEffectsPage extends StatelessWidget {
       builder: (context, _) {
         final state = soundEngine.state;
         final settings = state.settings;
-        return SingleChildScrollView(
+        // Fixed-height page: the pack list scrolls on its own so the active
+        // pack, DSP and sandbox cards stay put while browsing packs.
+        return Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -33,44 +35,49 @@ class SoundEffectsPage extends StatelessWidget {
                   ),
                   child: Text(state.loadError!, style: AppText.bodySm.copyWith(color: context.colors.error)),
                 ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Switch profiles list
-                  Expanded(
-                    flex: 2,
-                    child: SectionCard(
-                      icon: Icons.list_alt,
-                      title: '音效包列表',
-                      badge: '已加载 ${kBuiltinPacks.length} 个',
-                      child: Column(
-                        children: [
-                          for (var i = 0; i < kBuiltinPacks.length; i++)
-                            _PackTile(
-                              index: i + 1,
-                              pack: kBuiltinPacks[i],
-                              active: kBuiltinPacks[i].id == settings.activePackId,
-                            ),
-                        ],
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Switch profiles list (independently scrollable)
+                    Expanded(
+                      flex: 2,
+                      child: SectionCard(
+                        icon: Icons.list_alt,
+                        title: '音效包列表',
+                        badge: '已加载 ${kBuiltinPacks.length} 个',
+                        expand: true,
+                        child: ListView.builder(
+                          primary: false,
+                          itemCount: kBuiltinPacks.length,
+                          itemBuilder: (context, i) => _PackTile(
+                            index: i + 1,
+                            pack: kBuiltinPacks[i],
+                            active: kBuiltinPacks[i].id == settings.activePackId,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  // Active pack detail
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _ActivePackDetail(pack: state.activePack),
-                        const SizedBox(height: AppSpacing.lg),
-                        _DspEngine(settings: settings),
-                        const SizedBox(height: AppSpacing.lg),
-                        _Sandbox(enabled: settings.engineEnabled),
-                      ],
+                    const SizedBox(width: AppSpacing.lg),
+                    // Active pack detail
+                    Expanded(
+                      flex: 3,
+                      child: SingleChildScrollView(
+                        primary: false,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _ActivePackDetail(pack: state.activePack),
+                            const SizedBox(height: AppSpacing.lg),
+                            _DspEngine(settings: settings),
+                            const SizedBox(height: AppSpacing.lg),
+                            _Sandbox(enabled: settings.engineEnabled),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

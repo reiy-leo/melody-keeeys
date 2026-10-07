@@ -6,7 +6,7 @@
 
 ## 功能（当前进度）
 
-- **M1 音频内核** ✅ miniaudio + dart:ffi，10 个内置音效包 × 6 层采样（alpha/space/enter/modifier/nav/release），内存预解码、复音播放、音高抖动、音量补偿、三档延迟预设
+- **M1 音频内核** ✅ miniaudio + dart:ffi，17 个内置音效包 × 6 层采样（alpha/space/enter/modifier/nav/release），内存预解码、复音播放、音高抖动、音量补偿、三档延迟预设
 - **M2 全局监听与托盘** ✅ macOS CGEventTap / Windows WH_KEYBOARD_LL / Linux evdev；键码→5 层分类、Anti-Ghosting 抑制窗口、修饰键连发、松键音；托盘左键轮换音效（听觉确认）、右键菜单选择音效/设置/退出
 - **M3 设置窗口** ✅ 侧边栏四页（通用 / 音效 / 菜单栏 / 关于），设置持久化，开机自启，静默启动，全局热键（静音、轮换）
 - **主题** ✅ 浅色 / 深色 / 跟随系统三态，通用页切换即时生效，HUD 跟随；双色板 ThemeExtension（见 [DESIGN.md](DESIGN.md)）
@@ -68,7 +68,7 @@ assets/sounds/         # 占位音效（tool/make_placeholder_sounds.py 生成�
 ## 重新生成资产
 
 ```bash
-python3 tool/make_placeholder_sounds.py    # 占位音效（10 包 × 6 层）
+python3 tool/make_placeholder_sounds.py    # 占位音效（17 包 × 6 层）
 python3 tool/make_lucide_tray_icons.py     # Lucide 托盘图标（7 图标 × 3 变体）
 python3 tool/make_tray_icons.py            # 旧版自绘图标（about 页 256px 仍在用）
 ```

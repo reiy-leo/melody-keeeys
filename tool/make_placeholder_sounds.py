@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Synthesize stylized placeholder keyboard sound packs.
 
-Generates 10 packs x 6 layers (alpha/space/enter/modifier/nav/release) of
+Generates 17 packs x 6 layers (alpha/space/enter/modifier/nav/release) of
 48 kHz mono 16-bit WAV files under assets/sounds/. These are development
 placeholders - replace with CC0 recordings or real captures before release.
+
+The Tickeys-inspired set (bubble/typewriter/mechanical/sword/cherry_g80_*/
+drum - see https://github.com/yingDev/Tickeys, MIT) is synthesized from
+scratch here; no audio assets are copied from that project.
 
 Usage: python3 tool/make_placeholder_sounds.py [--out assets/sounds]
 """
@@ -91,8 +95,113 @@ def _tone(dur, freq, freq_end, decay, attack, gain=1.0):
     return x * _env(len(x), attack, decay) * gain
 
 
+# ---- Tickeys-inspired effect kernels ------------------------------------
+# Each returns the full {layer: float array} dict like synth_pack() does.
+
+def synth_bubble(p):
+    """Water droplet: fast rising chirp + soft tick + watery echo."""
+    out = {}
+    d = p["dur"]
+    decay = p.get("decay", 0.035)
+    for layer in ("alpha", "space", "enter", "modifier", "nav"):
+        pitch = p.get("layer_pitch", {}).get(layer, 1.0)
+        n = int(SR * d)
+        x = _tone(d, 140 * pitch, 720 * pitch, decay, 0.0010, 1.0)
+        tick = _noise_burst(0.010, 4000, 300, 0.0003, 0.005, 0.10,
+                            bp=650 * pitch, q=1.0)
+        x[:len(tick)] += tick[:n]
+        off = int(SR * 0.045)
+        if n > off:
+            echo = _tone(d - 0.045, 190 * pitch, 950 * pitch,
+                         decay * 0.6, 0.0008, 0.30)
+            x[off:off + len(echo)] += echo[:n - off]
+        out[layer] = x * p.get("layer_gain", {}).get(layer, 1.0)
+    rp = p.get("layer_pitch", {}).get("release", 1.2)
+    rel = _tone(0.05, 200 * rp, 950 * rp, 0.015, 0.0006, 0.5)
+    out["release"] = rel * p.get("layer_gain", {}).get("release", 0.3)
+    return out
+
+
+def synth_typewriter(p):
+    """Key strike + low thud + carriage bell (bell louder on space/enter)."""
+    out = {}
+    d = p["dur"]
+    decay = p.get("decay", 0.024)
+    for layer in ("alpha", "space", "enter", "modifier", "nav"):
+        pitch = p.get("layer_pitch", {}).get(layer, 1.0)
+        n = int(SR * d)
+        strike = _noise_burst(0.015, 6000, 500, 0.0002, 0.006, 0.75,
+                              bp=1800 * pitch, q=1.6)
+        x = np.zeros(n)
+        x[:len(strike)] += strike[:n]
+        thud = _tone(d, 240 * pitch, 170 * pitch, decay, 0.0005, 0.70)
+        x[:n] += thud[:n]
+        bell_gain = 0.20 if layer in ("enter", "space") else 0.07
+        for mult, g in ((1.0, 1.0), (2.76, 0.35), (5.4, 0.15)):
+            bell = _tone(d, 2093 * mult * pitch, None, 0.14, 0.0012,
+                         bell_gain * g)
+            x[:n] += bell[:n]
+        out[layer] = x * p.get("layer_gain", {}).get(layer, 1.0)
+    rel = _noise_burst(0.02, 4500, 400, 0.0002, 0.008, 0.35, bp=1400, q=1.4)
+    out["release"] = rel * p.get("layer_gain", {}).get("release", 0.3)
+    return out
+
+
+def synth_sword(p):
+    """Metal slash: bright sweep down + inharmonic metallic ring."""
+    out = {}
+    d = p["dur"]
+    decay = p.get("decay", 0.07)
+    for layer in ("alpha", "space", "enter", "modifier", "nav"):
+        pitch = p.get("layer_pitch", {}).get(layer, 1.0)
+        n = int(SR * d)
+        slash = _noise_burst(d, p.get("noise_lp", 11000), 700, 0.0002,
+                             decay, 0.75, bp=3200 * pitch, q=0.8)
+        x = slash[:n].copy()
+        ring_f = 2000 * pitch
+        for mult, g, dcy in ((1.0, 0.65, 0.05), (1.73, 0.38, 0.042),
+                             (3.1, 0.22, 0.03)):
+            tone = _tone(d, ring_f * mult, ring_f * mult * 0.35, dcy,
+                         0.0004, g)
+            x[:n] += tone[:n]
+        out[layer] = x * p.get("layer_gain", {}).get(layer, 1.0)
+    rel = _noise_burst(0.03, 8000, 1000, 0.0002, 0.01, 0.32, bp=2600, q=0.9)
+    out["release"] = rel * p.get("layer_gain", {}).get("release", 0.3)
+    return out
+
+
+def synth_drum(p):
+    """Drum hit: pitch-dropping kick body + attack crack."""
+    out = {}
+    d = p["dur"]
+    decay = p.get("decay", 0.075)
+    for layer in ("alpha", "space", "enter", "modifier", "nav"):
+        pitch = p.get("layer_pitch", {}).get(layer, 1.0)
+        n = int(SR * d)
+        body = _tone(d, 165 * pitch, 52 * pitch, decay, 0.0008, 1.0)
+        x = body[:n].copy()
+        crack = _noise_burst(0.012, 5000, 400, 0.0002, 0.006, 0.35,
+                             bp=1600 * pitch, q=1.1)
+        x[:len(crack)] += crack[:n]
+        out[layer] = x * p.get("layer_gain", {}).get(layer, 1.0)
+    rel = _noise_burst(0.02, 4000, 300, 0.0002, 0.008, 0.25, bp=900, q=1.0)
+    out["release"] = rel * p.get("layer_gain", {}).get("release", 0.3)
+    return out
+
+
+_CUSTOM_KERNELS = {
+    "bubble": synth_bubble,
+    "typewriter": synth_typewriter,
+    "sword": synth_sword,
+    "drum": synth_drum,
+}
+
+
 def synth_pack(p):
     """Build the 6 layer samples for one pack. Returns {layer: float array}."""
+    custom = p.get("custom")
+    if custom:
+        return _CUSTOM_KERNELS[custom](p)
     d = p["dur"]
     out = {}
 
@@ -208,6 +317,37 @@ PACKS = [
          attack=0.0006, decay=0.012, crack_gain=0.25, ring=False,
          layer_pitch={"space": 0.8, "enter": 0.8, "modifier": 1.2, "nav": 1.1, "release": 1.3},
          layer_gain={"space": 1.15, "enter": 1.2, "modifier": 0.7, "nav": 0.85, "release": 0.3}),
+    # ---- Tickeys-inspired set (synthesized approximations) ----
+    dict(id="bubble", name="Bubble", dur=0.14, custom="bubble", decay=0.035,
+         layer_pitch={"space": 0.72, "enter": 0.78, "modifier": 1.2, "nav": 1.08, "release": 1.3},
+         layer_gain={"space": 1.2, "enter": 1.25, "modifier": 0.65, "nav": 0.85, "release": 0.3}),
+    dict(id="typewriter", name="Typewriter", dur=0.26, custom="typewriter", decay=0.024,
+         layer_pitch={"space": 0.7, "enter": 0.72, "modifier": 1.15, "nav": 1.05, "release": 1.3},
+         layer_gain={"space": 1.2, "enter": 1.3, "modifier": 0.7, "nav": 0.9, "release": 0.3}),
+    dict(id="mechanical", name="Mechanical", dur=0.13,
+         click_f=2100, click_q=1.3, click_decay=0.005, click_gain=0.95,
+         body_f=430, body_gain=0.72, noise_lp=9500, noise_hp=550,
+         attack=0.0002, decay=0.028, crack_gain=0.72, ring=False, body_sweep=0.78,
+         layer_pitch={"space": 0.72, "enter": 0.78, "modifier": 1.15, "nav": 1.05, "release": 1.25},
+         layer_gain={"space": 1.18, "enter": 1.24, "modifier": 0.66, "nav": 0.86, "release": 0.32}),
+    dict(id="sword", name="Sword", dur=0.16, custom="sword", decay=0.07, noise_lp=11000,
+         layer_pitch={"space": 0.75, "enter": 0.8, "modifier": 1.18, "nav": 1.08, "release": 1.3},
+         layer_gain={"space": 1.15, "enter": 1.2, "modifier": 0.65, "nav": 0.85, "release": 0.3}),
+    dict(id="cherry_g80_3000", name="Cherry G80-3000", dur=0.13,
+         click_f=2600, click_q=1.6, click_decay=0.005, click_gain=0.95,
+         body_f=480, body_gain=0.7, noise_lp=9000, noise_hp=650,
+         attack=0.0003, decay=0.024, crack_gain=0.6, ring=False,
+         layer_pitch={"space": 0.7, "enter": 0.75, "modifier": 1.15, "nav": 1.05, "release": 1.25},
+         layer_gain={"space": 1.15, "enter": 1.22, "modifier": 0.68, "nav": 0.86, "release": 0.32}),
+    dict(id="cherry_g80_3494", name="Cherry G80-3494", dur=0.15,
+         click_f=1300, click_q=0.9, click_decay=0.006, click_gain=0.5,
+         body_f=135, body_gain=1.0, noise_lp=3600, noise_hp=240,
+         attack=0.0009, decay=0.058, crack_gain=0.4, ring=False, body_sweep=0.68,
+         layer_pitch={"space": 0.75, "enter": 0.8, "modifier": 1.2, "nav": 1.08, "release": 1.3},
+         layer_gain={"space": 1.22, "enter": 1.28, "modifier": 0.62, "nav": 0.85, "release": 0.3}),
+    dict(id="drum", name="Drum", dur=0.18, custom="drum", decay=0.075,
+         layer_pitch={"space": 0.72, "enter": 0.8, "modifier": 1.25, "nav": 1.1, "release": 1.35},
+         layer_gain={"space": 1.2, "enter": 1.25, "modifier": 0.6, "nav": 0.85, "release": 0.3}),
 ]
 
 
@@ -235,7 +375,5 @@ def main():
             write_wav(pack_dir / f"{layer}.wav", data)
         print(f"  {p['id']:<22} 6 layers -> {pack_dir}")
     print(f"Done: {len(PACKS)} packs x 6 layers @ {SR} Hz mono 16-bit")
-
-
 if __name__ == "__main__":
     main()

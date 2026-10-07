@@ -51,6 +51,13 @@ flutter:
     - assets/sounds/scifi_laser/
     - assets/sounds/typewriter_1930s/
     - assets/sounds/silent_red/
+    - assets/sounds/bubble/
+    - assets/sounds/typewriter/
+    - assets/sounds/mechanical/
+    - assets/sounds/sword/
+    - assets/sounds/cherry_g80_3000/
+    - assets/sounds/cherry_g80_3494/
+    - assets/sounds/drum/
     - assets/icons/
 
   fonts:

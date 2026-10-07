@@ -12,6 +12,7 @@ class SectionCard extends StatelessWidget {
     this.badge,
     this.subtitle,
     this.trailing,
+    this.expand = false,
     required this.child,
   });
 
@@ -20,6 +21,11 @@ class SectionCard extends StatelessWidget {
   final String? badge;
   final String? subtitle;
   final Widget? trailing;
+
+  /// When true the child fills the card's remaining height (the card itself
+  /// must be in a bounded-height context). Used for independently scrolling
+  /// list bodies inside fixed-height pages.
+  final bool expand;
   final Widget child;
 
   @override
@@ -73,7 +79,7 @@ class SectionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          child,
+          if (expand) Expanded(child: child) else child,
         ],
       ),
     );
