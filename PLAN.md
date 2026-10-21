@@ -258,7 +258,7 @@ tool/import_real_sounds.py      # 真实音效导入脚本（见 §5）
 | 托盘 `tray_manager` 旧 Menu/TrayListener API | `tray_manager ^0.7.0`（基于 nativeapi 的 TrayIcon/Menu） | 0.6+ 重构为新 API，旧 API 已废弃 |
 | 状态管理 Riverpod | 全局单例 `SoundEngine extends ChangeNotifier` + `ListenableBuilder` | 单窗口状态源简单直接，减少一层依赖 |
 | 开机自启 `setAsLoginItemService` | `launch_at_startup` 0.5.x 的 `enable()/disable()` | 包 API 演进 |
-| miniaudio 槽位：仅加载当前音效包 | 启动时预解码全部 22 包（132 段 × ~0.15s ≈ 5MB） | 切换/试听零延迟，内存可忽略 |
+| miniaudio 槽位：仅加载当前音效包 | 启动时预解码全部 22 包（132 段，s16@48k 常驻约 6MB；2026-10-22 由 f32 改 s16 减半，并去掉 HUD 的第二个引擎） | 切换/试听零延迟，内存可忽略 |
 | `native/` 目录 | 移入 `plugins/native_core/macos/Classes/src/`（本地路径插件） | CocoaPods 拒收 pod 根之外的源文件；Windows/Linux CMake 改指同一路径，仍是单一副本 |
 | miniaudio engine_config.periods | 仅设 periodSizeInFrames（0.11.25 无 periods 字段） | API 演进；延迟预设仍映射 mixer 更新粒度 |
 | ae_* 符号 | `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定 | 死代码剥离会移除无人静态引用的 FFI 符号 |

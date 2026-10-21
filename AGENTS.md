@@ -50,6 +50,14 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 
 - **颜色一律 `context.colors.xxx`**（ThemeExtension，浅/深双套在 `app_colors.dart`）；不要新增静态色常量。文字样式必须在 `buildAppTheme` 里绑定 `onSurface`（null color 会在浅色下变白字）。
 - **文案语言（用户固定要求）**：界面语言=中文——状态、按钮、徽章、滑杆标签、音效名称等所有用户可见文案一律中文；英文仅作辅助（音效包英文原名在中文名之后以弱化标签显示；品牌名 Melody Keeeys、快捷键 Option+Shift+K、技术名词如 miniaudio 保留原文）。数据模型 `SoundPack` 用 `name`（中文主名）+ `nameEn`（英文原名）+ `description`（纯中文）三字段；勿再用原型里的 `tag` 字段。布局上**中文名优先占位、英文名 Flexible 可截断**，否则中文名会被英文挤压（教训：`Row` 里先 Flexible 中文名会显示成"清..."）。
+- **说明文案一律进 tooltip（用户要求，2026-10-22）**：设置页不放常驻灰色说明行。`SettingsRow(tooltip:)` / `SectionCard(tooltip:)` 会在标题旁渲染 `InfoTip`（`?` 图标，悬停 250ms 显示）；`SectionCard.subtitle` 只留给实时状态（延迟、引擎版本等）。卡片类选项（左键行为）整卡包 `Tooltip`，音效包列表的描述挂在包名 tooltip 上。
+- **热路径性能约定（2026-10-22）**：
+  - 每次按键**不得** `notifyListeners()`：计数走 `soundEngine.keystrokes`（`ValueNotifier<int>`），只有显示计数的芯片用 `ValueListenableBuilder` 监听。否则每键都会重建所有设置页、碰托盘、给 HUD 推 JSON。
+  - 设置持久化去抖：`updateSettings` / `selectPack` 只改内存状态并 `_scheduleSave`（400ms），不 await 写盘；退出前 `appLifecycle.quit()` 会 `await soundEngine.flushSettings()`。
+  - `selectPack` 先换槽位并立即播放试听，再通知 UI/托盘；全部包已预解码，切换只是改索引。
+  - 托盘 `rebuildMenu` 只在签名（当前包/引擎开关/左键行为）变化时动 native（含 tooltip）；`_pushStateToHud` 对相同 payload 去重（showHud / ready 时 `force`）。
+  - **HUD 不再自建音频引擎**：试听一律 `_command('preview')` 交给主窗口引擎（旧实现在 HUD 里再解码一遍 132 段采样，内存翻倍且每次试听响两遍）。
+  - C 引擎自建 `ma_resource_manager`，解码格式 s16 @ 48kHz（默认是 f32），132 段采样常驻 PCM 约 6MB（原约 12.5MB）；声部带 `MA_SOUND_FLAG_NO_SPATIALIZATION`。Linux 上用 gcc + null 后端可做无声基准：加载 22 包实测采样占用 14.5MB → 8.1MB RSS。
 - **设置改动**：`AppSettings` 加字段要同时改 `copyWith / toJson / fromJson` 三处；HUD 通过 `toJson` 接收状态，新字段自动跟随。
 - **FFI 符号**：`ae_*` 用 `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定，防止死代码剥离（dlsym 找不到符号的教训见 git log）。
 - **CocoaPods 不收 pod 根之外的源文件**：共享 C 源码放 `plugins/native_core/macos/Classes/src/`。
@@ -64,7 +72,6 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 - **辅助功能授权稳定性（2026-10-07 踩过）**：TCC 授权是绑定签名的——ad-hoc 签名（`CODE_SIGN_IDENTITY = "-"`）下存的是 cdhash，每次重新构建 cdhash 变化导致授权失效；且 macOS 15 无 AX 权限时 `CGEvent.tapCreate` 也会成功（收不到事件），曾让芯片假绿。现已改为用 Apple Development 证书签名（team `EHBQV2H8YV`，`CODE_SIGN_IDENTITY` 用证书 SHA-1 hash），授权绑定到证书身份，重建不再掉；`startKeyHook` 里显式用 `AXIsProcessTrusted()` 门控。改动签名配置后需手动删掉 TCC 里的旧 cdhash 记录（`tccutil reset Accessibility dev.melodykeeeys.melodyKeeeys`）并重新勾选一次。
 - **tap 必须是 active tap 不能是 listenOnly（2026-10-07 第二课）**：listen-only tap 在最近的 macOS 上要「输入监控」权限，且该 TCC 记录同样绑定签名、重建即失效，失效时 tap 创建"成功"但零事件（症状：所有键无声、引擎芯片假绿、无任何报错）。改为 `options: .defaultTap`（事件原样透传不拦截）后只依赖稳定的辅助功能授权。验证方法：debug 构建看 `[melody] key code=...` 日志是否随按键输出。
 - **桌面多窗口子窗口插件注册**：desktop_multi_window 的每个子窗口跑独立 Flutter engine，插件不会自动注册——必须在 `macos/Runner/MainFlutterWindow.swift` 里 `FlutterMultiWindowPlugin.setOnWindowCreatedCallback { RegisterGeneratedPlugins(registry: $0) }`，否则 HUD 里 window_manager 等全部 MissingPluginException（曾导致点托盘 HUD 完全弹不出来）。
-- **HUD soundDir 传递**：`main.dart` 里必须 `appLifecycle.soundDir = soundEngine.soundDir`（曾遗漏导致 HUD 预览引擎无采样、且 `_soundDir!` 空断言崩溃）。
 - **HUD 定位**：托盘 bounds 随 `WindowConfiguration.arguments` 一起传给 HUD，在 `runHudWindow()` 启动时立即定位（首开时发 `place` 消息会与引擎启动竞态导致丢失，HUD 曾弹在屏幕中间）；屏幕尺寸必须用 `view.display.size / devicePixelRatio`，**不能用 `view.physicalSize`**（那是 HUD 自己窗口的尺寸，clamp 会全错）。`hudTopLeft()` 是纯函数，可单测。
 - **HUD 显示流程（黑窗/反复重建的坑）**：主窗口**不要**远程 `controller.show()` 一个还没启动完的 HUD 引擎——会先在默认位置闪黑窗再跳位。正确流程：HUD 隐藏创建（`hiddenAtLaunch`）→ HUD 自己首帧后 `windowManager.show()` 并 `_command('ready')` 通知主窗口 → 主窗口 `markHudReady()` 后走「reuse + place + show」。另：`_pushStateToHud` 的 catch 里**不能直接丢弃 controller**——引擎启动期 `CHANNEL_UNREGISTERED` 是暂时的，误删会导致每次点击新建一个窗口（黑窗累积）；要先 `WindowController.getAll()` 确认窗口真的没了才丢，且 push 成功本身可当作 ready 兜底。
 - **Impeller 渲染问题**：Intel Mac（UHD 630）上 Impeller 会渲染字形损坏（文字变噪点/沙子），Info.plist 里 `FLTEnableImpeller=false` 强制回 Skia。修改 plist 后必须重新构建才生效。

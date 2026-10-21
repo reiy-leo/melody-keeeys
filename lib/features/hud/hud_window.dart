@@ -8,7 +8,6 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/app_tokens.dart';
-import '../../core/audio/audio_engine_ffi.dart';
 import '../../core/audio/sound_pack.dart';
 import '../../core/settings/settings_model.dart';
 import '../../shared/debug_screenshot.dart';
@@ -70,25 +69,11 @@ Future<void> runHudWindow() async {
     }
   }
 
-  // Own preview engine instance for this isolate (shares the output device).
-  AudioEngineFfi? previewEngine;
-  try {
-    final soundDir = args['soundDir'] as String?;
-    if (soundDir != null) {
-      previewEngine = AudioEngineFfi.open();
-      previewEngine.init(preset: 1);
-      previewEngine.loadAllPacks(soundDir);
-    }
-  } catch (_) {
-    previewEngine = null;
-  }
-
   final hud = HudApp(
     controller: controller,
     initialSettings: AppSettings.fromJson(
         (args['settings'] as Map<String, dynamic>?) ?? const {}),
     initialLatencyMs: (args['latencyMs'] as num?)?.toDouble(),
-    previewEngine: previewEngine,
   );
   // Debug screenshot mode: the HUD renders itself to a PNG on request
   // (separate request file so it doesn't race the settings window).
@@ -107,13 +92,11 @@ class HudApp extends StatelessWidget {
     required this.controller,
     required this.initialSettings,
     required this.initialLatencyMs,
-    required this.previewEngine,
   });
 
   final WindowController controller;
   final AppSettings initialSettings;
   final double? initialLatencyMs;
-  final AudioEngineFfi? previewEngine;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +109,6 @@ class HudApp extends StatelessWidget {
         controller: controller,
         initialSettings: initialSettings,
         initialLatencyMs: initialLatencyMs,
-        previewEngine: previewEngine,
       ),
     );
   }
@@ -138,13 +120,11 @@ class HudWindow extends StatefulWidget {
     required this.controller,
     required this.initialSettings,
     required this.initialLatencyMs,
-    required this.previewEngine,
   });
 
   final WindowController controller;
   final AppSettings initialSettings;
   final double? initialLatencyMs;
-  final AudioEngineFfi? previewEngine;
 
   @override
   State<HudWindow> createState() => _HudWindowState();
@@ -224,14 +204,10 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
     } catch (_) {}
   }
 
-  void _preview(SoundPack pack) {
-    if (widget.previewEngine != null) {
-      final idx = kBuiltinPacks.indexOf(pack).clamp(0, kBuiltinPacks.length - 1);
-      widget.previewEngine!.play(SoundLayer.alpha,
-          packIndex: idx, gain: 1.0, pitch: _settings.layerPitch('alpha'));
-    }
-    _command('preview', {'packId': pack.id});
-  }
+  /// Previews play through the main window's engine: the HUD used to boot a
+  /// second miniaudio engine and decode all 132 samples again (double the
+  /// PCM memory, a second output stream) and then played every preview twice.
+  void _preview(SoundPack pack) => _command('preview', {'packId': pack.id});
 
   @override
   void onWindowBlur() {

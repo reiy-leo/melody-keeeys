@@ -95,7 +95,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.power_settings_new,
                       title: '声音引擎',
-                      subtitle: '关闭后全局按键将不再播放音效',
+                      tooltip: '关闭后全局按键将不再播放音效',
                       trailing: Switch(
                         value: settings.engineEnabled,
                         onChanged: (v) => soundEngine.updateSettings(settings.copyWith(engineEnabled: v)),
@@ -104,7 +104,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.rocket_launch,
                       title: '开机自动启动',
-                      subtitle: '登录后自动在后台启动 Melody Keeeys',
+                      tooltip: '登录后自动在后台启动 Melody Keeeys',
                       trailing: Switch(
                         value: settings.launchAtLogin,
                         onChanged: (v) async {
@@ -116,7 +116,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.visibility_off,
                       title: '启动时以托盘菜单静默运行',
-                      subtitle: '跳过主配置中心窗口，仅在系统菜单栏驻留',
+                      tooltip: '跳过主配置中心窗口，仅在系统菜单栏驻留',
                       trailing: Switch(
                         value: settings.silentStart,
                         onChanged: (v) => soundEngine.updateSettings(settings.copyWith(silentStart: v)),
@@ -125,7 +125,6 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.brightness_6,
                       title: '外观主题',
-                      subtitle: '浅色 / 深色 / 跟随系统',
                       trailing: _UiThemePicker(current: settings.uiTheme),
                     ),
                   ],
@@ -141,13 +140,13 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.notifications_off,
                       title: '全局静音 / 恢复输出',
-                      subtitle: '随时一键切断物理键盘声音',
+                      tooltip: '随时一键切断物理键盘声音',
                       trailing: MetricChip(label: settings.muteHotkey, color: context.colors.primary),
                     ),
                     SettingsRow(
                       icon: Icons.swap_horiz,
                       title: '快速轮换下一个按键声音包',
-                      subtitle: '在已加载的轴体音效配置中随时轮换',
+                      tooltip: '在已加载的轴体音效配置中随时轮换',
                       trailing: MetricChip(label: settings.cycleHotkey, color: context.colors.primary),
                     ),
                   ],
@@ -173,7 +172,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.repeat,
                       title: '修饰键长按连发声',
-                      subtitle: '长按 Shift / Control 等修饰键时持续循环修饰键行程音',
+                      tooltip: '长按 Shift / Control 等修饰键时持续循环修饰键行程音',
                       trailing: Switch(
                         value: settings.modifierAutoRepeat,
                         onChanged: (v) =>
@@ -183,7 +182,7 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                     SettingsRow(
                       icon: Icons.keyboard_return,
                       title: '松键上行程音',
-                      subtitle: '模拟轴体弹起时的回弹声',
+                      tooltip: '模拟轴体弹起时的回弹声',
                       trailing: Switch(
                         value: settings.keyReleaseSound,
                         onChanged: (v) =>
@@ -207,7 +206,6 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
               const SizedBox(height: AppSpacing.lg),
               _AcousticTestZone(
                 focus: _focus,
-                keystrokeCount: state.keystrokeCount,
                 onReset: () {/* counter resets with engine restart */},
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -215,10 +213,9 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                 icon: Icons.do_not_disturb_on,
                 title: '智能静音与防干扰应用列表',
                 badge: '即将推出',
-                subtitle: '目标进程获得操作系统焦点时自动切断声音输出',
+                tooltip: '目标进程获得操作系统焦点时自动切断声音输出。\n'
+                    '该功能将在后续版本提供：会议、游戏与 DAW 独占混音场景自动静音。',
                 trailing: const SizedBox.shrink(),
-                child: Text('该功能将在后续版本提供：会议、游戏与 DAW 独占混音场景自动静音。',
-                    style: AppText.bodySm.copyWith(color: context.colors.onSurfaceVariant)),
               ),
               const SizedBox(height: AppSpacing.lg),
               Row(
@@ -355,12 +352,10 @@ class _PermissionBanner extends StatelessWidget {  const _PermissionBanner({
 class _AcousticTestZone extends StatelessWidget {
   const _AcousticTestZone({
     required this.focus,
-    required this.keystrokeCount,
     required this.onReset,
   });
 
   final FocusNode focus;
-  final int keystrokeCount;
   final VoidCallback onReset;
 
   @override
@@ -380,8 +375,13 @@ class _AcousticTestZone extends StatelessWidget {
               Icon(Icons.monitor_heart, size: 18, color: context.colors.tertiary),
               const SizedBox(width: AppSpacing.sm),
               Text('声学测试跳线', style: AppText.titleLg),
+              const InfoTip('全局钩子运行时，在应用外打字也会发声；此输入框仅用于快速试音。'),
               const Spacer(),
-              MetricChip(label: '累计敲击 $keystrokeCount'),
+              // Only this chip listens to the per-keystroke counter.
+              ValueListenableBuilder<int>(
+                valueListenable: soundEngine.keystrokes,
+                builder: (_, count, _) => MetricChip(label: '累计敲击 $count'),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -396,9 +396,6 @@ class _AcousticTestZone extends StatelessWidget {
               border: OutlineInputBorder(borderRadius: AppRadii.md, borderSide: BorderSide.none),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text('提示：全局钩子运行时，在应用外打字也会发声；此输入框仅用于快速试音。',
-              style: AppText.bodySm.copyWith(color: context.colors.onSurfaceVariant)),
         ],
       ),
     );

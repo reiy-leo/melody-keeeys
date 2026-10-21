@@ -19,8 +19,6 @@ class EngineState {
     required this.settings,
     required this.latencyMs,
     required this.engineVersion,
-    required this.keystrokeCount,
-    required this.lastEventAtMs,
     required this.hookRunning,
     this.loadError,
   });
@@ -28,8 +26,6 @@ class EngineState {
   final AppSettings settings;
   final double? latencyMs;
   final String engineVersion;
-  final int keystrokeCount;
-  final int lastEventAtMs;
   final bool hookRunning;
   final String? loadError;
 
@@ -41,8 +37,6 @@ class EngineState {
     AppSettings? settings,
     double? latencyMs,
     String? engineVersion,
-    int? keystrokeCount,
-    int? lastEventAtMs,
     bool? hookRunning,
     String? loadError,
   }) =>
@@ -50,8 +44,6 @@ class EngineState {
         settings: settings ?? this.settings,
         latencyMs: latencyMs ?? this.latencyMs,
         engineVersion: engineVersion ?? this.engineVersion,
-        keystrokeCount: keystrokeCount ?? this.keystrokeCount,
-        lastEventAtMs: lastEventAtMs ?? this.lastEventAtMs,
         hookRunning: hookRunning ?? this.hookRunning,
         loadError: loadError ?? this.loadError,
       );
@@ -73,11 +65,21 @@ class SoundEngine extends ChangeNotifier {
     settings: const AppSettings(),
     latencyMs: null,
     engineVersion: '-',
-    keystrokeCount: 0,
-    lastEventAtMs: 0,
     hookRunning: false,
   );
   EngineState get state => _state;
+
+  /// Keystroke counter, kept out of [EngineState] on purpose: it changes on
+  /// every key press, and routing it through [notifyListeners] used to
+  /// rebuild every settings page, re-touch the tray and push JSON to the HUD
+  /// window per keystroke. Only the widgets that show the count listen here.
+  final ValueNotifier<int> keystrokes = ValueNotifier<int>(0);
+
+  /// Settings are persisted off the hot path: sliders call [updateSettings]
+  /// every frame and pack switches must sound immediately, so the
+  /// shared_preferences write is debounced and never awaited by callers.
+  Timer? _saveTimer;
+  AppSettings? _pendingSave;
 
   /// Directory holding the extracted sample WAVs (shared with the HUD window).
   String? get soundDir => _soundDir;
@@ -188,11 +190,7 @@ class SoundEngine extends ChangeNotifier {
 
     if (event.isKeyDown) {
       _playCategory(category, settings);
-      _state = _state.copyWith(
-        keystrokeCount: _state.keystrokeCount + 1,
-        lastEventAtMs: event.timestampMs,
-      );
-      notifyListeners();
+      keystrokes.value++;
     } else if (settings.keyReleaseSound &&
         (category == KeyCategory.alpha ||
             category == KeyCategory.space ||
@@ -238,9 +236,10 @@ class SoundEngine extends ChangeNotifier {
 
   Future<void> updateSettings(AppSettings next, {bool persist = true}) async {
     final old = _state.settings;
+    if (identical(old, next)) return;
     _state = _state.copyWith(settings: next);
-    if (persist) await _repo.save(next);
-    _ffi?.setMasterVolume(next.volumeLinear);
+    if (persist) _scheduleSave(next);
+    if (next.volumeDb != old.volumeDb) _ffi?.setMasterVolume(next.volumeLinear);
     if (next.latencyPreset != old.latencyPreset) {
       final latency = _ffi?.init(preset: next.latencyPreset.enginePreset);
       if (latency != null && _soundDir != null) {
@@ -251,13 +250,35 @@ class SoundEngine extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _scheduleSave(AppSettings s) {
+    _pendingSave = s;
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 400), flushSettings);
+  }
+
+  /// Write any pending settings now (called by the debounce timer and on quit).
+  Future<void> flushSettings() async {
+    _saveTimer?.cancel();
+    _saveTimer = null;
+    final s = _pendingSave;
+    if (s == null) return;
+    _pendingSave = null;
+    await _repo.save(s);
+  }
+
   Future<void> selectPack(String packId, {bool preview = true}) async {
+    if (packId == _state.settings.activePackId && !preview) return;
     final next = _state.settings.copyWith(activePackId: packId);
-    await updateSettings(next);
+    // Swap the active slot first and sound the preview right away; every
+    // pack is already decoded, so switching is just an index change. UI,
+    // tray and persistence follow (persistence debounced).
+    _state = _state.copyWith(settings: next);
     if (preview) {
       _lastPlayAtMs.clear(); // let the preview through
       _play(SoundLayer.alpha, next);
     }
+    _scheduleSave(next);
+    notifyListeners();
   }
 
   void cyclePack() {
@@ -286,6 +307,8 @@ class SoundEngine extends ChangeNotifier {
 
   @override
   void dispose() {
+    _saveTimer?.cancel();
+    keystrokes.dispose();
     _ffi?.dispose();
     KeyHookChannel.instance.stop();
     super.dispose();

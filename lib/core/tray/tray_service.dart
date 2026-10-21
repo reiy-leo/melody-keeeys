@@ -117,11 +117,11 @@ class TrayService {
     final state = soundEngine.state;
     _applyIcon(state.settings.trayIcon);
     final activePack = packById(state.settings.activePackId);
-    icon.setTooltip('Melody Keeeys · 旋律按键 — 正在使用：${activePack.name}');
     final signature =
         '${state.settings.activePackId}|${state.settings.engineEnabled}|${state.settings.leftClickAction}';
     if (signature == _lastMenuSignature) return;
     _lastMenuSignature = signature;
+    icon.setTooltip('Melody Keeeys · 旋律按键 — 正在使用：${activePack.name}');
 
     final menu = Menu.create();
     if (menu == null) return;

@@ -35,6 +35,11 @@ class AppLifecycle with WindowListener {
     _pushStateToHud();
   }
 
+  /// Last payload delivered to the HUD; identical states are not re-sent
+  /// (slider drags notify every frame, most of them change nothing the HUD
+  /// shows twice).
+  String? _lastHudPayload;
+
   Future<void> showSettingsWindow() async {
     await windowManager.show();
     await windowManager.focus();
@@ -52,7 +57,7 @@ class AppLifecycle with WindowListener {
       await _placeHud(controller);
       await controller.show();
     }
-    await _pushStateToHud();
+    await _pushStateToHud(force: true);
   }
 
   /// Called by the HUD isolate after its first frame; from then on the window
@@ -60,7 +65,7 @@ class AppLifecycle with WindowListener {
   Future<void> markHudReady() async {
     debugPrint('[melody] HUD ready');
     _hudReady = true;
-    await _pushStateToHud();
+    await _pushStateToHud(force: true);
   }
 
   Future<void> _placeHud(WindowController controller) async {
@@ -88,7 +93,6 @@ class AppLifecycle with WindowListener {
       arguments: jsonEncode({
         'settings': state.settings.toJson(),
         'latencyMs': state.latencyMs,
-        if (_soundDir != null) 'soundDir': _soundDir,
         if (bounds != null && !bounds.isEmpty)
           'bounds': {
             'x': bounds.left,
@@ -104,21 +108,19 @@ class AppLifecycle with WindowListener {
     return controller;
   }
 
-  String? _soundDir;
-
-  /// Sound files live here; the HUD isolate loads its own preview engine.
-  set soundDir(String? path) => _soundDir = path;
-
-  Future<void> _pushStateToHud() async {
+  Future<void> _pushStateToHud({bool force = false}) async {
     final controller = _hudController;
     if (controller == null) return;
     final state = soundEngine.state;
+    final payload = jsonEncode({
+      'kind': 'applyState',
+      'settings': state.settings.toJson(),
+      'latencyMs': state.latencyMs,
+    });
+    if (!force && _hudReady && payload == _lastHudPayload) return;
     try {
-      await controller.invokeMethod('hudState', jsonEncode({
-        'kind': 'applyState',
-        'settings': state.settings.toJson(),
-        'latencyMs': state.latencyMs,
-      }));
+      await controller.invokeMethod('hudState', payload);
+      _lastHudPayload = payload;
       // A successful push proves the HUD engine is up; treat it as ready even
       // if the 'ready' message itself was lost.
       _hudReady = true;
@@ -172,6 +174,7 @@ class AppLifecycle with WindowListener {
 
   Future<void> quit() async {
     _quitting = true;
+    await soundEngine.flushSettings(); // debounced write must land before exit
     TrayService.instance.dispose();
     soundEngine.dispose();
     exit(0);

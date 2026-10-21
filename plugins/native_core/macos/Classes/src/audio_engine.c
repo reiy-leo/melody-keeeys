@@ -21,6 +21,12 @@ struct ae_slot {
 };
 
 struct audio_engine {
+    /* Own resource manager so decoded samples are stored as s16 at the engine
+     * rate instead of miniaudio's default f32: half the resident PCM memory
+     * (~6 MB instead of ~12.5 MB for 22 packs), no quality loss for 16-bit
+     * source WAVs, and resampling is paid once at load, never per keystroke. */
+    ma_resource_manager rm;
+    ma_bool32 rm_inited;
     ma_engine engine;
     ma_bool32 engine_inited;
     struct ae_slot slots[AE_MAX_SLOTS];
@@ -58,11 +64,23 @@ struct audio_engine* ae_create(int latency_preset)
     }
     e->sample_rate = 48000;
 
+    ma_resource_manager_config rm_config = ma_resource_manager_config_init();
+    rm_config.decodedFormat = ma_format_s16;
+    rm_config.decodedChannels = 0; /* keep the file's channel count */
+    rm_config.decodedSampleRate = (ma_uint32)e->sample_rate;
+    if (ma_resource_manager_init(&rm_config, &e->rm) != MA_SUCCESS) {
+        free(e);
+        return NULL;
+    }
+    e->rm_inited = MA_TRUE;
+
     ma_engine_config config = ma_engine_config_init();
     config.sampleRate = (ma_uint32)e->sample_rate;
     config.periodSizeInFrames = (ma_uint32)e->period_size;
+    config.pResourceManager = &e->rm;
 
     if (ma_engine_init(&config, &e->engine) != MA_SUCCESS) {
+        ma_resource_manager_uninit(&e->rm);
         free(e);
         return NULL;
     }
@@ -79,6 +97,10 @@ void ae_destroy(struct audio_engine* e)
     if (e->engine_inited) {
         ma_engine_uninit(&e->engine);
     }
+    /* The engine does not own an external resource manager: free it last. */
+    if (e->rm_inited) {
+        ma_resource_manager_uninit(&e->rm);
+    }
     free(e);
 }
 
@@ -93,8 +115,11 @@ int ae_load_sound(struct audio_engine* e, int slot, const char* path)
     ma_result result = MA_SUCCESS;
     for (int i = 0; i < AE_VOICES_PER_SLOT; i++) {
         /* MA_SOUND_FLAG_DECODE: resource manager pre-decodes into memory once
-         * and shares the data buffer across every voice created for this path. */
-        result = ma_sound_init_from_file(&e->engine, path, MA_SOUND_FLAG_DECODE,
+         * and shares the data buffer across every voice created for this path.
+         * NO_SPATIALIZATION: key clicks are not positioned in 3D; skipping the
+         * spatializer saves per-voice state (528 voices) and mixer CPU. */
+        result = ma_sound_init_from_file(&e->engine, path,
+                                         MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_NO_SPATIALIZATION,
                                          NULL, NULL, &s->voices[i].sound);
         if (result != MA_SUCCESS) {
             s->voice_count = i;

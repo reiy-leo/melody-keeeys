@@ -123,7 +123,12 @@ class _PackTile extends StatelessWidget {
                   children: [
                     // Chinese name leads and keeps its full width; the English
                     // original is the part that yields when space runs short.
-                    Text(pack.name, style: AppText.titleMd),
+                    // Pack description lives in a hover tooltip on the name.
+                    Tooltip(
+                      message: pack.description,
+                      waitDuration: const Duration(milliseconds: 250),
+                      child: Text(pack.name, style: AppText.titleMd),
+                    ),
                     const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Container(
@@ -140,10 +145,6 @@ class _PackTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(pack.description,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.bodySm.copyWith(color: context.colors.onSurfaceVariant)),
               ],
             ),
           ),
@@ -226,7 +227,7 @@ class _ActivePackDetail extends StatelessWidget {
           icon: Icons.equalizer,
           title: pack.name,
           badge: '使用中',
-          subtitle: pack.description,
+          tooltip: pack.description,
           trailing: PillButton(
             label: '试听',
             icon: Icons.graphic_eq,

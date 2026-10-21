@@ -58,8 +58,9 @@
 
 ## 组件（lib/shared/widgets/app_widgets.dart）
 
-- `SectionCard`：图标章 + 标题 + 可选徽章/副标题 + 内容，containerLow 底 + 幽灵描边 + lg 圆角。
-- `SettingsRow`：图标 + 标题/副标题 + trailing 控件。
+- `SectionCard`：图标章 + 标题 + 可选徽章/状态副标题/`tooltip` + 可选内容，containerLow 底 + 幽灵描边 + lg 圆角。副标题只放实时状态，说明文案走 `tooltip`。
+- `SettingsRow`：图标 + 标题（可选 `tooltip`）+ trailing 控件；不再有常驻副标题。
+- `InfoTip`：标题旁 14px `help_outline` 图标（outline 色、help 光标），悬停 250ms 显示说明文案。界面原则：**说明不常驻，进 tooltip**。
 - `AppSlider`：标签行（左标题右 mono 值徽章）+ 8px 轨道滑杆，`accent` 可选（默认 primary）。
 - `PillButton`：胶囊主按钮（danger 变体灰底红字）。
 - `MetricChip`：mono 等宽读数芯片（延迟、热键、dB）。
@@ -71,4 +72,4 @@ Lucide 图标 7 选 1（`kTrayIcons`，默认 `keyboard-music`）：keyboard、k
 
 ## HUD 弹窗
 
-340×560 无边框置顶窗，定位在托盘图标正下（macOS）/正上（Windows 任务栏）；失焦自动隐藏。结构：TRAY HUD 头 → 引擎开关条（延迟徽章）→ 当前音效卡（CURRENT 描边 + Strike 试听）→ 10 包列表（序号/名称/中文标签/试听）→ 打开设置。主题跟随主窗口推送。
+340×560 无边框置顶窗（试听经 `hudCommand: preview` 走主窗口引擎，HUD 不加载音频），定位在托盘图标正下（macOS）/正上（Windows 任务栏）；失焦自动隐藏。结构：TRAY HUD 头 → 引擎开关条（延迟徽章）→ 当前音效卡（CURRENT 描边 + Strike 试听）→ 10 包列表（序号/名称/中文标签/试听）→ 打开设置。主题跟随主窗口推送。

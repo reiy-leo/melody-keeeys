@@ -11,22 +11,29 @@ class SectionCard extends StatelessWidget {
     required this.title,
     this.badge,
     this.subtitle,
+    this.tooltip,
     this.trailing,
     this.expand = false,
-    required this.child,
+    this.child,
   });
 
   final IconData icon;
   final String title;
   final String? badge;
+
+  /// Live status line under the title (numbers, current state). Explanatory
+  /// copy does not go here: use [tooltip].
   final String? subtitle;
+
+  /// Explanatory copy, shown on hover via an [InfoTip] next to the title.
+  final String? tooltip;
   final Widget? trailing;
 
   /// When true the child fills the card's remaining height (the card itself
   /// must be in a bounded-height context). Used for independently scrolling
   /// list bodies inside fixed-height pages.
   final bool expand;
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +67,7 @@ class SectionCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(title, style: AppText.titleLg),
+                        if (tooltip != null) InfoTip(tooltip!),
                         if (badge != null) ...[
                           const SizedBox(width: AppSpacing.sm),
                           _Badge(badge!),
@@ -78,8 +86,10 @@ class SectionCard extends StatelessWidget {
               ?trailing,
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          if (expand) Expanded(child: child) else child,
+          if (child != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            if (expand) Expanded(child: child!) else child!,
+          ],
         ],
       ),
     );
@@ -104,19 +114,21 @@ class _Badge extends StatelessWidget {
   }
 }
 
-/// A titled row with optional subtitle, icon and a trailing control.
+/// A titled row with an optional hover tooltip, icon and a trailing control.
 class SettingsRow extends StatelessWidget {
   const SettingsRow({
     super.key,
     required this.title,
-    this.subtitle,
+    this.tooltip,
     this.icon,
     this.trailing,
     this.onTap,
   });
 
   final String title;
-  final String? subtitle;
+
+  /// Explanatory copy, shown on hover via an [InfoTip] next to the title.
+  final String? tooltip;
   final IconData? icon;
   final Widget? trailing;
   final VoidCallback? onTap;
@@ -135,16 +147,10 @@ class SettingsRow extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
             ],
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(title, style: AppText.titleMd),
-                  if (subtitle != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(subtitle!,
-                          style: AppText.bodySm.copyWith(color: context.colors.onSurfaceVariant)),
-                    ),
+                  Flexible(child: Text(title, style: AppText.titleMd)),
+                  if (tooltip != null) InfoTip(tooltip!),
                 ],
               ),
             ),
@@ -268,6 +274,32 @@ class MetricChip extends StatelessWidget {
         border: Border.all(color: context.colors.ghostBorder),
       ),
       child: Text(label, style: AppText.mono.copyWith(color: color ?? context.colors.tertiary)),
+    );
+  }
+}
+
+/// Small "?" affordance that reveals explanatory copy on hover (or long
+/// press). Settings pages keep labels short and put descriptions here
+/// instead of permanent grey sub-lines.
+class InfoTip extends StatelessWidget {
+  const InfoTip(this.message, {super.key, this.size = 14});
+
+  final String message;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: message,
+      waitDuration: const Duration(milliseconds: 250),
+      preferBelow: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.help,
+          child: Icon(Icons.help_outline, size: size, color: context.colors.outline),
+        ),
+      ),
     );
   }
 }

@@ -29,7 +29,15 @@ class MenuBarPage extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: Text('左键行为（主要触发方式）', style: AppText.labelLg),
+                      child: Row(
+                        children: [
+                          Text('左键行为（主要触发方式）', style: AppText.labelLg),
+                          const InfoTip(
+                            'Linux 部分 DE（GNOME + AppIndicator）下左键会直接打开上下文菜单，'
+                            '菜单首项「切换下一个音效」可完成同样的操作。',
+                          ),
+                        ],
+                      ),
                     ),
                     Row(
                       children: [
@@ -37,7 +45,7 @@ class MenuBarPage extends StatelessWidget {
                           child: _LeftClickCard(
                             icon: Icons.swap_horiz,
                             title: '轮换下一个音效',
-                            subtitle: '立即切换声音配置，无 UI 打扰，快速而带感。',
+                            tooltip: '立即切换声音配置，无 UI 打扰，快速而带感。',
                             selected:
                                 settings.leftClickAction == TrayLeftClickAction.cycleNext,
                             onTap: () => soundEngine.updateSettings(
@@ -49,7 +57,7 @@ class MenuBarPage extends StatelessWidget {
                           child: _LeftClickCard(
                             icon: Icons.layers,
                             title: '显示托盘面板',
-                            subtitle: '弹出紧凑的悬浮调音面板：滑杆、音效包与预设。',
+                            tooltip: '弹出紧凑的悬浮调音面板：滑杆、音效包与预设。',
                             selected:
                                 settings.leftClickAction == TrayLeftClickAction.showHud,
                             onTap: () => soundEngine.updateSettings(
@@ -62,7 +70,7 @@ class MenuBarPage extends StatelessWidget {
                     SettingsRow(
                       icon: Icons.menu,
                       title: '右键上下文菜单',
-                      subtitle: '完整的音效包选择、快速面板与设置入口（系统级菜单）',
+                      tooltip: '完整的音效包选择、快速面板与设置入口（系统级菜单）',
                       trailing: MetricChip(label: '系统级菜单', color: context.colors.tertiary),
                     ),
                   ],
@@ -73,7 +81,7 @@ class MenuBarPage extends StatelessWidget {
                 icon: Icons.palette,
                 title: '菜单栏图标',
                 badge: 'Lucide 图标库',
-                subtitle: '从 Lucide 图标库中选择托盘/菜单栏图标',
+                tooltip: '从 Lucide 图标库中选择托盘/菜单栏图标',
                 child: Wrap(
                   spacing: AppSpacing.md,
                   runSpacing: AppSpacing.md,
@@ -89,16 +97,6 @@ class MenuBarPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              SectionCard(
-                icon: Icons.tips_and_updates,
-                title: '平台提示',
-                child: Text(
-                  'Linux 部分 DE（GNOME + AppIndicator）下左键会直接打开上下文菜单，'
-                  '菜单首项「切换下一个音效」可完成同样的操作。',
-                  style: AppText.bodySm.copyWith(color: context.colors.onSurfaceVariant),
-                ),
-              ),
             ],
           ),
         );
@@ -111,59 +109,56 @@ class _LeftClickCard extends StatelessWidget {
   const _LeftClickCard({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    required this.tooltip,
     required this.selected,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String tooltip;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadii.md,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: selected ? context.colors.primary.withValues(alpha: 0.9) : context.colors.container,
-          borderRadius: AppRadii.md,
-          border: Border.all(
-              color: selected ? context.colors.primary : context.colors.ghostBorder, width: 1.2),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon,
-                    size: 20,
-                    color: selected ? context.colors.onPrimary : context.colors.primary),
-                const Spacer(),
-                Icon(
-                  selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  size: 16,
-                  color: selected ? context.colors.onPrimary : context.colors.outline,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(title,
-                style: AppText.titleLg.copyWith(
-                    color: selected ? context.colors.onPrimary : context.colors.onSurface)),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              subtitle,
-              style: AppText.bodySm.copyWith(
-                  color:
-                      selected ? context.colors.onPrimary.withValues(alpha: 0.8) : context.colors.onSurfaceVariant),
-            ),
-          ],
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 250),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadii.md,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: selected ? context.colors.primary.withValues(alpha: 0.9) : context.colors.container,
+            borderRadius: AppRadii.md,
+            border: Border.all(
+                color: selected ? context.colors.primary : context.colors.ghostBorder, width: 1.2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon,
+                      size: 20,
+                      color: selected ? context.colors.onPrimary : context.colors.primary),
+                  const Spacer(),
+                  Icon(
+                    selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                    size: 16,
+                    color: selected ? context.colors.onPrimary : context.colors.outline,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(title,
+                  style: AppText.titleLg.copyWith(
+                      color: selected ? context.colors.onPrimary : context.colors.onSurface)),
+            ],
+          ),
         ),
       ),
     );
