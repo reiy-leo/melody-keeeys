@@ -114,15 +114,6 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                       ),
                     ),
                     SettingsRow(
-                      icon: Icons.visibility_off,
-                      title: '启动时以托盘菜单静默运行',
-                      tooltip: '跳过主配置中心窗口，仅在系统菜单栏驻留',
-                      trailing: Switch(
-                        value: settings.silentStart,
-                        onChanged: (v) => soundEngine.updateSettings(settings.copyWith(silentStart: v)),
-                      ),
-                    ),
-                    SettingsRow(
                       icon: Icons.brightness_6,
                       title: '外观主题',
                       trailing: _UiThemePicker(current: settings.uiTheme),

@@ -262,7 +262,7 @@ tool/import_real_sounds.py      # 真实音效导入脚本（见 §5）
 | `native/` 目录 | 移入 `plugins/native_core/macos/Classes/src/`（本地路径插件） | CocoaPods 拒收 pod 根之外的源文件；Windows/Linux CMake 改指同一路径，仍是单一副本 |
 | miniaudio engine_config.periods | 仅设 periodSizeInFrames（0.11.25 无 periods 字段） | API 演进；延迟预设仍映射 mixer 更新粒度 |
 | ae_* 符号 | `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定 | 死代码剥离会移除无人静态引用的 FFI 符号 |
-| 首次运行 | silentStart 默认 false | 首次用户必须看到设置窗口完成权限授予 |
+| 首次运行 | 启动一律只进菜单栏（2026-10-23 去掉「静默启动」开关）；仅当键盘钩子未能启动（缺辅助功能/input 权限）时自动打开设置窗 | 用户要求；权限引导仍在设置页 |
 | 仅深色主题 | 浅色/深色/跟随系统三态（`uiTheme` 设置 + ThemeExtension 双色板，见 DESIGN.md） | 用户需求；浅色为同色系加深主色保证对比度 |
 | 自绘托盘图标 | Lucide 图标 7 选 1（`trayIcon` 设置，默认 keyboard-music），qlmanage+色度键生成三变体 | 用户需求；旧自绘 256px 仅 about 页留用 |
 | 侧边栏布局 | 全高侧边栏（红绿灯落在其顶部、与导航图标对齐），状态芯片移至右上顶栏 | 用户反馈：贯通 + 红绿灯对齐/不遮挡 |

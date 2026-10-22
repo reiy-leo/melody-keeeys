@@ -30,7 +30,7 @@
 
 - **M1 音频内核** ✅ miniaudio + dart:ffi，22 个内置音效包 × 6 层采样（alpha/space/enter/modifier/nav/release），内存预解码、复音播放、音高抖动、音量补偿、三档延迟预设；全部为**真实录音素材**（[kbsim](https://github.com/tplai/kbsim) / [Tickeys](https://github.com/yingDev/Tickeys) / [Kenney](https://kenney.nl/assets/sci-fi-sounds) / Freesound CC0，授权见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)），统一响度归一化
 - **M2 全局监听与托盘** ✅ macOS CGEventTap / Windows WH_KEYBOARD_LL / Linux evdev；键码→5 层分类、Anti-Ghosting 抑制窗口、修饰键连发、松键音；托盘左键轮换音效（听觉确认）、右键菜单（首行显示当前音效）选择音效/设置/退出
-- **M3 设置窗口** ✅ 侧边栏四页（通用 / 音效 / 菜单栏 / 关于），设置持久化，开机自启，静默启动，全局热键（静音、轮换）
+- **M3 设置窗口** ✅ 侧边栏四页（通用 / 音效 / 菜单栏 / 关于），设置持久化，开机自启，启动仅驻留菜单栏（关窗不退出），全局热键（静音、轮换）
 - **主题** ✅ 浅色 / 深色 / 跟随系统三态，通用页切换即时生效，HUD 跟随；双色板 ThemeExtension（见 [DESIGN.md](DESIGN.md)）
 - **托盘图标** ✅ Lucide 图标 7 选 1（keyboard / keyboard-music / command / line-squiggle / gamepad-directional / tv / balloon，默认 keyboard-music），菜单栏页选择即时生效
 - **M4 HUD 与打包** ✅ 托盘 HUD 弹窗（第二窗口，失焦自动隐藏）、Windows Inno Setup 脚本；⏳ 智能静音应用名单（二期）、应用图标打磨、macOS 公证

@@ -58,6 +58,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
   - 托盘 `rebuildMenu` 只在签名（当前包/引擎开关/左键行为）变化时动 native（含 tooltip）；`_pushStateToHud` 对相同 payload 去重（showHud / ready 时 `force`）。
   - **HUD 不再自建音频引擎**：试听一律 `_command('preview')` 交给主窗口引擎（旧实现在 HUD 里再解码一遍 132 段采样，内存翻倍且每次试听响两遍）。
   - C 引擎自建 `ma_resource_manager`，解码格式 s16 @ 48kHz（默认是 f32），132 段采样常驻 PCM 约 6MB（原约 12.5MB）；声部带 `MA_SOUND_FLAG_NO_SPATIALIZATION`。Linux 上用 gcc + null 后端可做无声基准：加载 22 包实测采样占用 14.5MB → 8.1MB RSS。
+- **菜单栏常驻（2026-10-23 用户要求）**：启动不显示设置窗（`MainFlutterWindow.order` 里 `hiddenWindowAtLaunch()`；Windows `SetNextFrameCallback` 与 Linux `first_frame_cb` 不再自动 show），只有 `hookRunning == false`（缺权限）时 `appLifecycle.init(showSettings: true)`。`AppDelegate.applicationShouldTerminateAfterLastWindowClosed` 必须返回 **false**——关设置窗/HUD 子窗口销毁都不能结束进程（曾导致启动即退出、关窗即退出），退出只走托盘菜单 `appLifecycle.quit()`。`AppSettings.silentStart` 字段保留仅为兼容旧配置，已无 UI、不再读取。
 - **设置改动**：`AppSettings` 加字段要同时改 `copyWith / toJson / fromJson` 三处；HUD 通过 `toJson` 接收状态，新字段自动跟随。
 - **FFI 符号**：`ae_*` 用 `AE_API`(used+default visibility) + Swift `@_silgen_name("ae_version")` 锚定，防止死代码剥离（dlsym 找不到符号的教训见 git log）。
 - **CocoaPods 不收 pod 根之外的源文件**：共享 C 源码放 `plugins/native_core/macos/Classes/src/`。

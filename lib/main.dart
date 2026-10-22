@@ -49,7 +49,10 @@ Future<void> main(List<String> args) async {
     appPath: Platform.resolvedExecutable,
   );
 
-  await appLifecycle.init(silentStart: soundEngine.state.settings.silentStart);
+  // Menu-bar only at launch. The settings window opens by itself only when
+  // the key hook could not start (missing Accessibility / input permission),
+  // since that page is where the user grants it.
+  await appLifecycle.init(showSettings: !soundEngine.state.hookRunning);
   await TrayService.instance.init();
 
   await HotkeyService.instance.register(soundEngine.state.settings);

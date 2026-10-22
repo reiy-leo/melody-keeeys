@@ -19,13 +19,13 @@ class AppLifecycle with WindowListener {
   bool _quitting = false;
 
   /// Called by main() after the engine is ready.
-  Future<void> init({required bool silentStart}) async {
+  Future<void> init({required bool showSettings}) async {
     windowManager.addListener(this);
     await windowManager.setPreventClose(true);
-    if (silentStart) {
-      await windowManager.hide();
-    } else {
+    if (showSettings) {
       await showSettingsWindow();
+    } else {
+      await windowManager.hide();
     }
     soundEngine.addListener(_onEngineChanged);
   }

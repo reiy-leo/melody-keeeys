@@ -27,9 +27,10 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    this->Show();
-  });
+  // Menu-bar app: the window stays hidden until Dart calls
+  // windowManager.show() (settings opened from the tray, or first-run
+  // permission prompt).
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {});
 
   // Flutter can complete the first frame before the "show window" callback is
   // registered. The following call ensures a frame is pending to ensure the
