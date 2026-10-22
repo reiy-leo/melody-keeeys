@@ -87,4 +87,5 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 
 - **SSH 推送故障**：1Password SSH agent 报 `communication with agent failed`，SSH 推送/拉取全部失败。已把 origin 切到 HTTPS（`https://github.com/reiy-leo/melody-keeeys.git`），并用 `gh auth setup-git` 配好凭据助手（gh token 走 keyring），`git push`/`git fetch` 现在直接可用。若 1Password 修复后可自行决定是否切回 SSH。
 - **提交签名故障**：全局 `commit.gpgsign=true` 走 1Password `op-ssh-sign`，同样因 agent 故障报 `error: 1Password: agent returned an error`。临时绕过：`git -c commit.gpgsign=false commit`。1Password 修复后签名会自动恢复，无需改配置。
+- **发布（2026-10-23 起）**：推 `v*` 标签触发 `.github/workflows/release.yml`，GitHub Actions 三平台构建（macOS 用 ad-hoc 签名替换本地证书配置、Universal zip；Windows x64 zip；Linux x64 tar.gz），自动建 Release；标签带 `-`（如 `v0.2.0-alpha.1`）即标为预发布。说明文案在 `.github/release-notes.md`，每次发版前改。
 - **截图工具**：README 截图用 debug 专用 `ScreenshotHost`（`lib/shared/debug_screenshot.dart`），`flutter build macos --debug --dart-define=MELODY_SCREENSHOTS=true` 后运行，写入 `/tmp/melody_shot_req`（内容=输出路径）即可触发主窗口截图，HUD 用 `/tmp/melody_shot_hud_req`。不依赖系统屏幕录制权限。
