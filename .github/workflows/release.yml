@@ -79,7 +79,8 @@ jobs:
 
   release:
     needs: [macos, windows, linux]
-    if: startsWith(github.ref, 'refs/tags/')
+    # macOS 是主平台：它成功就发版，Windows/Linux 产物有则附上
+    if: always() && startsWith(github.ref, 'refs/tags/') && needs.macos.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
