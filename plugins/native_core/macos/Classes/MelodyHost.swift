@@ -573,7 +573,7 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
       }
     case "quit":
       result(nil)
-      DispatchQueue.main.async { NSApp.terminate(nil) }
+      DispatchQueue.main.async { [weak self] in self?.quit() }
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -817,17 +817,6 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
     menu.addItem(head)
     menu.addItem(.separator())
 
-    for (i, pack) in packs.enumerated() {
-      let item = NSMenuItem(
-        title: "\(i + 1). \(pack.name)（\(pack.nameEn)）",
-        action: #selector(menuSelectPack(_:)), keyEquivalent: "")
-      item.target = self
-      item.tag = i
-      item.state = i == activePackIndex ? .on : .off
-      menu.addItem(item)
-    }
-    menu.addItem(.separator())
-
     let engine = NSMenuItem(title: "声音引擎：已开启", action: #selector(menuToggleEngine), keyEquivalent: "")
     engine.target = self
     engine.state = settings.engineEnabled ? .on : .off
@@ -845,18 +834,25 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
     return menu
   }
 
-  @objc private func menuSelectPack(_ sender: NSMenuItem) {
-    guard packs.indices.contains(sender.tag) else { return }
-    selectPack(packs[sender.tag].id)
-  }
-
   @objc private func menuToggleEngine() { toggleEngine() }
   @objc private func menuShowHud() {
     // Let the menu finish closing before anchoring the popover.
     DispatchQueue.main.async { [weak self] in self?.showHud() }
   }
   @objc private func menuOpenSettings() { requestSettings() }
-  @objc private func menuQuit() { NSApp.terminate(nil) }
+  @objc private func menuQuit() { quit() }
+
+  /// Quit right away. Settings are flushed and the key tap is dropped first;
+  /// AppDelegate answers applicationShouldTerminate with .terminateNow so
+  /// Flutter's exit handshake (which waits on a Dart reply that never comes
+  /// once the settings engine is gone) can't stall it. exit(0) is the
+  /// backstop if anything else still holds the process up.
+  func quit() {
+    flushSettings()
+    if let tap = tap { CGEvent.tapEnable(tap: tap, enable: false) }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { exit(0) }
+    NSApp.terminate(nil)
+  }
 
   func requestSettings() {
     popover?.performClose(nil)

@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:ui' show Rect;
 
-import 'package:flutter/foundation.dart' show VoidCallback, debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart'
+    show VoidCallback, debugPrint, kDebugMode;
 import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
 
@@ -11,7 +12,7 @@ import '../audio/sound_pack.dart';
 import '../settings/settings_model.dart';
 
 /// Menu bar / tray icon behavior: left click cycles the pack (configurable to
-/// show the HUD), right click pops the context menu with all packs + settings.
+/// show the HUD), right click pops the context menu (current pack, engine, panel, settings, quit).
 /// Built on the nativeapi TrayIcon API that tray_manager >=0.6 exposes.
 class TrayService {
   TrayService._();
@@ -36,7 +37,14 @@ class TrayService {
     final exe = Platform.resolvedExecutable;
     final contents = p.dirname(p.dirname(exe)); // macOS: .../Contents
     final candidates = [
-      p.join(contents, 'Frameworks', 'App.framework', 'Resources', 'flutter_assets', asset),
+      p.join(
+        contents,
+        'Frameworks',
+        'App.framework',
+        'Resources',
+        'flutter_assets',
+        asset,
+      ),
       p.join(contents, 'Frameworks', 'flutter_assets', asset),
       p.join(p.dirname(exe), 'data', 'flutter_assets', asset),
       p.join(p.dirname(exe), 'flutter_assets', asset),
@@ -75,10 +83,14 @@ class TrayService {
     if (icon == null || iconId == _lastIconId) return;
     final image = _loadIconImage(iconId);
     if (image == null) {
-      debugPrint('[melody] tray icon "$iconId" failed to load; keeping current');
+      debugPrint(
+        '[melody] tray icon "$iconId" failed to load; keeping current',
+      );
       return; // keep current icon rather than a default one
     }
-    debugPrint('[melody] tray icon "$iconId" loaded (${image.size.width}x${image.size.height})');
+    debugPrint(
+      '[melody] tray icon "$iconId" loaded (${image.size.width}x${image.size.height})',
+    );
     _lastIconId = iconId;
     icon.isIconTemplate = Platform.isMacOS;
     icon.icon = image;
@@ -99,7 +111,8 @@ class TrayService {
   void _onTrayEvent(TrayIconEvent event) {
     if (kDebugMode) debugPrint('[melody] tray event: ${event.runtimeType}');
     if (event is TrayIconClickedEvent) {
-      if (soundEngine.state.settings.leftClickAction == TrayLeftClickAction.cycleNext) {
+      if (soundEngine.state.settings.leftClickAction ==
+          TrayLeftClickAction.cycleNext) {
         soundEngine.cyclePack();
       } else {
         appLifecycle.showHud();
@@ -141,7 +154,9 @@ class TrayService {
 
     // Headline: which pack is sounding right now.
     final currentItem = MenuItem.createWithLabelAndType(
-        '正在使用：${activePack.name}', MenuItemType.normal);
+      '正在使用：${activePack.name}',
+      MenuItemType.normal,
+    );
     if (currentItem != null) {
       currentItem.isEnabled = false;
       addItem(currentItem, null);
@@ -149,20 +164,10 @@ class TrayService {
 
     menu.addSeparator();
 
-    for (var i = 0; i < kBuiltinPacks.length; i++) {
-      final pack = kBuiltinPacks[i];
-      final item = MenuItem.createWithLabelAndType(
-          '${i + 1}. ${pack.name}（${pack.nameEn}）', MenuItemType.checkbox);
-      item?.state = pack.id == state.settings.activePackId
-          ? MenuItemState.checked
-          : MenuItemState.unchecked;
-      addItem(item, () => soundEngine.selectPack(pack.id));
-    }
-
-    menu.addSeparator();
-
-    final engineItem =
-        MenuItem.createWithLabelAndType('声音引擎：已开启', MenuItemType.checkbox);
+    final engineItem = MenuItem.createWithLabelAndType(
+      '声音引擎：已开启',
+      MenuItemType.checkbox,
+    );
     engineItem?.state = state.settings.engineEnabled
         ? MenuItemState.checked
         : MenuItemState.unchecked;

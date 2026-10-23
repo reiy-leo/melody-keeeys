@@ -32,6 +32,13 @@ class AppDelegate: FlutterAppDelegate {
     return false
   }
 
+  // Skip FlutterAppDelegate's termination handshake: it asks the Dart side
+  // for permission and, with the settings engine shut down (the normal state),
+  // nobody answers, so Quit hung. The native host owns quitting.
+  override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    return .terminateNow
+  }
+
   override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
     return true
   }
