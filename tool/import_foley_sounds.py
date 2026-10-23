@@ -19,6 +19,7 @@ Usage:
 import argparse
 import math
 import struct
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -67,12 +68,34 @@ ANCHOR_STARTS = {
     # crinkle sections (high centroid) live at 10-36s
     "plastic_bag": {"alpha": 27.0, "space": 24.0, "enter": 36.0,
                     "modifier": 10.0, "nav": 23.0, "release": 28.0},
-    # slurp takes at 17-23s and 4-6s
-    "straw_sip": {"alpha": 21.0, "space": 17.0, "enter": 18.0,
-                  "modifier": 6.0, "nav": 23.0, "release": 4.0},
+    # slurp onsets (2026-10-23 recalibrated: the old 6.0s modifier sat in a
+    # silent gap and came out as hiss, and 21.0s had 130 ms of lead silence)
+    "straw_sip": {"alpha": 21.35, "space": 16.85, "enter": 18.65,
+                  "modifier": 6.55, "nav": 23.08, "release": 3.90},
 }
 
 ANCHOR_PREROLL = 0.005  # start a hair before a transient to keep its attack
+
+# Decoders disagree on mp3 priming delay (afconvert vs ffmpeg differ by tens of
+# ms), so a hand-measured anchor can land before the transient: ipad_tap used
+# to start every key with ~60 ms of silence. After placing the anchor, slide
+# forward to the first sample above ONSET_RATIO of the window's peak.
+ONSET_SEARCH = 0.25
+ONSET_RATIO = 0.15
+
+
+def align_onset(samples, sr: int, start_s: float) -> float:
+    i0 = int(start_s * sr)
+    win = samples[i0:i0 + int(ONSET_SEARCH * sr)]
+    if not win:
+        return start_s
+    peak = max(abs(v) for v in win)
+    if peak <= 0:
+        return start_s
+    for i, v in enumerate(win):
+        if abs(v) >= peak * ONSET_RATIO:
+            return max(0.0, start_s + i / sr - ANCHOR_PREROLL)
+    return start_s
 
 # Per-pack high-pass (cutoff Hz, passes): removes mic rumble / handling noise
 # that otherwise dominates the spectrum and buries the effect's texture.
@@ -118,9 +141,12 @@ def read_wav(path: Path):
 
 def convert(src: Path, dst: Path) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
-    r = subprocess.run(
-        ["afconvert", "-f", "WAVE", "-d", f"LEI16@{SR}", str(src), str(dst)],
-        capture_output=True, text=True)
+    if shutil.which("afconvert"):  # macOS; elsewhere go straight to ffmpeg
+        r = subprocess.run(
+            ["afconvert", "-f", "WAVE", "-d", f"LEI16@{SR}", str(src), str(dst)],
+            capture_output=True, text=True)
+    else:
+        r = subprocess.CompletedProcess([], 1, "", "afconvert not found")
     if r.returncode != 0 or not dst.exists():
         r2 = subprocess.run(
             ["ffmpeg", "-y", "-i", str(src), "-ar", str(SR), "-ac", "1",
@@ -232,7 +258,8 @@ def main() -> None:
             anchors = ANCHOR_STARTS.get(pack)
             for layer, (dur, frac) in LAYER_CUTS.items():
                 if anchors and layer in anchors:
-                    start_s = max(0.0, anchors[layer] - ANCHOR_PREROLL)
+                    start_s = align_onset(
+                        samples, sr, max(0.0, anchors[layer] - ANCHOR_PREROLL))
                     chunk = cut_at(samples, sr, dur, start_s)
                     src_desc = f"anchor {anchors[layer]:.2f}s"
                 else:

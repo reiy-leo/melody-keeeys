@@ -62,13 +62,20 @@ KBSIM_LAYERS = {
 }
 KBSIM_FALLBACK = "press/GENERIC_R1.mp3"
 
+# kbsim's mxblue has no SPACE/ENTER recordings; falling back to R1 made
+# space, enter and modifier the very same sample. Use the other generic takes.
+KBSIM_LAYER_OVERRIDES = {
+    "cherry_mx_blue": {"space": "press/GENERIC_R3.mp3",
+                       "enter": "press/GENERIC_R4.mp3"},
+}
+
 # Tickeys leftovers for 07 (bubble variants not used by 11) and 09
 # (typewriter files not used by 12's mapping).
 TICKEYS_PACKS = {
     "bubble_pop": {
         "dir": "bubble",
         "alpha": "6.wav", "space": "8.wav", "enter": "enter.wav",
-        "modifier": "7.wav", "nav": "8.wav", "release_from": "6.wav",
+        "modifier": "7.wav", "nav": "5.wav", "release_from": "6.wav",
     },
     "typewriter_1930s": {
         "dir": "typewriter",
@@ -95,9 +102,12 @@ RELEASE_FADE = 0.05
 def convert(src: Path, dst: Path) -> None:
     """mp3/ogg -> 48 kHz 16-bit WAV via afconvert (ffmpeg fallback)."""
     dst.parent.mkdir(parents=True, exist_ok=True)
-    r = subprocess.run(
-        ["afconvert", "-f", "WAVE", "-d", f"LEI16@{SR}", str(src), str(dst)],
-        capture_output=True, text=True)
+    if shutil.which("afconvert"):  # macOS; elsewhere go straight to ffmpeg
+        r = subprocess.run(
+            ["afconvert", "-f", "WAVE", "-d", f"LEI16@{SR}", str(src), str(dst)],
+            capture_output=True, text=True)
+    else:
+        r = subprocess.CompletedProcess([], 1, "", "afconvert not found")
     if r.returncode != 0 or not dst.exists():
         r2 = subprocess.run(
             ["ffmpeg", "-y", "-i", str(src), "-ar", str(SR), "-ac", "2",
@@ -179,6 +189,7 @@ def main() -> None:
             dst_dir = args.out / pack
             dst_dir.mkdir(parents=True, exist_ok=True)
             for layer, rel in KBSIM_LAYERS.items():
+                rel = KBSIM_LAYER_OVERRIDES.get(pack, {}).get(layer, rel)
                 src = src_dir / rel
                 if not src.exists():
                     src = src_dir / KBSIM_FALLBACK

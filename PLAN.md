@@ -142,15 +142,15 @@ tool/import_real_sounds.py      # 真实音效导入脚本（见 §5）
 | # | 包名 | 中文名 | 素材（真实录音） |
 |---|---|---|---|
 | 01 | Cherry MX Blue | 清脆青轴 | kbsim `mxblue`（MIT） |
-| 02 | Gateron Oil King | 麻将音 | kbsim `blackink`（MIT） |
+| 02 | Gateron Black Ink | 黑墨轴 | kbsim `blackink`（MIT） |
 | 03 | Holy Panda | 圣熊猫轴 | kbsim `holypanda`（MIT） |
 | 04 | IBM Model M | 弹簧经典 | kbsim `buckling`（MIT） |
-| 05 | Kailh Box White | 凯华白盒 | kbsim `boxnavy`（MIT） |
+| 05 | Kailh Box Navy | 凯华海军蓝 | kbsim `boxnavy`（MIT） |
 | 06 | Topre Electrostatic | 静电容 | kbsim `topre`（MIT） |
 | 07 | Bubble Pop | 水泡泡 | Tickeys `bubble`（CC BY 3.0） |
 | 08 | Sci-Fi Laser | 电子镭射 | Kenney Sci-Fi Sounds（CC0） |
-| 09 | Typewriter 1930s | 老式打字机 | Tickeys `typewriter`（MIT） |
-| 10 | Silent Red | 消音红轴 | kbsim `redink`（MIT） |
+| 09 | Typewriter Alt | 打字机·变奏 | Tickeys `typewriter`（MIT） |
+| 10 | Gateron Red Ink | 墨红轴 | kbsim `redink`（MIT） |
 
 参考 [Tickeys](https://github.com/yingDev/Tickeys)（MIT）新增的 7 个——**直接使用其内置的真实音效素材**（非合成），经 `tool/import_tickeys_sounds.py` 按 Tickeys 的 `schemes.json` 映射到本项目 6 层结构；授权明细见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)：
 

@@ -7,15 +7,15 @@
 | # | 音效包 | 素材来源 | 授权 |
 |---|---|---|---|
 | 01 | 清脆青轴 Cherry MX Blue | [kbsim](https://github.com/tplai/kbsim) `mxblue/` | MIT (c) Thomas Lai |
-| 02 | 麻将音 Gateron Oil King | [kbsim](https://github.com/tplai/kbsim) `blackink/` | MIT (c) Thomas Lai |
+| 02 | 黑墨轴 Gateron Black Ink | [kbsim](https://github.com/tplai/kbsim) `blackink/` | MIT (c) Thomas Lai |
 | 03 | 圣熊猫轴 Holy Panda | [kbsim](https://github.com/tplai/kbsim) `holypanda/` | MIT (c) Thomas Lai |
 | 04 | 弹簧经典 IBM Model M | [kbsim](https://github.com/tplai/kbsim) `buckling/` | MIT (c) Thomas Lai |
-| 05 | 凯华白盒 Kailh Box White | [kbsim](https://github.com/tplai/kbsim) `boxnavy/` | MIT (c) Thomas Lai |
+| 05 | 凯华海军蓝 Kailh Box Navy | [kbsim](https://github.com/tplai/kbsim) `boxnavy/` | MIT (c) Thomas Lai |
 | 06 | 静电容 Topre Electrostatic | [kbsim](https://github.com/tplai/kbsim) `topre/` | MIT (c) Thomas Lai |
 | 07 | 水泡泡 Bubble Pop | [Tickeys](https://github.com/yingDev/Tickeys) `bubble/`（Freesound: Glaneur de sons） | CC BY 3.0（需署名） |
 | 08 | 电子镭射 Sci-Fi Laser | [Kenney Sci-Fi Sounds](https://kenney.nl/assets/sci-fi-sounds) | **CC0（公共领域）** |
-| 09 | 老式打字机 Typewriter 1930s | [Tickeys](https://github.com/yingDev/Tickeys) `typewriter/` | MIT（随仓库分发） |
-| 10 | 消音红轴 Silent Red | [kbsim](https://github.com/tplai/kbsim) `redink/` | MIT (c) Thomas Lai |
+| 09 | 打字机·变奏 Typewriter Alt | [Tickeys](https://github.com/yingDev/Tickeys) `typewriter/` | MIT（随仓库分发） |
+| 10 | 墨红轴 Gateron Red Ink | [kbsim](https://github.com/tplai/kbsim) `redink/` | MIT (c) Thomas Lai |
 
 ## 11-17：Tickeys 效果包（真实录音）
 
@@ -70,6 +70,8 @@ python3 tool/import_foley_sounds.py --src /tmp/newfx
 ```
 
 三个脚本都会把源素材转成 48 kHz 16-bit WAV、映射到本项目 6 层结构（alpha/space/enter/modifier/nav/release），并做响度归一化（RMS 目标 2500，峰值上限 32000）。release 层由真实素材裁剪前 0.10s + 0.05s 淡出得到。
+
+> **2026-10-23 名实校准**：02/05/10 原名（Oil King / Box White / Silent Red）与 kbsim 实际录音（Black Ink / Box Navy / Red Ink）不符，已按录音改名；09 与 12 同源（Tickeys typewriter），去掉无依据的「1930s」。包 id 保持不变以兼容已保存的设置。青轴空格/回车改用 GENERIC_R3/R4（kbsim 无专录，原先三层是同一采样）；水泡泡 nav 改用 5.wav（原与 space 重复）；拟音包加入起音对齐（iPad 点触原有约 60ms 前导静音），吸管喝水重选锚点（原 modifier 落在静音段只剩底噪）。拟音源可直接从 Freesound 预览地址下载（`https://freesound.org/s/<id>/` 页面里的 `-hq.mp3`）。
 
 **新增/变更素材后**需提升 `lib/core/audio/sound_engine.dart` 中 `_extractAssets` 的 `assetVersion`，已安装实例才会刷新 WAV。
 

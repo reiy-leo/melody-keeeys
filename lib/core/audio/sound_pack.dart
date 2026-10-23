@@ -56,9 +56,9 @@ const List<SoundPack> kBuiltinPacks = [
   ),
   SoundPack(
     id: 'gateron_oil_king',
-    name: '麻将音',
-    nameEn: 'Gateron Oil King',
-    description: '深沉麻将底音，密室共鸣与厚实触底。',
+    name: '黑墨轴',
+    nameEn: 'Gateron Black Ink',
+    description: '佳达隆墨轴线性重压，深沉厚实的触底声。',
   ),
   SoundPack(
     id: 'holy_panda',
@@ -70,13 +70,13 @@ const List<SoundPack> kBuiltinPacks = [
     id: 'ibm_model_m',
     name: '弹簧经典',
     nameEn: 'IBM Model M',
-    description: '屈张弹簧，钢板回响的金属铭牌。',
+    description: '屈曲弹簧，钢板回响的清亮敲击。',
   ),
   SoundPack(
     id: 'kailh_box_white',
-    name: '凯华白盒',
-    nameEn: 'Kailh Box White',
-    description: '独立发声杆，明亮清脆的金属断裂音。',
+    name: '凯华海军蓝',
+    nameEn: 'Kailh Box Navy',
+    description: '粗发声杆重段落，厚重响亮的咔嗒声。',
   ),
   SoundPack(
     id: 'topre_electrostatic',
@@ -98,15 +98,15 @@ const List<SoundPack> kBuiltinPacks = [
   ),
   SoundPack(
     id: 'typewriter_1930s',
-    name: '老式打字机',
-    nameEn: 'Typewriter 1930s',
-    description: '机械铃声与击锤回弹，复古打字机质感。',
+    name: '打字机·变奏',
+    nameEn: 'Typewriter Alt',
+    description: '与经典打字机同一台机器的另一组击键，节奏更轻快。',
   ),
   SoundPack(
     id: 'silent_red',
-    name: '消音红轴',
-    nameEn: 'Silent Red',
-    description: '硅胶消音垫，低分贝轻柔敲击。',
+    name: '墨红轴',
+    nameEn: 'Gateron Red Ink',
+    description: '佳达隆墨轴线性轻压，顺滑清亮的敲击声。',
   ),
   // Tickeys-inspired set (synthesized approximations, not its audio assets).
   SoundPack(
@@ -137,13 +137,13 @@ const List<SoundPack> kBuiltinPacks = [
     id: 'cherry_g80_3000',
     name: '樱桃 G80-3000',
     nameEn: 'Cherry G80-3000',
-    description: '经典樱桃机械手感，清脆扎实的段落声。',
+    description: '经典樱桃 G80 键盘实录，明亮清脆的敲击声。',
   ),
   SoundPack(
     id: 'cherry_g80_3494',
     name: '樱桃 G80-3494',
     nameEn: 'Cherry G80-3494',
-    description: '红轴线性触底，低沉顺滑的闷响。',
+    description: '樱桃 G80 键盘实录，比 3000 更低沉短促。',
   ),
   SoundPack(
     id: 'drum',
