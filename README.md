@@ -1,4 +1,4 @@
-# Melody Keeeys · 旋律按键
+# Melody Keeeys · 旋律键音
 
 跨平台键盘音效应用 —— 让每一次敲击都有声音。macOS / Windows / Linux 菜单栏（托盘）常驻，全局监听键盘，按当前音效包实时播放对应按键音。
 

@@ -58,7 +58,7 @@ final class SettingsWindowHost {
       backing: .buffered,
       defer: true)
     window.isReleasedWhenClosed = false
-    window.title = "Melody Keeeys · 旋律按键"
+    window.title = "Melody Keeeys · 旋律键音"
     window.center()
     return window
   }

@@ -1,10 +1,10 @@
-# AGENTS.md — Melody Keeeys（旋律按键）
+# AGENTS.md — Melody Keeeys（旋律键音）
 
 给 AI 编码代理的项目工作指南。人类开发者请先看 [README.md](README.md) 与 [PLAN.md](PLAN.md)。
 
 ## 项目一句话
 
-跨平台（macOS / Windows / Linux）菜单栏键盘音效应用：全局监听键盘，按当前音效包给 5 类按键层实时配音。Flutter 桌面 + miniaudio(FFI) + 自写原生键盘钩子。应用英文名 **Melody Keeeys**，中文名 **旋律按键**（原型图里的 KeySound 只是视觉参考，勿再使用）。
+跨平台（macOS / Windows / Linux）菜单栏键盘音效应用：全局监听键盘，按当前音效包给 5 类按键层实时配音。Flutter 桌面 + miniaudio(FFI) + 自写原生键盘钩子。应用英文名 **Melody Keeeys**，中文名 **旋律键音**（原型图里的 KeySound 只是视觉参考，勿再使用）。
 
 ## 目录导览
 
@@ -67,7 +67,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
   1. nativeapi 的 `ImageAsset.fromAsset` 只认 release 布局路径；托盘图标一律走 `TrayService._resolvedAssetFile()`（debug/release/三平台候选路径 + 回退链），失败时**保留当前图标**（nativeapi 对 null icon 会显示应用默认图标）。
   2. `ContextMenuTrigger` 默认是左键弹菜单，必须显式 `setContextMenuTrigger(ContextMenuTrigger.rightClicked)`，否则左键的 ClickedEvent 不派发（左键轮换失效）。
   3. Menu/MenuItem 的 Dart 局部变量 GC 后 Finalizer 释放 native 句柄 → 右键菜单悬空无反应。TrayService 用字段持有 `_menu`/`_menuItems`。
-  验证点击可用 System Events：`osascript -e 'tell app "System Events" to tell process "melody_keeeys" to click menu bar item 1 of menu bar 2'`，点击后读 plist 的 activePackId 是否轮换。
+  验证点击可用 System Events：`osascript -e 'tell app "System Events" to tell process "Melody Keeeys" to click menu bar item 1 of menu bar 2'`，点击后读 plist 的 activePackId 是否轮换。
 - 桌面多窗口：HUD 的窗口通信用 `WindowController.invokeMethod`（main→HUD 方法名 `hudState`，HUD→main 方法名 `hudCommand`）；启动日志里一行 benign 的 desktop_multi_window "Failed to send message" 可忽略。
 - macOS 权限：CGEventTap 需辅助功能授权（设置页有引导横幅；横幅复查后授权成功要清空 `_permissionError` 并重试 `startHook()`——hook 只在启动时尝试一次，窗口重新聚焦也会自动复查）；entitlements 已关沙箱，Info.plist `LSUIElement=true`。
 - **辅助功能授权稳定性（2026-10-07 踩过）**：TCC 授权是绑定签名的——ad-hoc 签名（`CODE_SIGN_IDENTITY = "-"`）下存的是 cdhash，每次重新构建 cdhash 变化导致授权失效；且 macOS 15 无 AX 权限时 `CGEvent.tapCreate` 也会成功（收不到事件），曾让芯片假绿。现已改为用 Apple Development 证书签名（team `EHBQV2H8YV`，`CODE_SIGN_IDENTITY` 用证书 SHA-1 hash），授权绑定到证书身份，重建不再掉；`startKeyHook` 里显式用 `AXIsProcessTrusted()` 门控。改动签名配置后需手动删掉 TCC 里的旧 cdhash 记录（`tccutil reset Accessibility dev.melodykeeeys.melodyKeeeys`）并重新勾选一次。
@@ -80,7 +80,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 ## 会话收尾清单（用户固定要求）
 
 每次开发工作结束后必须：
-1. `flutter build macos --release` 重新打包，并告知用户 .app 路径（`build/macos/Build/Products/Release/melody_keeeys.app`）；
+1. `flutter build macos --release` 重新打包，并告知用户 .app 路径（`build/macos/Build/Products/Release/Melody Keeeys.app`）；
 2. 同步文档（AGENTS.md / DESIGN.md / README.md / PLAN.md），保持代码与文档一致；
 3. `git add -A && git commit && git push`（用户已授权每次提交+推送）。
 

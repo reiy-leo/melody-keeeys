@@ -90,7 +90,7 @@ class TrayService {
     _icon = icon;
 
     _applyIcon(soundEngine.state.settings.trayIcon);
-    icon.setTooltip('Melody Keeeys · 旋律按键');
+    icon.setTooltip('Melody Keeeys · 旋律键音');
     icon.addListener(_onTrayEvent);
     icon.setVisible(true);
     rebuildMenu();
@@ -121,7 +121,7 @@ class TrayService {
         '${state.settings.activePackId}|${state.settings.engineEnabled}|${state.settings.leftClickAction}';
     if (signature == _lastMenuSignature) return;
     _lastMenuSignature = signature;
-    icon.setTooltip('Melody Keeeys · 旋律按键 — 正在使用：${activePack.name}');
+    icon.setTooltip('Melody Keeeys · 旋律键音 — 正在使用：${activePack.name}');
 
     final menu = Menu.create();
     if (menu == null) return;

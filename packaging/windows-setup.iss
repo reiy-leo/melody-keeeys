@@ -3,7 +3,7 @@
 ; Then compile: iscc packaging/windows-setup.iss
 
 #define MyAppName "Melody Keeeys"
-#define MyAppNameZh "旋律按键"
+#define MyAppNameZh "旋律键音"
 #define MyAppVersion "0.1.0"
 #define MyAppExeName "melody_keeeys.exe"
 

@@ -1,4 +1,4 @@
-# Melody Keeeys（旋律按键）实施计划
+# Melody Keeeys（旋律键音）实施计划
 
 > 跨平台键盘音效应用：macOS / Windows / Linux 菜单栏（托盘）应用。
 > 全局监听键盘敲击，按当前音效包播放对应按键声音。左键点击托盘图标切换下一个音效，右键选择具体音效或打开设置。
@@ -11,7 +11,7 @@
 
 | 项目 | 内容 |
 |---|---|
-| 应用名 | **Melody Keeeys**（英文名，托盘/HUD/窗口标题展示用）；中文名 **旋律按键**（关于页、中文 UI 副标题） |
+| 应用名 | **Melody Keeeys**（英文名，托盘/HUD/窗口标题展示用）；中文名 **旋律键音**（关于页、中文 UI 副标题） |
 | 形态 | 常驻菜单栏/托盘的应用（无 Dock/任务栏常驻窗口），主窗口即设置窗口 |
 | 核心功能 | 全局键盘监听 → 按键分类映射 → 低延迟播放对应音效 |
 | 默认音效 | 22 个内置音效包（见 §5） |
@@ -196,7 +196,7 @@ tool/import_real_sounds.py      # 真实音效导入脚本（见 §5）
 340px 宽、无边框、置顶、失焦自动关闭；内容：引擎开关+延迟徽章、当前音效卡片（CURRENT 徽章、Strike 试听、波形可视化、音量/音高抖动滑杆）、音效包列表（勾选+试听）。
 
 ### 设置窗口（900×640 可调，关闭=隐藏）
-侧边栏：Logo（Melody Keeeys / 旋律按键，替代原型中的 KeySound 字样）＋ 通用 / 音效 / 菜单栏 ＋ 底部（引擎状态、版本、**关于**）。
+侧边栏：Logo（Melody Keeeys / 旋律键音，替代原型中的 KeySound 字样）＋ 通用 / 音效 / 菜单栏 ＋ 底部（引擎状态、版本、**关于**）。
 - **通用**：引擎状态头（延迟/音量）、开机自启、静默启动（启动进托盘不出窗）、智能静音应用列表（二期）、音频引擎通道说明卡、全局热键 ×2、Anti-Ghosting 滑杆、修饰键连发开关、底部「敲击测试」区、恢复默认。
 - **音效**：10 包列表（延迟徽章、试听、ACTIVE 态）、当前包详情（描述+频谱可视化）、5 层按键层 tone 滑杆、DSP 引擎（音量补偿/音高抖动/松键音/缓冲预设）、打字沙盒（实时试音+计数）。
 - **菜单栏**：左键行为绑定（轮换音效 / 弹出 HUD）、右键说明、滚轮微调音量（二期）、图标样式三选（一期仅 Minimal Capsule，另两个二期）、沙盒。
@@ -269,6 +269,6 @@ tool/import_real_sounds.py      # 真实音效导入脚本（见 §5）
 | hotkey_manager 依赖 | 仍在（Carbon RegisterEventHotKey，无需辅助功能权限） | 评估过用钩子流自检组合键，暂不必要 |
 
 ## 10. 立即下一步
-1. `flutter create . --project-name melody_keeeys --platforms=macos,windows,linux`（Dart 包名用下划线形式；各平台显示名配置为 Melody Keeeys / 旋律按键）+ 依赖安装
+1. `flutter create . --project-name melody_keeeys --platforms=macos,windows,linux`（Dart 包名用下划线形式；各平台显示名配置为 Melody Keeeys / 旋律键音）+ 依赖安装
 2. 主题 token 化（docs/prototypes/DESIGN.md → `lib/app/theme/`）
 3. miniaudio FFI 三平台打通（M1 验收项）

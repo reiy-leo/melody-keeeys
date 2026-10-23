@@ -38,7 +38,7 @@ Future<void> main(List<String> args) async {
       size: Size(1020, 700),
       minimumSize: Size(880, 580),
       center: true,
-      title: 'Melody Keeeys · 旋律按键',
+      title: 'Melody Keeeys · 旋律键音',
       titleBarStyle: TitleBarStyle.hidden,
     ),
     () async {
@@ -109,7 +109,7 @@ Future<void> _runHostedSettings() async {
     const WindowOptions(
       // No size/center: the host keeps the window and its last frame.
       minimumSize: Size(880, 580),
-      title: 'Melody Keeeys · 旋律按键',
+      title: 'Melody Keeeys · 旋律键音',
       titleBarStyle: TitleBarStyle.hidden,
     ),
     () async {},

@@ -25,10 +25,10 @@ class AboutPage extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Image.asset('assets/icons/tray_256.png', width: 96, height: 96),
+                Image.asset('assets/icons/app_icon.png', width: 96, height: 96),
                 const SizedBox(height: AppSpacing.lg),
                 Text('Melody Keeeys', style: AppText.displayLg),
-                Text('旋律按键 · 让每一次敲击都有声音',
+                Text('旋律键音 · 让每一次敲击都有声音',
                     style: AppText.bodyLg.copyWith(color: context.colors.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.md),
                 MetricChip(label: 'v0.1.0 · M1-M3', color: context.colors.primary),
@@ -74,7 +74,7 @@ class AboutPage extends StatelessWidget {
                   context: context,
                   applicationName: 'Melody Keeeys',
                   applicationVersion: '0.1.0',
-                  applicationIcon: Image.asset('assets/icons/tray_256.png', width: 48, height: 48),
+                  applicationIcon: Image.asset('assets/icons/app_icon.png', width: 48, height: 48),
                 ),
               ),
             ],

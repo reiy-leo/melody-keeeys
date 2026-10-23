@@ -118,7 +118,7 @@ class _SettingsWindowState extends State<SettingsWindow> with WindowListener {
                               children: [
                                 Text('Melody Keeeys', style: AppText.titleMd),
                                 Text(
-                                  '旋律按键',
+                                  '旋律键音',
                                   style: AppText.bodySm.copyWith(
                                     color: context.colors.onSurfaceVariant,
                                   ),

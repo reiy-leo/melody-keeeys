@@ -30,7 +30,7 @@ jobs:
       - name: Package
         run: |
           cd build/macos/Build/Products/Release
-          ditto -c -k --sequesterRsrc --keepParent melody_keeeys.app "$GITHUB_WORKSPACE/MelodyKeeeys-${GITHUB_REF_NAME}-macos-universal.zip"
+          ditto -c -k --sequesterRsrc --keepParent "Melody Keeeys.app" "$GITHUB_WORKSPACE/MelodyKeeeys-${GITHUB_REF_NAME}-macos-universal.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: macos

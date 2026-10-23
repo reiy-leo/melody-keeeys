@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "dev.melodykeeeys" "\0"
-            VALUE "FileDescription", "melody_keeeys" "\0"
+            VALUE "FileDescription", "Melody Keeeys" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "melody_keeeys" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 dev.melodykeeeys. All rights reserved." "\0"
             VALUE "OriginalFilename", "melody_keeeys.exe" "\0"
-            VALUE "ProductName", "melody_keeeys" "\0"
+            VALUE "ProductName", "Melody Keeeys" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

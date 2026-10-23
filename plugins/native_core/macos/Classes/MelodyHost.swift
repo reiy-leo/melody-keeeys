@@ -773,7 +773,7 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
       button.image = image
     }
     let name = packs.indices.contains(activePackIndex) ? packs[activePackIndex].name : ""
-    button.toolTip = "Melody Keeeys · 旋律按键 — 正在使用：\(name)"
+    button.toolTip = "Melody Keeeys · 旋律键音 — 正在使用：\(name)"
     button.appearsDisabled = !settings.engineEnabled
   }
 
