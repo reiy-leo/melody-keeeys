@@ -16,8 +16,8 @@
 | `lib/core/tray/` | `tray_service.dart` 托盘（tray_manager 0.7 nativeapi TrayIcon API；图标=Lucide 7 选 1） |
 | `lib/core/settings/` | `settings_model.dart`（AppSettings+UiTheme+kTrayIcons）、`settings_repository.dart`（shared_preferences JSON） |
 | `lib/core/system/` | `hotkey_service.dart` 全局热键（Option+Shift+K 静音 / Option+Shift+] 轮换） |
-| `lib/features/hud/` | 托盘 HUD 弹窗（desktop_multi_window 第二窗口，入口 `runHudWindow`，main args 首参 `multi_window`） |
-| `plugins/native_core/` | 本地插件。C 音频引擎在 `macos/Classes/src/`（**唯一副本**，Windows/Linux CMake 反向引用此路径）；`macos/Classes/NativeCorePlugin.swift` CGEventTap；`windows/` WH_KEYBOARD_LL；`linux/` evdev |
+| `lib/features/hud/` | 托盘 HUD 弹窗（Windows/Linux；desktop_multi_window 第二窗口，入口 `runHudWindow`）。macOS 用原生 `HudView.swift` |
+| `plugins/native_core/` | 本地插件。C 音频引擎在 `macos/Classes/src/`（**唯一副本**，Windows/Linux CMake 反向引用此路径）；`macos/Classes/MelodyHost.swift` macOS 原生常驻宿主（菜单栏/钩子/音频/热键/设置，见下文）、`HudView.swift` 原生托盘面板、`NativeCorePlugin.swift` 设置引擎的权限查询与通道桥；`windows/` WH_KEYBOARD_LL；`linux/` evdev |
 | `assets/sounds/` | 132 个 WAV（22 包 × 6 层，**全部为真实录音素材**，已统一响度归一化；授权与来源见 `assets/sounds/CREDITS.md`）。导入脚本：`tool/import_real_sounds.py`（01-10，kbsim/Kenney/Tickeys）+ `tool/import_tickeys_sounds.py`（11-22）。新增包要同时改 `sound_pack.dart` 的 kBuiltinPacks + `pubspec.yaml` 资源目录；资源有改动时提升 `sound_engine.dart` 里 `_extractAssets` 的 `assetVersion`，否则已安装实例不会刷新 WAV |
 | `assets/icons/` | 托盘图标（`tool/make_lucide_tray_icons.py` 生成 Lucide 7 图标 ×3 变体）+ 旧版自绘图 |
 | `docs/prototypes/` | Google Stitch 原型图 + 原始设计系统（KeySound 字样仅供参考） |
@@ -91,7 +91,16 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 - **发布（2026-10-23 起）**：推 `v*` 标签触发 `.github/workflows/release.yml`，GitHub Actions 三平台构建（macOS 用 ad-hoc 签名替换本地证书配置、Universal zip；Windows x64 zip；Linux x64 tar.gz），自动建 Release；标签带 `-`（如 `v0.2.0-alpha.1`）即标为预发布。说明文案在 `.github/release-notes.md`，每次发版前改。
 - **截图工具**：README 截图用 debug 专用 `ScreenshotHost`（`lib/shared/debug_screenshot.dart`），`flutter build macos --debug --dart-define=MELODY_SCREENSHOTS=true` 后运行，写入 `/tmp/melody_shot_req`（内容=输出路径）即可触发主窗口截图，HUD 用 `/tmp/melody_shot_hud_req`。不依赖系统屏幕录制权限。
 
-## Memory while living in the menu bar (2026-10-23)
+## macOS 原生宿主（2026-10-24，内存架构）
 
-- Hidden settings window is *parked*: `AppLifecycle.settingsVisible` false unmounts the whole MaterialApp (SettingsApp renders `SizedBox.shrink`), image cache is cleared, and the window is shrunk to 64×64 so its GPU back buffers are released. `showSettingsWindow()` restores the saved frame and min size, remounts, waits one frame, then shows. Never hide the settings window with a bare `windowManager.hide()`; go through `_parkSettings()`.
-- The tray HUD runs on a second Flutter engine. After 30 s hidden it sends `hudDisposed` to the main window and asks the native `melody/hud_window` channel (macOS Runner, MainFlutterWindow.swift) to `close()` its NSWindow, which releases that engine. Next tray click creates a new HUD. On Windows/Linux the channel is absent and the HUD just stays hidden.
+Rei 实测 alpha.3 常驻仍约 120MB：只要进程里挂着 Flutter 引擎（Dart VM、Skia、字体、GPU surface）就降不下去，采样 PCM 才约 6.5MB。所以 macOS 改为「原生常驻 + Flutter 按需」：
+
+- **常驻部分全在 `plugins/native_core/macos/Classes/MelodyHost.swift`**（单例 `MelodyHost.shared`，`AppDelegate` 在 didFinishLaunching 时 `start()`）：NSStatusItem 菜单栏图标与右键菜单、CGEventTap 键盘钩子（独立线程）、按键分类与播放策略（移植自 `sound_engine.dart` / `keymap_classifier.dart` 的 macOS 表）、C 音频引擎（`@_silgen_name` 直调 `ae_*`，所有引擎操作在串行 `audioQueue`）、Carbon 全局热键、设置读写（UserDefaults `flutter.melody_keeeys.settings.v1`，与 shared_preferences 同一键，旧配置无缝沿用，400ms 去抖，退出时 flush）、开机自启（`launch_at_startup` 通道，SMAppService，macOS 13+）。
+- **托盘面板（HUD）在 macOS 是原生 SwiftUI**（`HudView.swift`，NSPopover，打开时构建、关闭即释放）。Flutter 版 HUD（`lib/features/hud/`、desktop_multi_window）只给 Windows/Linux 用。
+- **设置窗口按需起引擎**：`macos/Runner/MainFlutterWindow.swift` 的 `SettingsWindowHost` 在打开时新建 `FlutterViewController`（新引擎），关闭时 `shutDownEngine()` 并清空 contentView；NSWindow 本身复用以保留位置大小。启动不再从 xib 建窗口（MainMenu.xib 已删 window 和 `mainFlutterWindow` outlet）。
+- **插件手动注册**：设置引擎只注册 NativeCorePlugin / ScreenRetriever / SharedPreferences / WindowManager（见 `registerPlugins`），不注册 desktop_multi_window、hotkey_manager。**以后 macOS 新增插件必须加到这里**，不会自动走 `RegisterGeneratedPlugins`。
+- **Dart 侧（`kNativeHost = Platform.isMacOS`）**：`main()` 走 `_runHostedSettings()`，只跑设置页；`SoundEngine` 变成瘦客户端，经 `melody/host` 通道：`getState` / `updateSettings`(JSON 字符串) / `selectPack` / `preview` / `startHook` / `settingsShown` / `settingsClosed` / `quit`；宿主回推 `state`（菜单栏/热键/面板引起的变化；Flutter 发起的改动不回推，避免滑杆回跳）和 `keystrokes`（250ms 节流）。关窗 = `onWindowClose` → `settingsClosed` → 宿主销毁引擎。
+- **音效包清单**：宿主读 `assets/sounds/packs.json`（由 `python3 tool/gen_packs_json.py` 从 `kBuiltinPacks` 生成，`test/packs_manifest_test.dart` 校验一致）。**改包要重新生成**。采样直接从 `App.framework/Resources/flutter_assets/assets/sounds/` 读取，macOS 不再解压到 Application Support。
+- Windows/Linux 仍是原架构（Dart 常驻 + FFI + Flutter HUD + parked 设置窗），下面两条只对它们有效：
+  - Hidden settings window is *parked*: `settingsVisible` false unmounts the MaterialApp, clears the image cache and shrinks the window to 64×64. Go through `_parkSettings()`, never a bare `windowManager.hide()`.
+  - The Flutter HUD hides on blur and after 30 s asks `melody/hud_window` to close itself (no native implementation on Windows/Linux, so it just stays hidden).

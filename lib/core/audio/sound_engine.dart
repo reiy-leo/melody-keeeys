@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -49,8 +50,16 @@ class EngineState {
       );
 }
 
+/// macOS: the menu-bar app runs natively (MelodyHost in native_core) and
+/// the Flutter engine only exists while the settings window is open. In that
+/// mode [SoundEngine] is a thin client: state comes from and changes go to
+/// the host over this channel; no FFI engine, key hook or asset extraction.
+final bool kNativeHost = Platform.isMacOS;
+const MethodChannel _hostChannel = MethodChannel('melody/host');
+
 /// Owns the native audio engine, the settings repository and the keystroke
 /// play policy (classification, anti-ghosting, pitch jitter, release sounds).
+/// On macOS ([kNativeHost]) it mirrors the native host instead.
 class SoundEngine extends ChangeNotifier {
   SoundEngine(this._repo);
 
@@ -85,6 +94,7 @@ class SoundEngine extends ChangeNotifier {
   String? get soundDir => _soundDir;
 
   Future<void> initialize() async {
+    if (kNativeHost) return _initializeHosted();
     final settings = await _repo.load();
     _state = _state.copyWith(settings: settings);
 
@@ -128,6 +138,41 @@ class SoundEngine extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _initializeHosted() async {
+    _hostChannel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case 'state':
+          _applyHostState(call.arguments as Map);
+          notifyListeners();
+        case 'keystrokes':
+          keystrokes.value = (call.arguments as num).toInt();
+      }
+      return null;
+    });
+    final raw = await _hostChannel.invokeMethod<Map>('getState');
+    if (raw != null) {
+      _applyHostState(raw);
+      keystrokes.value = (raw['keystrokes'] as num?)?.toInt() ?? 0;
+    }
+    notifyListeners();
+  }
+
+  void _applyHostState(Map raw) {
+    var settings = _state.settings;
+    try {
+      settings = AppSettings.fromJson(
+        jsonDecode(raw['settings'] as String? ?? '{}') as Map<String, Object?>,
+      );
+    } catch (_) {/* keep current */}
+    _state = EngineState(
+      settings: settings,
+      latencyMs: (raw['latencyMs'] as num?)?.toDouble(),
+      engineVersion: raw['engineVersion'] as String? ?? '-',
+      hookRunning: raw['hookRunning'] as bool? ?? false,
+      loadError: raw['loadError'] as String?,
+    );
+  }
+
   Future<void> _extractAssets(Directory target) async {
     await target.create(recursive: true);
     // Bump when the bundled WAVs change: a version change re-copies every
@@ -153,6 +198,17 @@ class SoundEngine extends ChangeNotifier {
   }
 
   Future<void> startHook() async {
+    if (kNativeHost) {
+      bool ok;
+      try {
+        ok = await _hostChannel.invokeMethod<bool>('startHook') ?? false;
+      } on PlatformException {
+        ok = false;
+      }
+      _state = _state.copyWith(hookRunning: ok);
+      notifyListeners();
+      return;
+    }
     try {
       await KeyHookChannel.instance.start();
       _state = _state.copyWith(hookRunning: true);
@@ -163,6 +219,7 @@ class SoundEngine extends ChangeNotifier {
   }
 
   Future<void> stopHook() async {
+    if (kNativeHost) return; // the host's hook runs without any window
     await KeyHookChannel.instance.stop();
     _state = _state.copyWith(hookRunning: false);
     notifyListeners();
@@ -238,6 +295,13 @@ class SoundEngine extends ChangeNotifier {
     final old = _state.settings;
     if (identical(old, next)) return;
     _state = _state.copyWith(settings: next);
+    if (kNativeHost) {
+      // The host applies, persists and (for latency changes) pushes back
+      // the new latency.
+      _hostChannel.invokeMethod('updateSettings', jsonEncode(next.toJson()));
+      notifyListeners();
+      return;
+    }
     if (persist) _scheduleSave(next);
     if (next.volumeDb != old.volumeDb) _ffi?.setMasterVolume(next.volumeLinear);
     if (next.latencyPreset != old.latencyPreset) {
@@ -258,6 +322,7 @@ class SoundEngine extends ChangeNotifier {
 
   /// Write any pending settings now (called by the debounce timer and on quit).
   Future<void> flushSettings() async {
+    if (kNativeHost) return; // persisted by the host
     _saveTimer?.cancel();
     _saveTimer = null;
     final s = _pendingSave;
@@ -273,6 +338,11 @@ class SoundEngine extends ChangeNotifier {
     // pack is already decoded, so switching is just an index change. UI,
     // tray and persistence follow (persistence debounced).
     _state = _state.copyWith(settings: next);
+    if (kNativeHost) {
+      _hostChannel.invokeMethod('selectPack', {'packId': packId, 'preview': preview});
+      notifyListeners();
+      return;
+    }
     if (preview) {
       _lastPlayAtMs.clear(); // let the preview through
       _play(SoundLayer.alpha, next);
@@ -298,6 +368,10 @@ class SoundEngine extends ChangeNotifier {
 
   /// Fire a sample directly (Strike button, pack list previews).
   void previewPack(String packId, [SoundLayer layer = SoundLayer.alpha]) {
+    if (kNativeHost) {
+      _hostChannel.invokeMethod('preview', {'packId': packId, 'layer': layer.assetName});
+      return;
+    }
     final ffi = _ffi;
     if (ffi == null) return;
     final idx = kBuiltinPacks.indexWhere((p) => p.id == packId).clamp(0, kBuiltinPacks.length - 1);

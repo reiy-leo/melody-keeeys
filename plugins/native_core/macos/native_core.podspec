@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.summary          = 'Native audio engine and key hooks for Melody Keeeys.'
   s.description      = <<-DESC
 miniaudio-based FFI audio engine (audio_engine.c) compiled into the Runner
-binary, plus the CGEventTap global key hook plugin (Swift).
+binary, plus the native macOS host (menu bar, tray panel, key hook, hotkeys).
                        DESC
   s.homepage         = 'https://github.com/melody-keeeys/melody-keeeys'
   s.license          = { :type => 'MIT' }
@@ -22,8 +22,9 @@ binary, plus the CGEventTap global key hook plugin (Swift).
   s.source_files = 'Classes/**/*'
 
   s.dependency 'FlutterMacOS'
+  s.frameworks = 'Carbon', 'ServiceManagement', 'SwiftUI'
 
-  s.platform = :osx, '10.15'
+  s.platform = :osx, '12.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17' }
   s.swift_version = '5.0'
 end

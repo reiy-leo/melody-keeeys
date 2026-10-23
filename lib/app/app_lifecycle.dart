@@ -5,6 +5,7 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/foundation.dart' show ValueNotifier, debugPrint;
 import 'package:flutter/painting.dart' show PaintingBinding, Rect, Size;
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -13,6 +14,10 @@ import '../core/tray/tray_service.dart';
 
 /// App-wide lifecycle glue: settings window visibility, the tray HUD window,
 /// login item and quit. Widgets/pages reach it through [appLifecycle].
+///
+/// On macOS ([kNativeHost]) this engine *is* the settings window: it shows
+/// itself once, and closing it asks the native host to shut the engine down.
+/// Tray, HUD and quit belong to the host there.
 class AppLifecycle with WindowListener {
   AppLifecycle._();
   static final AppLifecycle instance = AppLifecycle._();
@@ -36,6 +41,10 @@ class AppLifecycle with WindowListener {
   Future<void> init({required bool showSettings}) async {
     windowManager.addListener(this);
     await windowManager.setPreventClose(true);
+    if (kNativeHost) {
+      settingsVisible.value = true;
+      return;
+    }
     if (showSettings) {
       await showSettingsWindow();
     } else {
@@ -55,6 +64,14 @@ class AppLifecycle with WindowListener {
   String? _lastHudPayload;
 
   Future<void> showSettingsWindow() async {
+    if (kNativeHost) {
+      await windowManager.show();
+      await windowManager.focus();
+      try {
+        await _host.invokeMethod('settingsShown');
+      } catch (_) {/* host absent */}
+      return;
+    }
     if (!settingsVisible.value) {
       final frame = _settingsFrame;
       await windowManager.setMinimumSize(_settingsMinSize);
@@ -231,6 +248,12 @@ class AppLifecycle with WindowListener {
 
   @override
   void onWindowClose() async {
+    if (kNativeHost) {
+      // The host tears this whole engine down; nothing here outlives it.
+      await windowManager.hide();
+      await _host.invokeMethod('settingsClosed');
+      return;
+    }
     // Settings window close = hide to tray, never exit.
     if (!_quitting) {
       await _parkSettings();
@@ -246,6 +269,10 @@ class AppLifecycle with WindowListener {
 
   Future<void> quit() async {
     _quitting = true;
+    if (kNativeHost) {
+      await _host.invokeMethod('quit');
+      return;
+    }
     await soundEngine.flushSettings(); // debounced write must land before exit
     TrayService.instance.dispose();
     soundEngine.dispose();
@@ -254,3 +281,5 @@ class AppLifecycle with WindowListener {
 }
 
 final AppLifecycle appLifecycle = AppLifecycle.instance;
+
+const MethodChannel _host = MethodChannel('melody/host');

@@ -1,48 +1,77 @@
 import Cocoa
 import FlutterMacOS
-import desktop_multi_window
+import native_core
+import screen_retriever_macos
+import shared_preferences_foundation
 import window_manager
 
-class MainFlutterWindow: NSWindow {
-  override func awakeFromNib() {
-    let flutterViewController = FlutterViewController()
-    let windowFrame = self.frame
-    self.contentViewController = flutterViewController
-    self.setFrame(windowFrame, display: true)
+/// The settings window, whose Flutter engine only exists while it is open.
+///
+/// Melody Keeeys lives in the menu bar; everything that runs all the time
+/// (key hook, audio, menu, tray panel, hotkeys) is native (MelodyHost). A
+/// Flutter engine costs ~100 MB resident (Dart VM, Skia, fonts, GPU
+/// surfaces) whether or not anything is on screen, so it is created when the
+/// settings window opens and shut down when it closes. The NSWindow itself
+/// is kept and reused, so its frame survives between openings.
+final class SettingsWindowHost {
+  private var window: NSWindow?
+  private var controller: FlutterViewController?
+  private var shown = false
 
-    RegisterGeneratedPlugins(registry: flutterViewController)
-
-    // Sub-windows (tray HUD) run on their own engines: without this, plugins
-    // like window_manager/tray_manager are missing there and every channel
-    // call throws MissingPluginException.
-    FlutterMultiWindowPlugin.setOnWindowCreatedCallback { controller in
-      RegisterGeneratedPlugins(registry: controller)
-      // Lets the idle HUD close its own window. Closing (not hiding) drops
-      // desktop_multi_window's reference, so the window, its
-      // FlutterViewController and the HUD's whole engine are released.
-      // window_manager can't do this: close() is performClose, a no-op on a
-      // frameless window, and destroy() terminates the app.
-      let channel = FlutterMethodChannel(
-        name: "melody/hud_window",
-        binaryMessenger: controller.engine.binaryMessenger)
-      channel.setMethodCallHandler { [weak controller] call, result in
-        guard call.method == "dispose" else {
-          result(FlutterMethodNotImplemented)
-          return
-        }
-        result(nil)
-        // Reply first; tear the engine down on the next runloop turn.
-        DispatchQueue.main.async { controller?.view.window?.close() }
-      }
+  func open() {
+    if let window, controller != nil {
+      // Still booting: Dart shows the window after its first frame.
+      guard shown else { return }
+      NSApp.activate(ignoringOtherApps: true)
+      window.makeKeyAndOrderFront(nil)
+      return
     }
-
-    super.awakeFromNib()
+    let window = self.window ?? makeWindow()
+    self.window = window
+    let controller = FlutterViewController()
+    let frame = window.frame
+    window.contentViewController = controller
+    window.setFrame(frame, display: false)
+    registerPlugins(controller)
+    self.controller = controller
+    shown = false
   }
 
-  // Keep the settings window hidden at launch (the xib would otherwise order
-  // it front before Dart runs); main() decides whether to show it.
-  override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
-    super.order(place, relativeTo: otherWin)
-    hiddenWindowAtLaunch()
+  func markShown() {
+    shown = true
+  }
+
+  func close() {
+    guard let window, let controller else { return }
+    window.orderOut(nil)
+    window.contentViewController = nil
+    window.contentView = NSView()
+    controller.engine.shutDownEngine()
+    self.controller = nil
+    shown = false
+  }
+
+  private func makeWindow() -> NSWindow {
+    let window = NSWindow(
+      contentRect: NSRect(x: 0, y: 0, width: 1020, height: 700),
+      styleMask: [.titled, .closable, .miniaturizable, .resizable],
+      backing: .buffered,
+      defer: true)
+    window.isReleasedWhenClosed = false
+    window.title = "Melody Keeeys · 旋律按键"
+    window.center()
+    return window
+  }
+
+  /// Only what the settings UI uses. desktop_multi_window (the Flutter HUD,
+  /// replaced by the native tray panel here) and hotkey_manager (hotkeys are
+  /// native) stay unregistered so nothing double-registers or pins the
+  /// engine. Add new macOS plugins here, not via RegisterGeneratedPlugins.
+  private func registerPlugins(_ registry: FlutterPluginRegistry) {
+    NativeCorePlugin.register(with: registry.registrar(forPlugin: "NativeCorePlugin"))
+    ScreenRetrieverMacosPlugin.register(
+      with: registry.registrar(forPlugin: "ScreenRetrieverMacosPlugin"))
+    SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
+    WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))
   }
 }

@@ -1,0 +1,45 @@
+name: macOS build check
+
+# Compiles the macOS app on every push to main (no tag, no Release) so
+# native Swift changes are verified, and keeps the .app as a run artifact
+# for testing before anything is published.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'macos/**'
+      - 'plugins/native_core/**'
+      - 'lib/**'
+      - 'assets/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/macos-check.yml'
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Ad-hoc signing for CI
+        run: |
+          sed -i '' -E 's/CODE_SIGN_IDENTITY = [^;]+;/CODE_SIGN_IDENTITY = "-";/; s/DEVELOPMENT_TEAM = [^;]+;/DEVELOPMENT_TEAM = "";/; s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/' macos/Runner.xcodeproj/project.pbxproj
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build macos --release
+      - name: Package
+        run: |
+          cd build/macos/Build/Products/Release
+          ditto -c -k --sequesterRsrc --keepParent melody_keeeys.app "$GITHUB_WORKSPACE/MelodyKeeeys-${GITHUB_SHA::7}-macos.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ github.sha }}
+          path: MelodyKeeeys-*.zip
+          retention-days: 14

@@ -27,6 +27,11 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  if (kNativeHost) {
+    await _runHostedSettings();
+    return;
+  }
+
   await windowManager.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
@@ -93,6 +98,49 @@ Future<void> main(List<String> args) async {
         ? const ScreenshotHost(child: SettingsApp())
         : const SettingsApp(),
   );
+}
+
+/// macOS: this engine exists only while the settings window is open; the
+/// native host (menu bar, key hook, audio, hotkeys, tray panel) started it
+/// and shuts it down when the window closes.
+Future<void> _runHostedSettings() async {
+  await windowManager.ensureInitialized();
+  await windowManager.waitUntilReadyToShow(
+    const WindowOptions(
+      // No size/center: the host keeps the window and its last frame.
+      minimumSize: Size(880, 580),
+      title: 'Melody Keeeys · 旋律按键',
+      titleBarStyle: TitleBarStyle.hidden,
+    ),
+    () async {},
+  );
+
+  soundEngine = SoundEngine(SettingsRepository());
+  await soundEngine.initialize();
+
+  launchAtStartup.setup(
+    appName: 'Melody Keeeys',
+    appPath: Platform.resolvedExecutable,
+  );
+
+  await appLifecycle.init(showSettings: true);
+  runApp(
+    kDebugMode && _kScreenshotMode
+        ? const ScreenshotHost(child: SettingsApp())
+        : const SettingsApp(),
+  );
+
+  // Order the window front once it has painted (no blank flash); the
+  // timeout covers a hidden window that gets no vsync.
+  var shown = false;
+  Future<void> show() async {
+    if (shown) return;
+    shown = true;
+    await appLifecycle.showSettingsWindow();
+  }
+
+  WidgetsBinding.instance.addPostFrameCallback((_) => show());
+  Future.delayed(const Duration(milliseconds: 600), show);
 }
 
 /// Set with `--dart-define=MELODY_SCREENSHOTS=true` (debug builds only):
