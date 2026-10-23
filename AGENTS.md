@@ -104,3 +104,8 @@ Rei 实测 alpha.3 常驻仍约 120MB：只要进程里挂着 Flutter 引擎（D
 - Windows/Linux 仍是原架构（Dart 常驻 + FFI + Flutter HUD + parked 设置窗），下面两条只对它们有效：
   - Hidden settings window is *parked*: `settingsVisible` false unmounts the MaterialApp, clears the image cache and shrinks the window to 64×64. Go through `_parkSettings()`, never a bare `windowManager.hide()`.
   - The Flutter HUD hides on blur and after 30 s asks `melody/hud_window` to close itself (no native implementation on Windows/Linux, so it just stays hidden).
+
+## 应用名与图标
+
+- 英文名 Melody Keeeys，中文名「旋律键音」。macOS 产物 `Melody Keeeys.app`；Finder/访达的中文名来自 `macos/Runner/zh-Hans.lproj/InfoPlist.strings`（`LSHasLocalizedDisplayName`），en 同理。
+- 应用图标源图 `assets/icons/source/app_icon_source.webp`（背景棋盘格是烘焙进去的，脚本按圆角矩形抠图）；改图后运行 `python3 tool/make_app_icons.py` 重新生成 macOS appiconset、Windows ico 和关于页 `assets/icons/app_icon.png`。菜单栏托盘图标不在此列。
