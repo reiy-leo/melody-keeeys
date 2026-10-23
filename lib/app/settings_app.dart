@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../core/audio/sound_engine.dart';
+import 'app_lifecycle.dart';
 import '../core/settings/settings_model.dart';
 import 'features/about_page.dart';
 import 'features/general_page.dart';
@@ -16,6 +17,16 @@ class SettingsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hidden settings window = nothing mounted (frees the UI's memory and
+    // stops rebuilding on every engine change while living in the menu bar).
+    return ValueListenableBuilder<bool>(
+      valueListenable: appLifecycle.settingsVisible,
+      builder: (context, visible, _) =>
+          visible ? _buildApp() : const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildApp() {
     return ListenableBuilder(
       listenable: soundEngine,
       builder: (context, _) {

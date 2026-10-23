@@ -64,7 +64,9 @@ Future<void> main(List<String> args) async {
       final controller = await WindowController.fromCurrentEngine();
       controller.setWindowMethodHandler((call) async {
         if (call.method != 'hudCommand') return null;
-        final payload = jsonDecode(call.arguments as String? ?? '{}') as Map<String, dynamic>;
+        final payload = jsonDecode(
+          call.arguments as String? ?? '{}',
+        ) as Map<String, dynamic>;
         switch (payload['action']) {
           case 'selectPack':
             await soundEngine.selectPack(payload['packId'] as String);
@@ -76,6 +78,8 @@ Future<void> main(List<String> args) async {
             await appLifecycle.showSettingsWindow();
           case 'ready':
             await appLifecycle.markHudReady();
+          case 'hudDisposed':
+            appLifecycle.forgetHud();
         }
         return null;
       });
@@ -94,5 +98,4 @@ Future<void> main(List<String> args) async {
 /// Set with `--dart-define=MELODY_SCREENSHOTS=true` (debug builds only):
 /// wraps the app so README screenshots can be rendered from Flutter's own
 /// tree without the macOS screen-recording permission.
-final bool _kScreenshotMode =
-    const bool.fromEnvironment('MELODY_SCREENSHOTS');
+final bool _kScreenshotMode = const bool.fromEnvironment('MELODY_SCREENSHOTS');

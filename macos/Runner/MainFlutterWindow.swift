@@ -17,6 +17,23 @@ class MainFlutterWindow: NSWindow {
     // call throws MissingPluginException.
     FlutterMultiWindowPlugin.setOnWindowCreatedCallback { controller in
       RegisterGeneratedPlugins(registry: controller)
+      // Lets the idle HUD close its own window. Closing (not hiding) drops
+      // desktop_multi_window's reference, so the window, its
+      // FlutterViewController and the HUD's whole engine are released.
+      // window_manager can't do this: close() is performClose, a no-op on a
+      // frameless window, and destroy() terminates the app.
+      let channel = FlutterMethodChannel(
+        name: "melody/hud_window",
+        binaryMessenger: controller.engine.binaryMessenger)
+      channel.setMethodCallHandler { [weak controller] call, result in
+        guard call.method == "dispose" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        result(nil)
+        // Reply first; tear the engine down on the next runloop turn.
+        DispatchQueue.main.async { controller?.view.window?.close() }
+      }
     }
 
     super.awakeFromNib()

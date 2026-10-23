@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show ValueNotifier, debugPrint;
+import 'package:flutter/painting.dart' show PaintingBinding, Rect, Size;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../core/audio/sound_engine.dart';
 import '../core/tray/tray_service.dart';
+
 /// App-wide lifecycle glue: settings window visibility, the tray HUD window,
 /// login item and quit. Widgets/pages reach it through [appLifecycle].
 class AppLifecycle with WindowListener {
@@ -15,6 +18,17 @@ class AppLifecycle with WindowListener {
   static final AppLifecycle instance = AppLifecycle._();
 
   WindowController? _hudController;
+
+  /// Whether the settings UI is mounted. While the window is hidden the whole
+  /// MaterialApp is swapped for an empty box (see SettingsApp), so a
+  /// menu-bar-only session doesn't keep the widget/render trees, text layout
+  /// caches and decoded images of four settings pages alive.
+  final ValueNotifier<bool> settingsVisible = ValueNotifier<bool>(false);
+
+  /// Frame of the settings window before it was parked (see [_parkSettings]).
+  Rect? _settingsFrame;
+  static const Size _settingsMinSize = Size(880, 580);
+  static const Size _parkedSize = Size(64, 64);
   bool _hudReady = false;
   bool _quitting = false;
 
@@ -25,7 +39,7 @@ class AppLifecycle with WindowListener {
     if (showSettings) {
       await showSettingsWindow();
     } else {
-      await windowManager.hide();
+      await _parkSettings();
     }
     soundEngine.addListener(_onEngineChanged);
   }
@@ -41,15 +55,57 @@ class AppLifecycle with WindowListener {
   String? _lastHudPayload;
 
   Future<void> showSettingsWindow() async {
+    if (!settingsVisible.value) {
+      final frame = _settingsFrame;
+      await windowManager.setMinimumSize(_settingsMinSize);
+      if (frame != null) {
+        await windowManager.setBounds(frame);
+      } else {
+        await windowManager.setSize(const Size(1020, 700));
+        await windowManager.center();
+      }
+      settingsVisible.value = true;
+      // Let the remounted tree paint once at full size before ordering the
+      // window front, otherwise it flashes the empty parked frame.
+      await SchedulerBinding.instance.endOfFrame;
+    }
     await windowManager.show();
     await windowManager.focus();
+  }
+
+  /// Hide the settings window and release what it holds. Besides unmounting
+  /// the UI, the hidden window is shrunk: a hidden Flutter view keeps its
+  /// full-size GPU back buffers (1020x700 at 2x is ~11 MB each, and the
+  /// compositor keeps up to three), which made up a large share of the
+  /// menu-bar-only footprint.
+  Future<void> _parkSettings() async {
+    await windowManager.hide();
+    if (settingsVisible.value) {
+      try {
+        _settingsFrame = await windowManager.getBounds();
+      } catch (_) {
+        /* keep the previous frame */
+      }
+    }
+    settingsVisible.value = false;
+    final images = PaintingBinding.instance.imageCache;
+    images.clear();
+    images.clearLiveImages();
+    try {
+      await windowManager.setMinimumSize(_parkedSize);
+      await windowManager.setSize(_parkedSize);
+    } catch (e) {
+      debugPrint('[melody] park settings failed: $e');
+    }
   }
 
   // ---- HUD window ----
 
   Future<void> showHud() async {
     final existing = _hudController;
-    debugPrint('[melody] showHud: ${existing == null ? 'no controller, creating' : 'reusing ${existing.windowId}'}, ready=$_hudReady');
+    debugPrint(
+      '[melody] showHud: ${existing == null ? 'no controller, creating' : 'reusing ${existing.windowId}'}, ready=$_hudReady',
+    );
     final controller = _hudController ?? await _createHud();
     // The HUD shows itself once its engine is up ('ready'); showing it from
     // here before that flashes a black window at the default position.
@@ -68,17 +124,31 @@ class AppLifecycle with WindowListener {
     await _pushStateToHud(force: true);
   }
 
+  /// The HUD closed its own window after sitting hidden (its engine is gone);
+  /// the next tray click creates a new one.
+  void forgetHud() {
+    debugPrint('[melody] HUD disposed after idle');
+    _hudController = null;
+    _hudReady = false;
+    _lastHudPayload = null;
+  }
+
   Future<void> _placeHud(WindowController controller) async {
     final bounds = TrayService.instance.bounds;
     if (bounds == null || bounds.isEmpty) return;
     try {
-      await controller.invokeMethod('hudState', jsonEncode({
-        'kind': 'place',
-        'bounds': {
-          'x': bounds.left, 'y': bounds.top,
-          'w': bounds.width, 'h': bounds.height,
-        },
-      }));
+      await controller.invokeMethod(
+        'hudState',
+        jsonEncode({
+          'kind': 'place',
+          'bounds': {
+            'x': bounds.left,
+            'y': bounds.top,
+            'w': bounds.width,
+            'h': bounds.height,
+          },
+        }),
+      );
     } catch (e) {
       debugPrint('[melody] place failed: $e');
     }
@@ -137,7 +207,9 @@ class AppLifecycle with WindowListener {
           _hudController = null;
           _hudReady = false;
         }
-      } catch (_) {/* keep the controller */}
+      } catch (_) {
+        /* keep the controller */
+      }
     }
   }
 
@@ -161,7 +233,7 @@ class AppLifecycle with WindowListener {
   void onWindowClose() async {
     // Settings window close = hide to tray, never exit.
     if (!_quitting) {
-      await windowManager.hide();
+      await _parkSettings();
     }
   }
 

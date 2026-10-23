@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' show FlutterView;
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:window_manager/window_manager.dart';
 
 import '../../app/theme/app_theme.dart';
@@ -13,6 +15,16 @@ import '../../core/settings/settings_model.dart';
 import '../../shared/debug_screenshot.dart';
 
 const _hudSize = Size(340, 560);
+
+/// How long a dismissed HUD stays alive for a quick reopen. After that its
+/// window is closed, which tears down the whole second Flutter engine (its
+/// isolate heap, raster cache and GPU surfaces: tens of MB that otherwise sit
+/// idle for the rest of the session).
+const _hudIdleDispose = Duration(seconds: 30);
+
+/// Native helper on the HUD engine (macOS Runner): closes this sub-window.
+/// Absent on other platforms, where the HUD just stays hidden.
+const _hudWindowChannel = MethodChannel('melody/hud_window');
 
 /// Top-left position for the HUD: centered under the tray icon (menu bar) or
 /// above it (taskbar on the bottom), in logical top-left-origin coordinates.
@@ -46,7 +58,9 @@ Future<void> runHudWindow() async {
   await windowManager.setAsFrameless();
   await windowManager.setSize(_hudSize);
   await windowManager.setMinimumSize(_hudSize);
-  await windowManager.setMaximumSize(Size(_hudSize.width + 40, _hudSize.height + 40));
+  await windowManager.setMaximumSize(
+    Size(_hudSize.width + 40, _hudSize.height + 40),
+  );
   await windowManager.setAlwaysOnTop(true);
   await windowManager.setSkipTaskbar(true);
 
@@ -62,8 +76,10 @@ Future<void> runHudWindow() async {
       final view = WidgetsBinding.instance.platformDispatcher.views.first;
       final pos = hudTopLeft(initialBounds, _screenSize(view));
       await windowManager.setPosition(pos);
-      debugPrint('[melody-hud] initial position $pos '
-          '(bounds=$initialBounds screen=${_screenSize(view)})');
+      debugPrint(
+        '[melody-hud] initial position $pos '
+        '(bounds=$initialBounds screen=${_screenSize(view)})',
+      );
     } catch (e) {
       debugPrint('[melody-hud] initial position failed: $e');
     }
@@ -72,18 +88,21 @@ Future<void> runHudWindow() async {
   final hud = HudApp(
     controller: controller,
     initialSettings: AppSettings.fromJson(
-        (args['settings'] as Map<String, dynamic>?) ?? const {}),
+      (args['settings'] as Map<String, dynamic>?) ?? const {},
+    ),
     initialLatencyMs: (args['latencyMs'] as num?)?.toDouble(),
   );
   // Debug screenshot mode: the HUD renders itself to a PNG on request
   // (separate request file so it doesn't race the settings window).
-  runApp(kDebugMode && const bool.fromEnvironment('MELODY_SCREENSHOTS')
-      ? ScreenshotHost(
-          requestPath: '/tmp/melody_shot_hud_req',
-          outputPath: '/tmp/melody_shot_hud.png',
-          child: hud,
-        )
-      : hud);
+  runApp(
+    kDebugMode && const bool.fromEnvironment('MELODY_SCREENSHOTS')
+        ? ScreenshotHost(
+            requestPath: '/tmp/melody_shot_hud_req',
+            outputPath: '/tmp/melody_shot_hud.png',
+            child: hud,
+          )
+        : hud,
+  );
 }
 
 class HudApp extends StatelessWidget {
@@ -144,8 +163,9 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
     windowManager.addListener(this);
     widget.controller.setWindowMethodHandler((call) async {
       if (call.method == 'hudState') {
-        final data =
-            jsonDecode(call.arguments as String? ?? '{}') as Map<String, dynamic>;
+        final data = jsonDecode(
+          call.arguments as String? ?? '{}',
+        ) as Map<String, dynamic>;
         if (!mounted) return null;
         switch (data['kind']) {
           case 'place':
@@ -154,7 +174,8 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
           case 'applyState':
             setState(() {
               _settings = AppSettings.fromJson(
-                  (data['settings'] as Map<String, dynamic>?) ?? const {});
+                (data['settings'] as Map<String, dynamic>?) ?? const {},
+              );
               _latencyMs = (data['latencyMs'] as num?)?.toDouble();
             });
         }
@@ -209,10 +230,38 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
   /// PCM memory, a second output stream) and then played every preview twice.
   void _preview(SoundPack pack) => _command('preview', {'packId': pack.id});
 
+  Timer? _disposeTimer;
+
   @override
   void onWindowBlur() {
     // Tray-HUD convention: dismiss on losing focus.
     widget.controller.hide();
+    _disposeTimer?.cancel();
+    _disposeTimer = Timer(_hudIdleDispose, _disposeEngine);
+  }
+
+  @override
+  void onWindowFocus() {
+    _disposeTimer?.cancel();
+    _disposeTimer = null;
+  }
+
+  Future<void> _disposeEngine() async {
+    // Tell the main window first so its next tray click builds a fresh HUD
+    // instead of talking to a dead controller.
+    await _command('hudDisposed');
+    try {
+      await _hudWindowChannel.invokeMethod('dispose');
+    } catch (_) {
+      // Not supported on this platform: keep the hidden HUD around.
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeTimer?.cancel();
+    windowManager.removeListener(this);
+    super.dispose();
   }
 
   @override
@@ -231,145 +280,170 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
     return Theme(
       data: buildAppTheme(isDark ? Brightness.dark : Brightness.light),
       child: Scaffold(
-      backgroundColor: context.colors.containerHigh.withValues(alpha: 0.96),
-      body: Container(
-        decoration: BoxDecoration(
-          color: context.colors.containerHigh,
-          borderRadius: AppRadii.lg,
-          border: Border.all(color: context.colors.ghostBorder),
-        ),
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.piano, size: 18, color: context.colors.primary),
-                const SizedBox(width: AppSpacing.sm),
-                Text('Melody Keeeys', style: AppText.titleLg),
-                const Spacer(),
-                Text('托盘面板', style: AppText.labelMd.copyWith(color: context.colors.outline)),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
-              decoration: BoxDecoration(
-                color: context.colors.container,
-                borderRadius: AppRadii.md,
-              ),
-              child: Row(
+        backgroundColor: context.colors.containerHigh.withValues(alpha: 0.96),
+        body: Container(
+          decoration: BoxDecoration(
+            color: context.colors.containerHigh,
+            borderRadius: AppRadii.lg,
+            border: Border.all(color: context.colors.ghostBorder),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
                 children: [
-                  Icon(
-                    Icons.circle,
-                    size: 10,
-                    color: _settings.engineEnabled ? context.colors.tertiary : context.colors.outline,
-                  ),
+                  Icon(Icons.piano, size: 18, color: context.colors.primary),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      _settings.engineEnabled
-                          ? '音频引擎运行中  ${_latencyMs?.toStringAsFixed(1) ?? '--'}ms'
-                          : '音频引擎已静音',
-                      style: AppText.labelMd.copyWith(color: context.colors.tertiary),
-                    ),
-                  ),
-                  Switch(
-                    value: _settings.engineEnabled,
-                    onChanged: (_) => _command('toggleEngine'),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: context.colors.container,
-                borderRadius: AppRadii.md,
-                border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text('正在使用',
-                                style: AppText.labelMd
-                                    .copyWith(color: context.colors.success)),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Text(pack.name,
-                                style: AppText.headlineMd,
-                                overflow: TextOverflow.ellipsis),
-                            const SizedBox(width: AppSpacing.sm),
-                            Flexible(child: _TagChip(pack.nameEn)),
-                          ],
-                        ),
-                        Text(pack.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.bodySm.copyWith(color: context.colors.onSurfaceVariant)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  SizedBox(
-                    height: 34,
-                    child: FilledButton.icon(
-                      onPressed: () => _preview(pack),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: context.colors.containerHighest,
-                        foregroundColor: context.colors.primary,
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      icon: const Icon(Icons.graphic_eq, size: 14),
-                      label: const Text('试听', style: AppText.labelMd),
+                  Text('Melody Keeeys', style: AppText.titleLg),
+                  const Spacer(),
+                  Text(
+                    '托盘面板',
+                    style: AppText.labelMd.copyWith(
+                      color: context.colors.outline,
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.container,
+                  borderRadius: AppRadii.md,
+                ),
+                child: Row(
                   children: [
-                    for (var i = 0; i < kBuiltinPacks.length; i++)
-                      _HudPackRow(
-                        index: i + 1,
-                        pack: kBuiltinPacks[i],
-                        active: kBuiltinPacks[i].id == _settings.activePackId,
-                        onSelect: () => _command('selectPack', {'packId': kBuiltinPacks[i].id}),
-                        onPreview: () => _preview(kBuiltinPacks[i]),
+                    Icon(
+                      Icons.circle,
+                      size: 10,
+                      color: _settings.engineEnabled
+                          ? context.colors.tertiary
+                          : context.colors.outline,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        _settings.engineEnabled
+                            ? '音频引擎运行中  ${_latencyMs?.toStringAsFixed(1) ?? '--'}ms'
+                            : '音频引擎已静音',
+                        style: AppText.labelMd.copyWith(
+                          color: context.colors.tertiary,
+                        ),
                       ),
+                    ),
+                    Switch(
+                      value: _settings.engineEnabled,
+                      onChanged: (_) => _command('toggleEngine'),
+                    ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            SizedBox(
-              height: 34,
-              child: OutlinedButton.icon(
-                onPressed: () => _command('openSettings'),
-                style: OutlinedButton.styleFrom(
-                  shape: const StadiumBorder(),
-                  side: BorderSide(color: context.colors.outlineVariant),
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.colors.container,
+                  borderRadius: AppRadii.md,
+                  border: Border.all(
+                    color: context.colors.primary.withValues(alpha: 0.3),
+                  ),
                 ),
-                icon: const Icon(Icons.settings, size: 14),
-                label: Text('打开设置…', style: AppText.labelMd),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                '正在使用',
+                                style: AppText.labelMd.copyWith(
+                                  color: context.colors.success,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Text(
+                                pack.name,
+                                style: AppText.headlineMd,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Flexible(child: _TagChip(pack.nameEn)),
+                            ],
+                          ),
+                          Text(
+                            pack.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.bodySm.copyWith(
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    SizedBox(
+                      height: 34,
+                      child: FilledButton.icon(
+                        onPressed: () => _preview(pack),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: context.colors.containerHighest,
+                          foregroundColor: context.colors.primary,
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                        icon: const Icon(Icons.graphic_eq, size: 14),
+                        label: const Text('试听', style: AppText.labelMd),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.md),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < kBuiltinPacks.length; i++)
+                        _HudPackRow(
+                          index: i + 1,
+                          pack: kBuiltinPacks[i],
+                          active: kBuiltinPacks[i].id == _settings.activePackId,
+                          onSelect: () => _command('selectPack', {
+                            'packId': kBuiltinPacks[i].id,
+                          }),
+                          onPreview: () => _preview(kBuiltinPacks[i]),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              SizedBox(
+                height: 34,
+                child: OutlinedButton.icon(
+                  onPressed: () => _command('openSettings'),
+                  style: OutlinedButton.styleFrom(
+                    shape: const StadiumBorder(),
+                    side: BorderSide(color: context.colors.outlineVariant),
+                  ),
+                  icon: const Icon(Icons.settings, size: 14),
+                  label: Text('打开设置…', style: AppText.labelMd),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -388,10 +462,12 @@ class _TagChip extends StatelessWidget {
         color: context.colors.primaryContainer.withValues(alpha: 0.5),
         borderRadius: AppRadii.pill,
       ),
-      child: Text(text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppText.labelMd.copyWith(color: context.colors.primary)),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppText.labelMd.copyWith(color: context.colors.primary),
+      ),
     );
   }
 }
@@ -418,18 +494,29 @@ class _HudPackRow extends StatelessWidget {
       borderRadius: AppRadii.md,
       child: Container(
         margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: 10,
+        ),
         decoration: BoxDecoration(
-          color: active ? context.colors.containerHigh : context.colors.container,
+          color: active
+              ? context.colors.containerHigh
+              : context.colors.container,
           borderRadius: AppRadii.md,
           border: Border.all(
-              color: active ? context.colors.primary.withValues(alpha: 0.5) : context.colors.ghostBorder),
+            color: active
+                ? context.colors.primary.withValues(alpha: 0.5)
+                : context.colors.ghostBorder,
+          ),
         ),
         child: Row(
           children: [
-            Text('$index'.padLeft(2, '0'),
-                style: AppText.mono.copyWith(
-                    color: active ? context.colors.primary : context.colors.outline)),
+            Text(
+              '$index'.padLeft(2, '0'),
+              style: AppText.mono.copyWith(
+                color: active ? context.colors.primary : context.colors.outline,
+              ),
+            ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Row(

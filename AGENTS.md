@@ -90,3 +90,8 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 - **提交签名故障**：全局 `commit.gpgsign=true` 走 1Password `op-ssh-sign`，同样因 agent 故障报 `error: 1Password: agent returned an error`。临时绕过：`git -c commit.gpgsign=false commit`。1Password 修复后签名会自动恢复，无需改配置。
 - **发布（2026-10-23 起）**：推 `v*` 标签触发 `.github/workflows/release.yml`，GitHub Actions 三平台构建（macOS 用 ad-hoc 签名替换本地证书配置、Universal zip；Windows x64 zip；Linux x64 tar.gz），自动建 Release；标签带 `-`（如 `v0.2.0-alpha.1`）即标为预发布。说明文案在 `.github/release-notes.md`，每次发版前改。
 - **截图工具**：README 截图用 debug 专用 `ScreenshotHost`（`lib/shared/debug_screenshot.dart`），`flutter build macos --debug --dart-define=MELODY_SCREENSHOTS=true` 后运行，写入 `/tmp/melody_shot_req`（内容=输出路径）即可触发主窗口截图，HUD 用 `/tmp/melody_shot_hud_req`。不依赖系统屏幕录制权限。
+
+## Memory while living in the menu bar (2026-10-23)
+
+- Hidden settings window is *parked*: `AppLifecycle.settingsVisible` false unmounts the whole MaterialApp (SettingsApp renders `SizedBox.shrink`), image cache is cleared, and the window is shrunk to 64×64 so its GPU back buffers are released. `showSettingsWindow()` restores the saved frame and min size, remounts, waits one frame, then shows. Never hide the settings window with a bare `windowManager.hide()`; go through `_parkSettings()`.
+- The tray HUD runs on a second Flutter engine. After 30 s hidden it sends `hudDisposed` to the main window and asks the native `melody/hud_window` channel (macOS Runner, MainFlutterWindow.swift) to `close()` its NSWindow, which releases that engine. Next tray click creates a new HUD. On Windows/Linux the channel is absent and the HUD just stays hidden.
