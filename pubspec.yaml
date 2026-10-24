@@ -64,6 +64,7 @@ flutter:
     - assets/sounds/plastic_bag/
     - assets/sounds/straw_sip/
     - assets/icons/
+    - assets/i18n/
 
   fonts:
     - family: Space Grotesk

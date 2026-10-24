@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../core/audio/sound_engine.dart';
 import '../../shared/widgets/app_widgets.dart';
+import '../../core/i18n/i18n.dart';
 
 /// 关于 tab: branding, version, tech stack, licenses.
 class AboutPage extends StatelessWidget {
@@ -28,7 +29,7 @@ class AboutPage extends StatelessWidget {
                 Image.asset('assets/icons/app_icon.png', width: 96, height: 96),
                 const SizedBox(height: AppSpacing.lg),
                 Text('Melody Keeeys', style: AppText.displayLg),
-                Text('旋律键音 · 让每一次敲击都有声音',
+                Text('${tr('app.name')} · ${tr('about.tagline')}',
                     style: AppText.bodyLg.copyWith(color: context.colors.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.md),
                 MetricChip(label: 'v0.1.0 · M1-M3', color: context.colors.primary),
@@ -46,20 +47,20 @@ class AboutPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('技术栈', style: AppText.titleLg),
+                Text(tr('about.techStack'), style: AppText.titleLg),
                 const SizedBox(height: AppSpacing.md),
                 _TechRow(
                     icon: Icons.graphic_eq,
-                    title: '音频引擎',
+                    title: tr('about.audioEngine'),
                     detail:
-                        'miniaudio ${state.engineVersion} · dart:ffi 直连，内存预解码与复音引擎，输出延迟约 ${state.latencyMs?.toStringAsFixed(1) ?? '--'}ms'),
+                        tr('about.audioEngineDetail', {'version': state.engineVersion, 'latency': state.latencyMs?.toStringAsFixed(1)})),
                 _TechRow(
                     icon: Icons.keyboard,
-                    title: '全局键盘钩子',
-                    detail: 'macOS CGEventTap · Windows WH_KEYBOARD_LL · Linux evdev（input 组）'),
+                    title: tr('about.keyHook'),
+                    detail: tr('about.keyHookDetail')),
                 _TechRow(
                     icon: Icons.desktop_windows,
-                    title: '应用框架',
+                    title: tr('about.framework'),
                     detail: 'Flutter Desktop（macOS / Windows / Linux）+ tray_manager + window_manager'),
               ],
             ),
@@ -68,7 +69,7 @@ class AboutPage extends StatelessWidget {
           Row(
             children: [
               PillButton(
-                label: '开源许可',
+                label: tr('about.licenses'),
                 icon: Icons.description_outlined,
                 onPressed: () => showLicensePage(
                   context: context,

@@ -7,6 +7,7 @@ import '../../app/theme/app_tokens.dart';
 import '../../core/audio/sound_engine.dart';
 import '../../core/settings/settings_model.dart';
 import '../../shared/widgets/app_widgets.dart';
+import '../../core/i18n/i18n.dart';
 
 /// 通用 tab: engine core, launch behavior, hotkeys, trigger shaping, test zone.
 class GeneralPage extends StatefulWidget {
@@ -19,6 +20,7 @@ class GeneralPage extends StatefulWidget {
 class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
   final _focus = FocusNode();
   String? _permissionError;
+
   /// Which System Settings pane the banner's 打开设置 should open.
   String _permissionPane = 'accessibility';
 
@@ -48,7 +50,9 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
     if (!mounted) return;
     // The tap is an active pass-through tap, which macOS covers with the
     // Accessibility grant alone; Input Monitoring is not required.
-    final granted = Platform.isMacOS ? ax : await KeyHookChannel.instance.isPermissionGranted();
+    final granted = Platform.isMacOS
+        ? ax
+        : await KeyHookChannel.instance.isPermissionGranted();
     setState(() {
       _permissionError = granted ? null : _permissionIssue();
       _permissionPane = 'accessibility';
@@ -62,10 +66,10 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
 
   String? _permissionIssue() {
     if (Platform.isMacOS) {
-      return '需要「辅助功能」权限才能监听全局键盘。请前往 系统设置 → 隐私与安全性 → 辅助功能，勾选 Melody Keeeys 后重试。';
+      return tr('general.permMac');
     }
     if (Platform.isLinux) {
-      return '需要读取 /dev/input 设备（input 用户组）。执行 sudo usermod -aG input \$USER 并重新登录后重试。';
+      return tr('general.permLinux');
     }
     return null;
   }
@@ -82,41 +86,61 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_permissionError != null) _PermissionBanner(message: _permissionError!, onOpen: () async {
-                await KeyHookChannel.instance.openPermissionSettings(which: _permissionPane);
-              }, onRetry: _checkPermission),
+              if (_permissionError != null)
+                _PermissionBanner(
+                  message: _permissionError!,
+                  onOpen: () async {
+                    await KeyHookChannel.instance.openPermissionSettings(
+                      which: _permissionPane,
+                    );
+                  },
+                  onRetry: _checkPermission,
+                ),
               SectionCard(
                 icon: Icons.settings_input_component,
-                title: '系统与启动',
-                badge: '核心配置',
-                subtitle: '引擎状态 ${state.latencyMs?.toStringAsFixed(1) ?? '--'}ms · 引擎 ${state.engineVersion}',
+                title: tr('general.systemTitle'),
+                badge: tr('general.coreBadge'),
+                subtitle: tr('general.engineStatus', {
+                  'latency': state.latencyMs?.toStringAsFixed(1),
+                  'version': state.engineVersion,
+                }),
                 child: Column(
                   children: [
                     SettingsRow(
                       icon: Icons.power_settings_new,
-                      title: '声音引擎',
-                      tooltip: '关闭后全局按键将不再播放音效',
+                      title: tr('general.soundEngine'),
+                      tooltip: tr('general.soundEngineTip'),
                       trailing: Switch(
                         value: settings.engineEnabled,
-                        onChanged: (v) => soundEngine.updateSettings(settings.copyWith(engineEnabled: v)),
+                        onChanged: (v) => soundEngine.updateSettings(
+                          settings.copyWith(engineEnabled: v),
+                        ),
                       ),
                     ),
                     SettingsRow(
                       icon: Icons.rocket_launch,
-                      title: '开机自动启动',
-                      tooltip: '登录后自动在后台启动 Melody Keeeys',
+                      title: tr('general.launchAtStartup'),
+                      tooltip: tr('general.launchTip'),
                       trailing: Switch(
                         value: settings.launchAtLogin,
                         onChanged: (v) async {
-                          await soundEngine.updateSettings(settings.copyWith(launchAtLogin: v));
+                          await soundEngine.updateSettings(
+                            settings.copyWith(launchAtLogin: v),
+                          );
                           await appLifecycle.setLaunchAtLogin(v);
                         },
                       ),
                     ),
                     SettingsRow(
                       icon: Icons.brightness_6,
-                      title: '外观主题',
+                      title: tr('general.theme'),
                       trailing: _UiThemePicker(current: settings.uiTheme),
+                    ),
+                    SettingsRow(
+                      icon: Icons.translate,
+                      title: tr('general.language'),
+                      tooltip: tr('general.languageTip'),
+                      trailing: _LanguagePicker(current: settings.language),
                     ),
                   ],
                 ),
@@ -124,21 +148,27 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 icon: Icons.keyboard_command_key,
-                title: '全局热键映射',
-                badge: '系统级',
+                title: tr('general.hotkeysTitle'),
+                badge: tr('general.systemBadge'),
                 child: Column(
                   children: [
                     SettingsRow(
                       icon: Icons.notifications_off,
-                      title: '全局静音 / 恢复输出',
-                      tooltip: '随时一键切断物理键盘声音',
-                      trailing: MetricChip(label: settings.muteHotkey, color: context.colors.primary),
+                      title: tr('general.muteHotkey'),
+                      tooltip: tr('general.muteTip'),
+                      trailing: MetricChip(
+                        label: settings.muteHotkey,
+                        color: context.colors.primary,
+                      ),
                     ),
                     SettingsRow(
                       icon: Icons.swap_horiz,
-                      title: '快速轮换下一个按键声音包',
-                      tooltip: '在已加载的轴体音效配置中随时轮换',
-                      trailing: MetricChip(label: settings.cycleHotkey, color: context.colors.primary),
+                      title: tr('general.cycleHotkey'),
+                      tooltip: tr('general.cycleTip'),
+                      trailing: MetricChip(
+                        label: settings.cycleHotkey,
+                        color: context.colors.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -146,50 +176,55 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 icon: Icons.bolt,
-                title: '触发防冲突与按键响应',
-                badge: '声学抑制',
+                title: tr('general.antiGhostTitle'),
+                badge: tr('general.acousticBadge'),
                 child: Column(
                   children: [
                     AppSlider(
-                      label: '连击抑制窗口',
+                      label: tr('general.antiGhostWindow'),
                       value: settings.antiGhostingMs.toDouble(),
                       min: 10,
                       max: 100,
                       divisions: 18,
                       valueText: '${settings.antiGhostingMs} ms',
                       onChanged: (v) => soundEngine.updateSettings(
-                          settings.copyWith(antiGhostingMs: v.round())),
+                        settings.copyWith(antiGhostingMs: v.round()),
+                      ),
                     ),
                     SettingsRow(
                       icon: Icons.repeat,
-                      title: '修饰键长按连发声',
-                      tooltip: '长按 Shift / Control 等修饰键时持续循环修饰键行程音',
+                      title: tr('general.modifierRepeat'),
+                      tooltip: tr('general.modifierRepeatTip'),
                       trailing: Switch(
                         value: settings.modifierAutoRepeat,
-                        onChanged: (v) =>
-                            soundEngine.updateSettings(settings.copyWith(modifierAutoRepeat: v)),
+                        onChanged: (v) => soundEngine.updateSettings(
+                          settings.copyWith(modifierAutoRepeat: v),
+                        ),
                       ),
                     ),
                     SettingsRow(
                       icon: Icons.keyboard_return,
-                      title: '松键上行程音',
-                      tooltip: '模拟轴体弹起时的回弹声',
+                      title: tr('general.releaseSound'),
+                      tooltip: tr('general.releaseSoundTip'),
                       trailing: Switch(
                         value: settings.keyReleaseSound,
-                        onChanged: (v) =>
-                            soundEngine.updateSettings(settings.copyWith(keyReleaseSound: v)),
+                        onChanged: (v) => soundEngine.updateSettings(
+                          settings.copyWith(keyReleaseSound: v),
+                        ),
                       ),
                     ),
                     if (settings.keyReleaseSound)
                       AppSlider(
-                        label: '回弹音量',
+                        label: tr('general.releaseVolume'),
                         value: settings.keyReleaseGain,
                         min: 0.1,
                         max: 1.0,
-                        valueText: '${(settings.keyReleaseGain * 100).round()}%',
+                        valueText:
+                            '${(settings.keyReleaseGain * 100).round()}%',
                         accent: context.colors.secondary,
-                        onChanged: (v) =>
-                            soundEngine.updateSettings(settings.copyWith(keyReleaseGain: v)),
+                        onChanged: (v) => soundEngine.updateSettings(
+                          settings.copyWith(keyReleaseGain: v),
+                        ),
                       ),
                   ],
                 ),
@@ -197,15 +232,16 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
               const SizedBox(height: AppSpacing.lg),
               _AcousticTestZone(
                 focus: _focus,
-                onReset: () {/* counter resets with engine restart */},
+                onReset: () {
+                  /* counter resets with engine restart */
+                },
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 icon: Icons.do_not_disturb_on,
-                title: '智能静音与防干扰应用列表',
-                badge: '即将推出',
-                tooltip: '目标进程获得操作系统焦点时自动切断声音输出。\n'
-                    '该功能将在后续版本提供：会议、游戏与 DAW 独占混音场景自动静音。',
+                title: tr('general.smartMuteTitle'),
+                badge: tr('general.comingSoon'),
+                tooltip: tr('general.smartMuteTip'),
                 trailing: const SizedBox.shrink(),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -213,13 +249,14 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
                 children: [
                   const Spacer(),
                   PillButton(
-                    label: '恢复默认出厂设置',
+                    label: tr('general.factoryReset'),
                     icon: Icons.restart_alt,
                     danger: true,
                     onPressed: () async {
                       await soundEngine.resetToDefaults();
                       await appLifecycle.setLaunchAtLogin(
-                          soundEngine.state.settings.launchAtLogin);
+                        soundEngine.state.settings.launchAtLogin,
+                      );
                     },
                   ),
                 ],
@@ -233,6 +270,52 @@ class _GeneralPageState extends State<GeneralPage> with WidgetsBindingObserver {
 }
 
 /// Light / dark / system three-way segmented picker (pill style).
+class _LanguagePicker extends StatelessWidget {
+  const _LanguagePicker({required this.current});
+
+  final String current;
+
+  @override
+  Widget build(BuildContext context) {
+    final options = <(String, String)>[
+      (I18n.system, tr('common.followSystem')),
+      for (final code in I18n.languages) (code, I18n.names[code] ?? code),
+    ];
+    final value = options.any((o) => o.$1 == current) ? current : I18n.system;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: context.colors.containerHighest,
+        borderRadius: AppRadii.pill,
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isDense: true,
+          borderRadius: BorderRadius.circular(12),
+          dropdownColor: context.colors.containerHigh,
+          style: AppText.labelMd.copyWith(color: context.colors.onSurface),
+          icon: Icon(
+            Icons.expand_more,
+            size: 16,
+            color: context.colors.onSurfaceVariant,
+          ),
+          items: [
+            for (final (code, label) in options)
+              DropdownMenuItem(value: code, child: Text(label)),
+          ],
+          onChanged: (code) {
+            if (code == null || code == current) return;
+            soundEngine.updateSettings(
+              soundEngine.state.settings.copyWith(language: code),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
 class _UiThemePicker extends StatelessWidget {
   const _UiThemePicker({required this.current});
 
@@ -251,12 +334,16 @@ class _UiThemePicker extends StatelessWidget {
         children: [
           for (final mode in UiTheme.values) ...[
             InkWell(
-              onTap: () => soundEngine
-                  .updateSettings(soundEngine.state.settings.copyWith(uiTheme: mode)),
+              onTap: () => soundEngine.updateSettings(
+                soundEngine.state.settings.copyWith(uiTheme: mode),
+              ),
               borderRadius: AppRadii.pill,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: current == mode
                       ? context.colors.primary
@@ -298,7 +385,8 @@ class _UiThemePicker extends StatelessWidget {
   }
 }
 
-class _PermissionBanner extends StatelessWidget {  const _PermissionBanner({
+class _PermissionBanner extends StatelessWidget {
+  const _PermissionBanner({
     required this.message,
     required this.onOpen,
     required this.onRetry,
@@ -316,15 +404,25 @@ class _PermissionBanner extends StatelessWidget {  const _PermissionBanner({
       decoration: BoxDecoration(
         color: context.colors.container,
         borderRadius: AppRadii.md,
-        border: Border.all(color: context.colors.secondary.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: context.colors.secondary.withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, color: context.colors.secondary, size: 20),
+          Icon(
+            Icons.warning_amber_rounded,
+            color: context.colors.secondary,
+            size: 20,
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(message, style: AppText.bodyMd)),
           const SizedBox(width: AppSpacing.md),
-          PillButton(label: '打开设置', icon: Icons.open_in_new, onPressed: onOpen),
+          PillButton(
+            label: tr('general.openSettings'),
+            icon: Icons.open_in_new,
+            onPressed: onOpen,
+          ),
           const SizedBox(width: AppSpacing.sm),
           OutlinedButton(
             onPressed: onRetry,
@@ -332,7 +430,7 @@ class _PermissionBanner extends StatelessWidget {  const _PermissionBanner({
               shape: const StadiumBorder(),
               side: BorderSide(color: context.colors.outlineVariant),
             ),
-            child: const Text('重新检查'),
+            child: Text(tr('general.recheck')),
           ),
         ],
       ),
@@ -341,10 +439,7 @@ class _PermissionBanner extends StatelessWidget {  const _PermissionBanner({
 }
 
 class _AcousticTestZone extends StatelessWidget {
-  const _AcousticTestZone({
-    required this.focus,
-    required this.onReset,
-  });
+  const _AcousticTestZone({required this.focus, required this.onReset});
 
   final FocusNode focus;
   final VoidCallback onReset;
@@ -363,15 +458,21 @@ class _AcousticTestZone extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.monitor_heart, size: 18, color: context.colors.tertiary),
+              Icon(
+                Icons.monitor_heart,
+                size: 18,
+                color: context.colors.tertiary,
+              ),
               const SizedBox(width: AppSpacing.sm),
-              Text('声学测试跳线', style: AppText.titleLg),
-              const InfoTip('全局钩子运行时，在应用外打字也会发声；此输入框仅用于快速试音。'),
+              Text(tr('general.testPad'), style: AppText.titleLg),
+              InfoTip(tr('general.testPadTip')),
               const Spacer(),
               // Only this chip listens to the per-keystroke counter.
               ValueListenableBuilder<int>(
                 valueListenable: soundEngine.keystrokes,
-                builder: (_, count, _) => MetricChip(label: '累计敲击 $count'),
+                builder: (_, count, _) => MetricChip(
+                  label: tr('general.keystrokesTotal', {'n': count}),
+                ),
               ),
             ],
           ),
@@ -380,11 +481,14 @@ class _AcousticTestZone extends StatelessWidget {
             focusNode: focus,
             style: AppText.bodyLg,
             decoration: InputDecoration(
-              hintText: '在此区域敲击键盘或输入文字，实时试听当前音效包的敲击响应…',
+              hintText: tr('general.testPadHint'),
               hintStyle: AppText.bodyMd.copyWith(color: context.colors.outline),
               filled: true,
               fillColor: context.colors.container,
-              border: OutlineInputBorder(borderRadius: AppRadii.md, borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: AppRadii.md,
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
         ],

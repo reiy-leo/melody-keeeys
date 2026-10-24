@@ -10,6 +10,7 @@ import 'package:window_manager/window_manager.dart';
 import 'app/app_lifecycle.dart';
 import 'app/settings_app.dart';
 import 'core/audio/sound_engine.dart';
+import 'core/i18n/i18n.dart';
 import 'core/settings/settings_repository.dart';
 import 'core/system/hotkey_service.dart';
 import 'core/tray/tray_service.dart';
@@ -20,6 +21,7 @@ const _kMultiWindowArg = 'multi_window';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await I18n.load();
 
   // Second-window entry point (tray HUD), launched by desktop_multi_window.
   if (args.isNotEmpty && args.first == _kMultiWindowArg) {
@@ -38,7 +40,7 @@ Future<void> main(List<String> args) async {
       size: Size(1020, 700),
       minimumSize: Size(880, 580),
       center: true,
-      title: 'Melody Keeeys · 旋律键音',
+      title: 'Melody Keeeys',
       titleBarStyle: TitleBarStyle.hidden,
     ),
     () async {
@@ -48,6 +50,7 @@ Future<void> main(List<String> args) async {
 
   soundEngine = SoundEngine(SettingsRepository());
   await soundEngine.initialize();
+  I18n.apply(soundEngine.state.settings.language);
 
   launchAtStartup.setup(
     appName: 'Melody Keeeys',
@@ -120,7 +123,7 @@ Future<void> _runHostedSettings() async {
       const WindowOptions(
         // No size/center: the host keeps the window and its last frame.
         minimumSize: Size(880, 580),
-        title: 'Melody Keeeys · 旋律键音',
+        title: 'Melody Keeeys',
         titleBarStyle: TitleBarStyle.hidden,
       ),
       () async {},
@@ -129,6 +132,7 @@ Future<void> _runHostedSettings() async {
 
   soundEngine = SoundEngine(SettingsRepository());
   await step('soundEngine', soundEngine.initialize);
+  I18n.apply(soundEngine.state.settings.language);
 
   launchAtStartup.setup(
     appName: 'Melody Keeeys',

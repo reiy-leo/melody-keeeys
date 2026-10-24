@@ -1,3 +1,5 @@
+import '../i18n/i18n.dart';
+
 /// The five physical key layers a keystroke maps to, plus the optional
 /// key-release sample. Mirrors the prototype's "Physical Acoustic Key-Layers".
 enum SoundLayer { alpha, space, enter, modifier, nav, release }
@@ -41,6 +43,19 @@ class SoundPack {
 
   /// Chinese-only one-line description.
   final String description;
+
+  /// Name shown in the current UI language: the Chinese name for zh, the
+  /// original English name everywhere else.
+  String get displayName => I18n.lang == 'zh' ? name : nameEn;
+
+  /// Secondary tag beside [displayName] (the English name, zh only).
+  String? get displayTag => I18n.lang == 'zh' ? nameEn : null;
+
+  /// Description in the current UI language.
+  String get displayDescription {
+    final text = tr('pack.$id');
+    return text == 'pack.$id' ? description : text;
+  }
 
   String assetPathFor(SoundLayer layer) => 'sounds/$id/${layer.assetName}.wav';
 }

@@ -10,6 +10,7 @@ import 'features/menubar_page.dart';
 import 'features/sound_effects_page.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_tokens.dart';
+import '../core/i18n/i18n.dart';
 
 /// Root of the settings window: draggable frameless shell + sidebar nav.
 class SettingsApp extends StatelessWidget {
@@ -36,7 +37,10 @@ class SettingsApp extends StatelessWidget {
           theme: buildAppTheme(Brightness.light),
           darkTheme: buildAppTheme(Brightness.dark),
           themeMode: settings.uiTheme.themeMode,
-          home: const SettingsWindow(),
+          // Locale steers font fallback (e.g. Japanese vs Chinese glyphs);
+          // the key rebuilds every page when the language changes.
+          locale: Locale(I18n.lang),
+          home: SettingsWindow(key: ValueKey(I18n.lang)),
         );
       },
     );
@@ -118,7 +122,7 @@ class _SettingsWindowState extends State<SettingsWindow> with WindowListener {
                               children: [
                                 Text('Melody Keeeys', style: AppText.titleMd),
                                 Text(
-                                  '旋律键音',
+                                  tr('app.subtitle'),
                                   style: AppText.bodySm.copyWith(
                                     color: context.colors.onSurfaceVariant,
                                   ),
@@ -128,14 +132,14 @@ class _SettingsWindowState extends State<SettingsWindow> with WindowListener {
                             const Spacer(),
                             _StatusChip(
                               label:
-                                  '延迟 ${state.latencyMs?.toStringAsFixed(1) ?? '--'}ms',
+                                  tr('nav.latency', {'latency': state.latencyMs?.toStringAsFixed(1)}),
                               color: state.hookRunning
                                   ? context.colors.tertiary
                                   : context.colors.error,
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             _StatusChip(
-                              label: state.hookRunning ? '钩子运行中' : '钩子未运行',
+                              label: state.hookRunning ? tr('status.hookRunning') : tr('status.hookStopped'),
                               color: state.hookRunning
                                   ? context.colors.success
                                   : context.colors.error,
@@ -226,19 +230,19 @@ class _Sidebar extends StatelessWidget {
             const SizedBox(height: 34),
             _NavItem(
               icon: Icons.graphic_eq,
-              label: '通用',
+              label: tr('nav.general'),
               selected: tab == SettingsTab.general,
               onTap: () => onSelect(SettingsTab.general),
             ),
             _NavItem(
               icon: Icons.volume_up,
-              label: '音效',
+              label: tr('nav.sounds'),
               selected: tab == SettingsTab.sounds,
               onTap: () => onSelect(SettingsTab.sounds),
             ),
             _NavItem(
               icon: Icons.window,
-              label: '菜单栏',
+              label: tr('nav.menubar'),
               selected: tab == SettingsTab.menuBar,
               onTap: () => onSelect(SettingsTab.menuBar),
             ),
@@ -257,7 +261,7 @@ class _Sidebar extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '引擎状态',
+                        tr('nav.engineStatus'),
                         style: AppText.labelMd.copyWith(
                           color: context.colors.onSurfaceVariant,
                         ),
@@ -275,8 +279,8 @@ class _Sidebar extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         state.settings.engineEnabled && state.hookRunning
-                            ? '运行中'
-                            : '停止',
+                            ? tr('status.running')
+                            : tr('status.stopped'),
                         style: AppText.labelMd.copyWith(
                           color:
                               state.settings.engineEnabled && state.hookRunning
@@ -287,13 +291,13 @@ class _Sidebar extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  Text('引擎 ${state.engineVersion}', style: AppText.bodySm),
+                  Text(tr('nav.engineVersion', {'version': state.engineVersion}), style: AppText.bodySm),
                   const SizedBox(height: AppSpacing.sm),
                   InkWell(
                     onTap: () => onSelect(SettingsTab.about),
                     borderRadius: AppRadii.sm,
                     child: Text(
-                      '关于',
+                      tr('nav.about'),
                       style: AppText.labelLg.copyWith(
                         color: context.colors.primary,
                       ),

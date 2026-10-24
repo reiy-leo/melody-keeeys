@@ -13,6 +13,7 @@ import '../../app/theme/app_tokens.dart';
 import '../../core/audio/sound_pack.dart';
 import '../../core/settings/settings_model.dart';
 import '../../shared/debug_screenshot.dart';
+import '../../core/i18n/i18n.dart';
 
 const _hudSize = Size(340, 560);
 
@@ -159,6 +160,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
   void initState() {
     super.initState();
     _settings = widget.initialSettings;
+    I18n.apply(_settings.language);
     _latencyMs = widget.initialLatencyMs;
     windowManager.addListener(this);
     widget.controller.setWindowMethodHandler((call) async {
@@ -177,6 +179,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                 (data['settings'] as Map<String, dynamic>?) ?? const {},
               );
               _latencyMs = (data['latencyMs'] as num?)?.toDouble();
+              I18n.apply(_settings.language);
             });
         }
       }
@@ -298,7 +301,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                   Text('Melody Keeeys', style: AppText.titleLg),
                   const Spacer(),
                   Text(
-                    '托盘面板',
+                    tr('hud.title'),
                     style: AppText.labelMd.copyWith(
                       color: context.colors.outline,
                     ),
@@ -328,8 +331,8 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                     Expanded(
                       child: Text(
                         _settings.engineEnabled
-                            ? '音频引擎运行中  ${_latencyMs?.toStringAsFixed(1) ?? '--'}ms'
-                            : '音频引擎已静音',
+                            ? tr('hud.engineRunning', {'latency': _latencyMs?.toStringAsFixed(1)})
+                            : tr('hud.engineMuted'),
                         style: AppText.labelMd.copyWith(
                           color: context.colors.tertiary,
                         ),
@@ -361,7 +364,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                           Row(
                             children: [
                               Text(
-                                '正在使用',
+                                tr('hud.inUse'),
                                 style: AppText.labelMd.copyWith(
                                   color: context.colors.success,
                                 ),
@@ -372,16 +375,17 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                           Row(
                             children: [
                               Text(
-                                pack.name,
+                                pack.displayName,
                                 style: AppText.headlineMd,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(width: AppSpacing.sm),
-                              Flexible(child: _TagChip(pack.nameEn)),
+                              if (pack.displayTag != null)
+                                Flexible(child: _TagChip(pack.displayTag!)),
                             ],
                           ),
                           Text(
-                            pack.description,
+                            pack.displayDescription,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.bodySm.copyWith(
@@ -403,7 +407,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
                         icon: const Icon(Icons.graphic_eq, size: 14),
-                        label: const Text('试听', style: AppText.labelMd),
+                        label: Text(tr('common.preview'), style: AppText.labelMd),
                       ),
                     ),
                   ],
@@ -438,7 +442,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                     side: BorderSide(color: context.colors.outlineVariant),
                   ),
                   icon: const Icon(Icons.settings, size: 14),
-                  label: Text('打开设置…', style: AppText.labelMd),
+                  label: Text(tr('hud.openSettings'), style: AppText.labelMd),
                 ),
               ),
             ],
@@ -521,9 +525,11 @@ class _HudPackRow extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  Text(pack.name, style: AppText.titleMd),
-                  const SizedBox(width: AppSpacing.sm),
-                  Flexible(child: _TagChip(pack.nameEn)),
+                  Text(pack.displayName, style: AppText.titleMd),
+                  if (pack.displayTag != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(child: _TagChip(pack.displayTag!)),
+                  ],
                 ],
               ),
             ),

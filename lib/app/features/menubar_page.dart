@@ -4,6 +4,7 @@ import '../../app/theme/app_tokens.dart';
 import '../../core/audio/sound_engine.dart';
 import '../../core/settings/settings_model.dart';
 import '../../shared/widgets/app_widgets.dart';
+import '../../core/i18n/i18n.dart';
 
 /// 菜单栏 tab: left-click binding, context menu description, tray icon styles.
 class MenuBarPage extends StatelessWidget {
@@ -22,8 +23,8 @@ class MenuBarPage extends StatelessWidget {
             children: [
               SectionCard(
                 icon: Icons.mouse,
-                title: '点击与手势绑定',
-                badge: '原生钩子',
+                title: tr('menubar.clickTitle'),
+                badge: tr('menubar.nativeBadge'),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -31,11 +32,8 @@ class MenuBarPage extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: Row(
                         children: [
-                          Text('左键行为（主要触发方式）', style: AppText.labelLg),
-                          const InfoTip(
-                            'Linux 部分 DE（GNOME + AppIndicator）下左键会直接打开上下文菜单，'
-                            '菜单首项「切换下一个音效」可完成同样的操作。',
-                          ),
+                          Text(tr('menubar.leftClick'), style: AppText.labelLg),
+                          InfoTip(tr('menubar.linuxTip')),
                         ],
                       ),
                     ),
@@ -44,8 +42,8 @@ class MenuBarPage extends StatelessWidget {
                         Expanded(
                           child: _LeftClickCard(
                             icon: Icons.swap_horiz,
-                            title: '轮换下一个音效',
-                            tooltip: '立即切换声音配置，无 UI 打扰，快速而带感。',
+                            title: tr('menubar.cycleNext'),
+                            tooltip: tr('menubar.cycleNextTip'),
                             selected:
                                 settings.leftClickAction == TrayLeftClickAction.cycleNext,
                             onTap: () => soundEngine.updateSettings(
@@ -56,8 +54,8 @@ class MenuBarPage extends StatelessWidget {
                         Expanded(
                           child: _LeftClickCard(
                             icon: Icons.layers,
-                            title: '显示托盘面板',
-                            tooltip: '弹出紧凑的悬浮调音面板：滑杆、音效包与预设。',
+                            title: tr('menubar.showPanel'),
+                            tooltip: tr('menubar.showPanelTip'),
                             selected:
                                 settings.leftClickAction == TrayLeftClickAction.showHud,
                             onTap: () => soundEngine.updateSettings(
@@ -69,9 +67,9 @@ class MenuBarPage extends StatelessWidget {
                     const SizedBox(height: AppSpacing.lg),
                     SettingsRow(
                       icon: Icons.menu,
-                      title: '右键上下文菜单',
-                      tooltip: '完整的音效包选择、快速面板与设置入口（系统级菜单）',
-                      trailing: MetricChip(label: '系统级菜单', color: context.colors.tertiary),
+                      title: tr('menubar.contextMenu'),
+                      tooltip: tr('menubar.contextMenuTip'),
+                      trailing: MetricChip(label: tr('menubar.systemMenu'), color: context.colors.tertiary),
                     ),
                   ],
                 ),
@@ -79,9 +77,9 @@ class MenuBarPage extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 icon: Icons.palette,
-                title: '菜单栏图标',
-                badge: 'Lucide 图标库',
-                tooltip: '从 Lucide 图标库中选择托盘/菜单栏图标',
+                title: tr('menubar.iconTitle'),
+                badge: tr('menubar.iconBadge'),
+                tooltip: tr('menubar.iconTip'),
                 child: Wrap(
                   spacing: AppSpacing.md,
                   runSpacing: AppSpacing.md,
@@ -206,7 +204,7 @@ class _TrayIconCard extends StatelessWidget {
                     color: selected ? context.colors.primary : context.colors.onSurface)),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              selected ? '使用中' : '选择',
+              selected ? tr('common.inUse') : tr('common.select'),
               style: AppText.labelMd.copyWith(
                   color: selected ? context.colors.success : context.colors.outline),
             ),

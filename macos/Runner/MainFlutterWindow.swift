@@ -124,7 +124,7 @@ final class SettingsWindowHost {
       backing: .buffered,
       defer: true)
     window.isReleasedWhenClosed = false
-    window.title = "Melody Keeeys · 旋律键音"
+    window.title = "Melody Keeeys"
     // Same chrome Dart applies (TitleBarStyle.hidden), set up front so the
     // title bar doesn't flash in and out while the engine boots.
     window.titlebarAppearsTransparent = true

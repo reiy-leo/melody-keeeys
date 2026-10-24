@@ -10,6 +10,7 @@ import '../../app/app_lifecycle.dart';
 import '../audio/sound_engine.dart';
 import '../audio/sound_pack.dart';
 import '../settings/settings_model.dart';
+import '../i18n/i18n.dart';
 
 /// Menu bar / tray icon behavior: left click cycles the pack (configurable to
 /// show the HUD), right click pops the context menu (current pack, engine, panel, settings, quit).
@@ -102,7 +103,7 @@ class TrayService {
     _icon = icon;
 
     _applyIcon(soundEngine.state.settings.trayIcon);
-    icon.setTooltip('Melody Keeeys · 旋律键音');
+    icon.setTooltip(tr('app.windowTitle'));
     icon.addListener(_onTrayEvent);
     icon.setVisible(true);
     rebuildMenu();
@@ -131,10 +132,10 @@ class TrayService {
     _applyIcon(state.settings.trayIcon);
     final activePack = packById(state.settings.activePackId);
     final signature =
-        '${state.settings.activePackId}|${state.settings.engineEnabled}|${state.settings.leftClickAction}';
+        '${state.settings.activePackId}|${state.settings.engineEnabled}|${state.settings.leftClickAction}|${I18n.lang}';
     if (signature == _lastMenuSignature) return;
     _lastMenuSignature = signature;
-    icon.setTooltip('Melody Keeeys · 旋律键音 — 正在使用：${activePack.name}');
+    icon.setTooltip('${tr('app.windowTitle')} — ${tr('tray.nowPlaying', {'pack': activePack.displayName})}');
 
     final menu = Menu.create();
     if (menu == null) return;
@@ -154,7 +155,7 @@ class TrayService {
 
     // Headline: which pack is sounding right now.
     final currentItem = MenuItem.createWithLabelAndType(
-      '正在使用：${activePack.name}',
+      tr('tray.nowPlaying', {'pack': activePack.displayName}),
       MenuItemType.normal,
     );
     if (currentItem != null) {
@@ -165,7 +166,7 @@ class TrayService {
     menu.addSeparator();
 
     final engineItem = MenuItem.createWithLabelAndType(
-      '声音引擎：已开启',
+      tr('tray.engineOn'),
       MenuItemType.checkbox,
     );
     engineItem?.state = state.settings.engineEnabled
@@ -174,18 +175,18 @@ class TrayService {
     addItem(engineItem, soundEngine.toggleEngine);
 
     addItem(
-      MenuItem.createWithLabelAndType('打开托盘面板', MenuItemType.normal),
+      MenuItem.createWithLabelAndType(tr('tray.openPanel'), MenuItemType.normal),
       appLifecycle.showHud,
     );
     addItem(
-      MenuItem.createWithLabelAndType('设置…', MenuItemType.normal),
+      MenuItem.createWithLabelAndType(tr('tray.settings'), MenuItemType.normal),
       appLifecycle.showSettingsWindow,
     );
 
     menu.addSeparator();
 
     addItem(
-      MenuItem.createWithLabelAndType('退出 Melody Keeeys', MenuItemType.normal),
+      MenuItem.createWithLabelAndType(tr('tray.quit'), MenuItemType.normal),
       appLifecycle.quit,
     );
 

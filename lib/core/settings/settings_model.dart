@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart' show ThemeMode;
 
 import '../audio/sound_pack.dart';
+import '../i18n/i18n.dart';
 
 enum TrayLeftClickAction { cycleNext, showHud }
 
@@ -17,9 +18,9 @@ extension UiThemeX on UiTheme {
       };
 
   String get label => switch (this) {
-        UiTheme.light => '浅色',
-        UiTheme.dark => '深色',
-        UiTheme.system => '跟随系统',
+        UiTheme.light => tr('theme.light'),
+        UiTheme.dark => tr('theme.dark'),
+        UiTheme.system => tr('common.followSystem'),
       };
 }
 
@@ -33,22 +34,26 @@ extension LatencyPresetX on LatencyPreset {
       };
 
   String get label => switch (this) {
-        LatencyPreset.ultra => '极速 (2ms)',
-        LatencyPreset.native => '标准 (5ms)',
-        LatencyPreset.safe => '稳健 (21ms)',
+        LatencyPreset.ultra => tr('latency.ultra'),
+        LatencyPreset.native => tr('latency.native'),
+        LatencyPreset.safe => tr('latency.safe'),
       };
 }
 
 /// The Lucide glyphs selectable as the tray/menu-bar icon.
-const List<(String id, String label)> kTrayIcons = [
-  ('keyboard', '键盘'),
-  ('keyboard-music', '键盘音符'),
-  ('command', '命令'),
-  ('line-squiggle', '涂鸦线'),
-  ('gamepad-directional', '方向键'),
-  ('tv', '电视'),
-  ('balloon', '气球'),
+const List<String> kTrayIconIds = [
+  'keyboard',
+  'keyboard-music',
+  'command',
+  'line-squiggle',
+  'gamepad-directional',
+  'tv',
+  'balloon',
 ];
+
+/// (id, localized label) for each selectable tray icon.
+List<(String id, String label)> get kTrayIcons =>
+    [for (final id in kTrayIconIds) (id, tr('icon.$id'))];
 
 class AppSettings {
   const AppSettings({
@@ -69,6 +74,7 @@ class AppSettings {
     this.trayIcon = 'keyboard-music',
     this.muteHotkey = 'Option+Shift+K',
     this.cycleHotkey = 'Option+Shift+]',
+    this.language = 'system',
   });
 
   final bool engineEnabled;
@@ -104,6 +110,9 @@ class AppSettings {
   final String muteHotkey;
   final String cycleHotkey;
 
+  /// UI language: 'system' or a code from assets/i18n/strings.json.
+  final String language;
+
   /// Pitch multiplier applied to a layer's samples from its tone value.
   double layerPitch(String layer) {
     final tone = layerTones[layer] ?? 0.5;
@@ -130,6 +139,7 @@ class AppSettings {
     String? trayIcon,
     String? muteHotkey,
     String? cycleHotkey,
+    String? language,
   }) =>
       AppSettings(
         engineEnabled: engineEnabled ?? this.engineEnabled,
@@ -149,6 +159,7 @@ class AppSettings {
         trayIcon: trayIcon ?? this.trayIcon,
         muteHotkey: muteHotkey ?? this.muteHotkey,
         cycleHotkey: cycleHotkey ?? this.cycleHotkey,
+        language: language ?? this.language,
       );
 
   Map<String, Object?> toJson() => {
@@ -169,6 +180,7 @@ class AppSettings {
         'trayIcon': trayIcon,
         'muteHotkey': muteHotkey,
         'cycleHotkey': cycleHotkey,
+        'language': language,
       };
 
   factory AppSettings.fromJson(Map<String, Object?> json) {
@@ -204,6 +216,7 @@ class AppSettings {
       trayIcon: stringOf(json['trayIcon']) ?? 'keyboard-music',
       muteHotkey: stringOf(json['muteHotkey']) ?? 'Option+Shift+K',
       cycleHotkey: stringOf(json['cycleHotkey']) ?? 'Option+Shift+]',
+      language: stringOf(json['language']) ?? 'system',
     );
   }
 }

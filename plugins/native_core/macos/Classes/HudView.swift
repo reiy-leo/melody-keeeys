@@ -53,21 +53,21 @@ struct HudView: View {
         Image(systemName: "pianokeys").foregroundColor(brand)
         Text("Melody Keeeys").font(.headline)
         Spacer()
-        Text("托盘面板").font(.caption).foregroundColor(.secondary)
+        Text(L10n.t("hud.title")).font(.caption).foregroundColor(.secondary)
       }
 
       if !model.hookRunning {
         VStack(alignment: .leading, spacing: 6) {
           HStack(spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
-            Text("未开启辅助功能权限").font(.subheadline).fontWeight(.semibold)
+            Text(L10n.t("hud.noPermTitle")).font(.subheadline).fontWeight(.semibold)
           }
-          Text("不开启时打字不会有任何声音。请在「系统设置 → 隐私与安全性 → 辅助功能」中勾选旋律键音，勾选后几秒内自动生效，无需重启。")
+          Text(L10n.t("hud.noPermBody"))
             .font(.caption)
             .foregroundColor(.primary.opacity(0.8))
             .fixedSize(horizontal: false, vertical: true)
           Button(action: onGrantAccess) {
-            Label("去开启权限", systemImage: "lock.open")
+            Label(L10n.t("hud.grant"), systemImage: "lock.open")
               .frame(maxWidth: .infinity)
           }
           .buttonStyle(.borderedProminent)
@@ -99,19 +99,19 @@ struct HudView: View {
       if let pack = active {
         HStack(alignment: .center, spacing: 8) {
           VStack(alignment: .leading, spacing: 2) {
-            Text("正在使用").font(.caption).fontWeight(.semibold).foregroundColor(brand)
+            Text(L10n.t("hud.inUse")).font(.caption).fontWeight(.semibold).foregroundColor(brand)
             HStack(spacing: 6) {
-              Text(pack.name).font(.title3).fontWeight(.semibold).lineLimit(1)
-              TagChip(text: pack.nameEn)
+              Text(pack.displayName).font(.title3).fontWeight(.semibold).lineLimit(1)
+              if let tag = pack.displayTag { TagChip(text: tag) }
             }
-            Text(pack.description)
+            Text(pack.displayDescription)
               .font(.caption)
               .foregroundColor(.secondary)
               .lineLimit(2)
           }
           Spacer(minLength: 4)
           Button(action: { onPreview(pack.id) }) {
-            Label("试听", systemImage: "waveform")
+            Label(L10n.t("common.preview"), systemImage: "waveform")
           }
           .buttonStyle(.bordered)
           .controlSize(.small)
@@ -137,7 +137,7 @@ struct HudView: View {
       }
 
       Button(action: onOpenSettings) {
-        Label("打开设置…", systemImage: "gearshape")
+        Label(L10n.t("hud.openSettings"), systemImage: "gearshape")
           .frame(maxWidth: .infinity)
       }
       .buttonStyle(.bordered)
@@ -147,10 +147,10 @@ struct HudView: View {
   }
 
   private var statusText: String {
-    guard model.hookRunning else { return "无辅助功能权限，按键无声" }
-    guard model.engineEnabled else { return "音频引擎已静音" }
+    guard model.hookRunning else { return L10n.t("hud.noPermStatus") }
+    guard model.engineEnabled else { return L10n.t("hud.engineMuted") }
     let latency = model.latencyMs.map { String(format: "%.1f", $0) } ?? "--"
-    return "音频引擎运行中  \(latency)ms"
+    return L10n.t("hud.engineRunning", ["latency": latency])
   }
 }
 
@@ -183,8 +183,8 @@ private struct PackRow: View {
       Text(String(format: "%02d", index))
         .font(.system(.caption, design: .monospaced))
         .foregroundColor(active ? brand : .secondary)
-      Text(pack.name).font(.callout).fontWeight(.medium).lineLimit(1)
-      TagChip(text: pack.nameEn)
+      Text(pack.displayName).font(.callout).fontWeight(.medium).lineLimit(1)
+      if let tag = pack.displayTag { TagChip(text: tag) }
       Spacer(minLength: 4)
       if active {
         Image(systemName: "checkmark.circle.fill").foregroundColor(brand)

@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'audio_engine_ffi.dart';
 import '../hooks/keymap_classifier.dart';
 import 'sound_pack.dart';
+import '../i18n/i18n.dart';
 import '../settings/settings_model.dart';
 import '../settings/settings_repository.dart';
 
@@ -77,6 +78,15 @@ class SoundEngine extends ChangeNotifier {
     hookRunning: false,
   );
   EngineState get state => _state;
+
+  /// Every state change re-resolves the UI language first, so a language
+  /// switch (or a hosted-mode state push) is already in effect when
+  /// listeners rebuild.
+  @override
+  void notifyListeners() {
+    I18n.apply(_state.settings.language);
+    super.notifyListeners();
+  }
 
   /// Keystroke counter, kept out of [EngineState] on purpose: it changes on
   /// every key press, and routing it through [notifyListeners] used to

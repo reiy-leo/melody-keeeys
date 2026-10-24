@@ -5,6 +5,7 @@ import '../../core/audio/sound_engine.dart';
 import '../../core/audio/sound_pack.dart';
 import '../../core/settings/settings_model.dart';
 import '../../shared/widgets/app_widgets.dart';
+import '../../core/i18n/i18n.dart';
 
 /// 音效 tab: pack list, active pack detail with layer tones, DSP engine, sandbox.
 class SoundEffectsPage extends StatelessWidget {
@@ -44,8 +45,8 @@ class SoundEffectsPage extends StatelessWidget {
                       flex: 2,
                       child: SectionCard(
                         icon: Icons.list_alt,
-                        title: '音效包列表',
-                        badge: '已加载 ${kBuiltinPacks.length} 个',
+                        title: tr('sounds.listTitle'),
+                        badge: tr('sounds.loadedBadge', {'n': kBuiltinPacks.length}),
                         expand: true,
                         child: ListView.builder(
                           primary: false,
@@ -125,10 +126,11 @@ class _PackTile extends StatelessWidget {
                     // original is the part that yields when space runs short.
                     // Pack description lives in a hover tooltip on the name.
                     Tooltip(
-                      message: pack.description,
+                      message: pack.displayDescription,
                       waitDuration: const Duration(milliseconds: 250),
-                      child: Text(pack.name, style: AppText.titleMd),
+                      child: Text(pack.displayName, style: AppText.titleMd),
                     ),
+                    if (pack.displayTag != null) ...[
                     const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Container(
@@ -137,12 +139,13 @@ class _PackTile extends StatelessWidget {
                           color: context.colors.primaryContainer.withValues(alpha: 0.4),
                           borderRadius: AppRadii.pill,
                         ),
-                        child: Text(pack.nameEn,
+                        child: Text(pack.displayTag!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.labelMd.copyWith(color: context.colors.primary)),
                       ),
                     ),
+                    ],
                   ],
                 ),
               ],
@@ -155,7 +158,7 @@ class _PackTile extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           _RoundIconBtn(
             icon: Icons.play_arrow,
-            tooltip: '试听',
+            tooltip: tr('common.preview'),
             onPressed: () => soundEngine.previewPack(pack.id),
           ),
           if (!active)
@@ -163,7 +166,7 @@ class _PackTile extends StatelessWidget {
               padding: const EdgeInsets.only(left: AppSpacing.sm),
               child: _RoundIconBtn(
                 icon: Icons.check,
-                tooltip: '切换到此音效包',
+                tooltip: tr('sounds.switchTo'),
                 onPressed: () => soundEngine.selectPack(pack.id),
               ),
             ),
@@ -209,13 +212,6 @@ class _ActivePackDetail extends StatelessWidget {
   final SoundPack pack;
 
   static const _layers = ['alpha', 'space', 'enter', 'modifier', 'nav'];
-  static const _layerLabels = {
-    'alpha': '字母键 A-Z',
-    'space': '空格键',
-    'enter': '回车/退格',
-    'modifier': '修饰键',
-    'nav': '功能/导航键',
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -225,11 +221,11 @@ class _ActivePackDetail extends StatelessWidget {
         final settings = soundEngine.state.settings;
         return SectionCard(
           icon: Icons.equalizer,
-          title: pack.name,
-          badge: '使用中',
-          tooltip: pack.description,
+          title: pack.displayName,
+          badge: tr('common.inUse'),
+          tooltip: pack.displayDescription,
           trailing: PillButton(
-            label: '试听',
+            label: tr('common.preview'),
             icon: Icons.graphic_eq,
             onPressed: () => soundEngine.previewPack(pack.id),
           ),
@@ -237,7 +233,7 @@ class _ActivePackDetail extends StatelessWidget {
             children: [
               for (final layer in _layers)
                 AppSlider(
-                  label: _layerLabels[layer]!,
+                  label: tr('layer.$layer'),
                   value: settings.layerTones[layer] ?? 0.5,
                   min: 0,
                   max: 1,
@@ -265,15 +261,15 @@ class _DspEngine extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       icon: Icons.tune,
-      title: '声学主引擎 DSP',
+      title: tr('sounds.dspTitle'),
       trailing: GestureDetector(
         onTap: () => soundEngine.resetToDefaults(),
-        child: Text('恢复默认', style: AppText.labelMd.copyWith(color: context.colors.outline)),
+        child: Text(tr('common.resetDefault'), style: AppText.labelMd.copyWith(color: context.colors.outline)),
       ),
       child: Column(
         children: [
           AppSlider(
-            label: '音量补偿',
+            label: tr('sounds.volume'),
             value: settings.volumeDb,
             min: -12,
             max: 6,
@@ -282,7 +278,7 @@ class _DspEngine extends StatelessWidget {
                 soundEngine.updateSettings(settings.copyWith(volumeDb: v)),
           ),
           AppSlider(
-            label: '音高抖动',
+            label: tr('sounds.pitchJitter'),
             value: settings.pitchJitter,
             min: 0,
             max: 0.5,
@@ -383,9 +379,9 @@ class _SandboxState extends State<_Sandbox> {
             children: [
               Icon(Icons.keyboard, size: 18, color: context.colors.tertiary),
               const SizedBox(width: AppSpacing.sm),
-              Text('交互试音台', style: AppText.titleLg),
+              Text(tr('sounds.testBench'), style: AppText.titleLg),
               const Spacer(),
-              MetricChip(label: '本框敲击 $_count'),
+              MetricChip(label: tr('sounds.boxKeystrokes', {'n': _count})),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -396,8 +392,8 @@ class _SandboxState extends State<_Sandbox> {
             style: AppText.bodyLg,
             decoration: InputDecoration(
               hintText: widget.enabled
-                  ? '在此输入以实时试音（试试快速连按 Shift、空格与回退键）…'
-                  : '声音引擎已关闭，开启后可在此试音。',
+                  ? tr('sounds.testHint')
+                  : tr('sounds.engineOffHint'),
               hintStyle: AppText.bodyMd.copyWith(color: context.colors.outline),
               filled: true,
               fillColor: context.colors.container,

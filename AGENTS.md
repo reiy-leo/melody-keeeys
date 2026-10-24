@@ -49,7 +49,7 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
 ## 代码约定与注意点
 
 - **颜色一律 `context.colors.xxx`**（ThemeExtension，浅/深双套在 `app_colors.dart`）；不要新增静态色常量。文字样式必须在 `buildAppTheme` 里绑定 `onSurface`（null color 会在浅色下变白字）。
-- **文案语言（用户固定要求）**：界面语言=中文——状态、按钮、徽章、滑杆标签、音效名称等所有用户可见文案一律中文；英文仅作辅助（音效包英文原名在中文名之后以弱化标签显示；品牌名 Melody Keeeys、快捷键 Option+Shift+K、技术名词如 miniaudio 保留原文）。数据模型 `SoundPack` 用 `name`（中文主名）+ `nameEn`（英文原名）+ `description`（纯中文）三字段；勿再用原型里的 `tag` 字段。布局上**中文名优先占位、英文名 Flexible 可截断**，否则中文名会被英文挤压（教训：`Row` 里先 Flexible 中文名会显示成"清..."）。
+- **多语言（2026-10-24 用户要求）**：界面支持 简体中文 / English / Español / Português / Русский / 日本語 / Deutsch / Français / Bahasa Indonesia，默认跟随系统，设置 → 通用 →「界面语言」可手动切换（`AppSettings.language`，'system' 或语言代码）。**所有用户可见文案不得写死**：Dart 用 `tr('key', {'n': x})`（`lib/core/i18n/i18n.dart`），macOS 原生用 `L10n.t("key", ["n": x])`（MelodyHost.swift）。唯一源头是 `tool/i18n_source.py`（每个 key 9 种语言，占位符 `{name}` 各语言一致，脚本会校验），改完运行 `python3 tool/i18n_source.py` 重新生成 `assets/i18n/strings.json`（Dart 与 Swift 共用）。音效包：中文界面显示中文名 + 英文原名标签，其他语言显示英文原名（`displayName` / `displayTag`），描述走 `pack.<id>` 键（`displayDescription`）。德/俄/法文案较长，布局要允许换行或截断。
 - **说明文案一律进 tooltip（用户要求，2026-10-22）**：设置页不放常驻灰色说明行。`SettingsRow(tooltip:)` / `SectionCard(tooltip:)` 会在标题旁渲染 `InfoTip`（`?` 图标，悬停 250ms 显示）；`SectionCard.subtitle` 只留给实时状态（延迟、引擎版本等）。卡片类选项（左键行为）整卡包 `Tooltip`，音效包列表的描述挂在包名 tooltip 上。
 - **热路径性能约定（2026-10-22）**：
   - 每次按键**不得** `notifyListeners()`：计数走 `soundEngine.keystrokes`（`ValueNotifier<int>`），只有显示计数的芯片用 `ValueListenableBuilder` 监听。否则每键都会重建所有设置页、碰托盘、给 HUD 推 JSON。
