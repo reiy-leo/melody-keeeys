@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:window_manager/window_manager.dart';
@@ -104,26 +104,38 @@ Future<void> main(List<String> args) async {
 /// native host (menu bar, key hook, audio, hotkeys, tray panel) started it
 /// and shuts it down when the window closes.
 Future<void> _runHostedSettings() async {
-  await windowManager.ensureInitialized();
-  await windowManager.waitUntilReadyToShow(
-    const WindowOptions(
-      // No size/center: the host keeps the window and its last frame.
-      minimumSize: Size(880, 580),
-      title: 'Melody Keeeys · 旋律键音',
-      titleBarStyle: TitleBarStyle.hidden,
-    ),
-    () async {},
-  );
+  // Every step is guarded: a failing plugin call must not stop the UI from
+  // running, or the settings window would stay blank or never appear.
+  Future<void> step(String name, Future<void> Function() body) async {
+    try {
+      await body();
+    } catch (e, st) {
+      debugPrint('[settings] $name failed: $e\n$st');
+    }
+  }
+
+  await step('windowManager', () async {
+    await windowManager.ensureInitialized();
+    await windowManager.waitUntilReadyToShow(
+      const WindowOptions(
+        // No size/center: the host keeps the window and its last frame.
+        minimumSize: Size(880, 580),
+        title: 'Melody Keeeys · 旋律键音',
+        titleBarStyle: TitleBarStyle.hidden,
+      ),
+      () async {},
+    );
+  });
 
   soundEngine = SoundEngine(SettingsRepository());
-  await soundEngine.initialize();
+  await step('soundEngine', soundEngine.initialize);
 
   launchAtStartup.setup(
     appName: 'Melody Keeeys',
     appPath: Platform.resolvedExecutable,
   );
 
-  await appLifecycle.init(showSettings: true);
+  await step('appLifecycle', () => appLifecycle.init(showSettings: true));
   runApp(
     kDebugMode && _kScreenshotMode
         ? const ScreenshotHost(child: SettingsApp())
@@ -131,12 +143,13 @@ Future<void> _runHostedSettings() async {
   );
 
   // Order the window front once it has painted (no blank flash); the
-  // timeout covers a hidden window that gets no vsync.
+  // timeout covers a hidden window that gets no vsync. The native host also
+  // shows the window on its own if this never arrives.
   var shown = false;
   Future<void> show() async {
     if (shown) return;
     shown = true;
-    await appLifecycle.showSettingsWindow();
+    await step('show', appLifecycle.showSettingsWindow);
   }
 
   WidgetsBinding.instance.addPostFrameCallback((_) => show());

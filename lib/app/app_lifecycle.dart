@@ -65,11 +65,15 @@ class AppLifecycle with WindowListener {
 
   Future<void> showSettingsWindow() async {
     if (kNativeHost) {
-      await windowManager.show();
-      await windowManager.focus();
+      // The native host orders the window front and activates the app
+      // (SettingsWindowHost.bringFront); window_manager's show cannot bring
+      // an LSUIElement app forward reliably.
       try {
         await _host.invokeMethod('settingsShown');
-      } catch (_) {/* host absent */}
+      } catch (_) {
+        await windowManager.show();
+        await windowManager.focus();
+      }
       return;
     }
     if (!settingsVisible.value) {
