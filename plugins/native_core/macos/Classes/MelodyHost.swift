@@ -311,7 +311,30 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
     if !startHook() {
       // Missing Accessibility grant: the settings page walks the user
       // through it, so open it right away (the only time it opens by itself).
+      NSLog("[melody] key hook not running: Accessibility not granted (AXIsProcessTrusted=false)")
       openSettings?()
+      startHookWatchdog()
+    }
+  }
+
+  /// Settings-window theme for the native window chrome before Flutter
+  /// paints: 0 light, 1 dark, 2 follow the system.
+  public var uiThemeIndex: Int { settings.uiTheme }
+
+  private var hookWatchdog: Timer?
+
+  /// Retries the key hook every 2 s until Accessibility is granted, so
+  /// ticking the box in System Settings is enough: no relaunch, and no need
+  /// to keep the settings window open.
+  private func startHookWatchdog() {
+    guard hookWatchdog == nil else { return }
+    hookWatchdog = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] timer in
+      guard let self else { timer.invalidate(); return }
+      if self.startHook() {
+        NSLog("[melody] Accessibility granted; key hook started")
+        timer.invalidate()
+        self.hookWatchdog = nil
+      }
     }
   }
 
@@ -409,6 +432,10 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
       DispatchQueue.main.async {
         guard let self else { return }
         self.latencyMs = result.latency
+        NSLog("[melody] audio engine: latency=%@ ms, packs=%ld, failed samples=%ld",
+              result.latency.map { String(format: "%.1f", $0) } ?? "nil",
+              self.packs.count, result.failures.count)
+        if let first = result.failures.first { NSLog("[melody] first failed sample: %@", first) }
         if result.latency == nil {
           self.loadError = "Audio engine init failed: ae_create failed"
         } else if let first = result.failures.first {

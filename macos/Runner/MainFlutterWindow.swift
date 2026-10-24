@@ -26,10 +26,10 @@ final class SettingsWindowHost {
         bringFront(window)
         return
       }
-      // Dart has not reported its first frame. Give it a moment, then show
-      // the window anyway; an engine stuck for long is torn down and rebuilt
-      // so a failed boot can never lock the settings window out for good.
-      if Date().timeIntervalSince(bootedAt) < 4 {
+      // Dart has not reported its first frame yet (it is still booting).
+      // An engine stuck for 10 s+ is torn down and rebuilt, so a failed boot
+      // can never lock the settings window out for good.
+      if Date().timeIntervalSince(bootedAt) < 10 {
         reveal()
         return
       }
@@ -38,7 +38,11 @@ final class SettingsWindowHost {
     }
     let window = self.window ?? makeWindow()
     self.window = window
+    applyTheme(window)
     let controller = FlutterViewController()
+    // Paint the window in the app's own surface color while Dart boots
+    // (1-3 s on older Macs) instead of a black or empty frame.
+    controller.backgroundColor = window.backgroundColor
     let frame = window.frame
     window.contentViewController = controller
     window.setFrame(frame, display: false)
@@ -46,13 +50,23 @@ final class SettingsWindowHost {
     self.controller = controller
     shown = false
     bootedAt = Date()
-    // Dart orders the window front after its first frame (no blank flash).
-    // If that call never comes, show it from here after a short wait.
-    revealTimer?.invalidate()
-    revealTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { [weak self] _ in
-      guard let self, !self.shown, self.controller != nil else { return }
-      NSLog("[MelodyKeeeys] settings window shown by fallback timer (no ready signal from Dart)")
-      self.reveal()
+    // Show the window at once so the click gets instant feedback; Flutter
+    // fills it in when its first frame is ready.
+    reveal()
+  }
+
+  /// Light / dark / system, from the saved settings, with the matching
+  /// surface color (app_colors.dart surface: light 0xFBFAFE, dark 0x12111A).
+  private func applyTheme(_ window: NSWindow) {
+    switch MelodyHost.shared.uiThemeIndex {
+    case 0: window.appearance = NSAppearance(named: .aqua)
+    case 1: window.appearance = NSAppearance(named: .darkAqua)
+    default: window.appearance = nil
+    }
+    window.backgroundColor = NSColor(name: nil) { appearance in
+      appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        ? NSColor(red: 0x12 / 255, green: 0x11 / 255, blue: 0x1A / 255, alpha: 1)
+        : NSColor(red: 0xFB / 255, green: 0xFA / 255, blue: 0xFE / 255, alpha: 1)
     }
   }
 
@@ -72,7 +86,6 @@ final class SettingsWindowHost {
   }
 
   private func reveal() {
-    shown = true
     revealTimer?.invalidate()
     revealTimer = nil
     if let window { bringFront(window) }
@@ -107,11 +120,15 @@ final class SettingsWindowHost {
   private func makeWindow() -> NSWindow {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 1020, height: 700),
-      styleMask: [.titled, .closable, .miniaturizable, .resizable],
+      styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
       backing: .buffered,
       defer: true)
     window.isReleasedWhenClosed = false
     window.title = "Melody Keeeys · 旋律键音"
+    // Same chrome Dart applies (TitleBarStyle.hidden), set up front so the
+    // title bar doesn't flash in and out while the engine boots.
+    window.titlebarAppearsTransparent = true
+    window.titleVisibility = .hidden
     window.center()
     return window
   }
