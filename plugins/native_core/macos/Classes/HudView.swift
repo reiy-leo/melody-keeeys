@@ -6,6 +6,8 @@ final class HudModel: ObservableObject {
   @Published var engineEnabled = true
   @Published var activePackId = ""
   @Published var latencyMs: Double?
+  /// False until Accessibility is granted: keystrokes are not heard.
+  @Published var hookRunning = true
 }
 
 /// Native tray panel (replaces the Flutter HUD window on macOS: no second
@@ -18,7 +20,8 @@ final class HudViewController: NSHostingController<HudView> {
       onToggleEngine: { [weak host] in host?.toggleEngine() },
       onSelect: { [weak host] id in host?.selectPack(id) },
       onPreview: { [weak host] id in host?.preview(packId: id) },
-      onOpenSettings: { [weak host] in host?.requestSettings() }))
+      onOpenSettings: { [weak host] in host?.requestSettings() },
+      onGrantAccess: { [weak host] in host?.openAccessibilitySettings() }))
     preferredContentSize = NSSize(width: 340, height: 560)
   }
 
@@ -40,6 +43,7 @@ struct HudView: View {
   let onSelect: (String) -> Void
   let onPreview: (String) -> Void
   let onOpenSettings: () -> Void
+  let onGrantAccess: () -> Void
 
   private var active: PackInfo? { packs.first { $0.id == model.activePackId } ?? packs.first }
 
@@ -52,9 +56,34 @@ struct HudView: View {
         Text("托盘面板").font(.caption).foregroundColor(.secondary)
       }
 
+      if !model.hookRunning {
+        VStack(alignment: .leading, spacing: 6) {
+          HStack(spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
+            Text("未开启辅助功能权限").font(.subheadline).fontWeight(.semibold)
+          }
+          Text("不开启时打字不会有任何声音。请在「系统设置 → 隐私与安全性 → 辅助功能」中勾选旋律键音，勾选后几秒内自动生效，无需重启。")
+            .font(.caption)
+            .foregroundColor(.primary.opacity(0.8))
+            .fixedSize(horizontal: false, vertical: true)
+          Button(action: onGrantAccess) {
+            Label("去开启权限", systemImage: "lock.open")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.borderedProminent)
+          .tint(.orange)
+          .controlSize(.small)
+        }
+        .padding(10)
+        .background(
+          RoundedRectangle(cornerRadius: 10)
+            .stroke(Color.orange.opacity(0.6))
+            .background(RoundedRectangle(cornerRadius: 10).fill(Color.orange.opacity(0.10))))
+      }
+
       HStack(spacing: 8) {
         Circle()
-          .fill(model.engineEnabled ? Color.green : Color.gray)
+          .fill(!model.hookRunning ? Color.orange : model.engineEnabled ? Color.green : Color.gray)
           .frame(width: 8, height: 8)
         Text(statusText).font(.caption).foregroundColor(.secondary)
         Spacer()
@@ -118,6 +147,7 @@ struct HudView: View {
   }
 
   private var statusText: String {
+    guard model.hookRunning else { return "无辅助功能权限，按键无声" }
     guard model.engineEnabled else { return "音频引擎已静音" }
     let latency = model.latencyMs.map { String(format: "%.1f", $0) } ?? "--"
     return "音频引擎运行中  \(latency)ms"

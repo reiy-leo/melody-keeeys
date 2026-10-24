@@ -800,7 +800,9 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
       button.image = image
     }
     let name = packs.indices.contains(activePackIndex) ? packs[activePackIndex].name : ""
-    button.toolTip = "Melody Keeeys · 旋律键音 — 正在使用：\(name)"
+    button.toolTip = hookRunning
+      ? "Melody Keeeys · 旋律键音 — 正在使用：\(name)"
+      : "Melody Keeeys · 旋律键音 — 未开启辅助功能权限，打字不会有声音"
     button.appearsDisabled = !settings.engineEnabled
   }
 
@@ -819,7 +821,9 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
     let event = NSApp.currentEvent
     if event?.type == .rightMouseUp || event?.modifierFlags.contains(.control) == true {
       showMenu()
-    } else if settings.leftClickAction == 1 {
+    } else if settings.leftClickAction == 1 || !hookRunning {
+      // Without Accessibility a pack switch would be silent: show the panel
+      // and its permission banner instead.
       toggleHud()
     } else {
       cyclePack()
@@ -929,5 +933,18 @@ public final class MelodyHost: NSObject, NSPopoverDelegate {
     model.engineEnabled = settings.engineEnabled
     model.activePackId = settings.activePackId
     model.latencyMs = latencyMs
+    model.hookRunning = hookRunning
+  }
+
+  /// Tray-panel "grant" button: register with the Accessibility list (system
+  /// prompt), open the pane, and keep retrying until the box is ticked.
+  func openAccessibilitySettings() {
+    popover?.performClose(nil)
+    let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+    _ = AXIsProcessTrustedWithOptions([key: true] as CFDictionary)
+    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+      NSWorkspace.shared.open(url)
+    }
+    startHookWatchdog()
   }
 }
