@@ -2,7 +2,7 @@ name: melody_keeeys
 description: "Melody Keeeys (旋律键音) - cross-platform keyboard sound effects tray app."
 publish_to: 'none'
 
-version: 0.2.0+4
+version: 0.2.0+5
 
 environment:
   sdk: ^3.13.5
