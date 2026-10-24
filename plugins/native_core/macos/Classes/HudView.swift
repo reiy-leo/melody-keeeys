@@ -70,7 +70,7 @@ struct HudView: View {
       if let pack = active {
         HStack(alignment: .center, spacing: 8) {
           VStack(alignment: .leading, spacing: 2) {
-            Text("正在使用").font(.caption).foregroundColor(.green)
+            Text("正在使用").font(.caption).fontWeight(.semibold).foregroundColor(brand)
             HStack(spacing: 6) {
               Text(pack.name).font(.title3).fontWeight(.semibold).lineLimit(1)
               TagChip(text: pack.nameEn)
@@ -157,7 +157,7 @@ private struct PackRow: View {
       TagChip(text: pack.nameEn)
       Spacer(minLength: 4)
       if active {
-        Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+        Image(systemName: "checkmark.circle.fill").foregroundColor(brand)
       } else {
         Button(action: onPreview) { Image(systemName: "play.fill") }
           .buttonStyle(.borderless)
