@@ -1,5 +1,7 @@
 # AGENTS.md — Melody Keeeys（旋律键音）
 
+> **新 session 先读 [`.agent/status.md`](.agent/status.md)**：项目进度、没做完的事、没真机验证的改动都在那里。
+
 给 AI 编码代理的项目工作指南。人类开发者请先看 [README.md](README.md) 与 [PLAN.md](PLAN.md)。
 
 ## 项目一句话
@@ -26,10 +28,8 @@
 
 ## 构建环境（本机关键坑）
 
-- **Flutter**：`brew install --cask flutter`（PATH 已有）。
-- **CocoaPods 必须用 brew ruby 的 gem**，构建前导出：
-  `export PATH="/usr/local/lib/ruby/gems/4.0.0/bin:/usr/local/opt/ruby/bin:/usr/local/bin:$PATH"`
-  系统 ruby 2.6 的 gem 原生扩展全坏；tray_manager 0.7+（依赖 nativeapi）不支持 SPM，macOS 构建绕不开 CocoaPods。
+- **Rei 的机器是 2018 款 Intel Mac（最高 macOS 15），用 MacPorts，不用 Homebrew**（Homebrew 已把 Intel 降到 Tier 3）。
+- **CocoaPods**：MacPorts 没有 cocoapods port，用 MacPorts 的 Ruby 装：`sudo port install ruby33 && sudo port select --set ruby ruby33`，再 `gem install cocoapods`。系统自带 Ruby 2.6 的 gem 原生扩展装不上。tray_manager 0.7+（依赖 nativeapi）不支持 SPM，macOS 构建绕不开 CocoaPods；构建时 SPM 相关警告可以忽略。
 - **C 音频引擎独立冒烟测试**（不启 Flutter 即可验证出声）：
   `clang -I plugins/native_core/macos/Classes/src -o /tmp/ae_test tool/audio_smoke_test.c plugins/native_core/macos/Classes/src/audio_engine.c -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreFoundation && /tmp/ae_test assets/sounds/<pack>/alpha.wav`
 
@@ -70,21 +70,21 @@ python3 tool/make_tray_icons.py           # 旧版自绘托盘图标（about 页
   验证点击可用 System Events：`osascript -e 'tell app "System Events" to tell process "Melody Keeeys" to click menu bar item 1 of menu bar 2'`，点击后读 plist 的 activePackId 是否轮换。
 - 桌面多窗口：HUD 的窗口通信用 `WindowController.invokeMethod`（main→HUD 方法名 `hudState`，HUD→main 方法名 `hudCommand`）；启动日志里一行 benign 的 desktop_multi_window "Failed to send message" 可忽略。
 - macOS 权限：CGEventTap 需辅助功能授权（设置页有引导横幅；横幅复查后授权成功要清空 `_permissionError` 并重试 `startHook()`——hook 只在启动时尝试一次，窗口重新聚焦也会自动复查）；entitlements 已关沙箱，Info.plist `LSUIElement=true`。
-- **辅助功能授权稳定性（2026-10-07 踩过）**：TCC 授权是绑定签名的——ad-hoc 签名（`CODE_SIGN_IDENTITY = "-"`）下存的是 cdhash，每次重新构建 cdhash 变化导致授权失效；且 macOS 15 无 AX 权限时 `CGEvent.tapCreate` 也会成功（收不到事件），曾让芯片假绿。现已改为用 Apple Development 证书签名（team `EHBQV2H8YV`，`CODE_SIGN_IDENTITY` 用证书 SHA-1 hash），授权绑定到证书身份，重建不再掉；`startKeyHook` 里显式用 `AXIsProcessTrusted()` 门控。改动签名配置后需手动删掉 TCC 里的旧 cdhash 记录（`tccutil reset Accessibility dev.melodykeeeys.melodyKeeeys`）并重新勾选一次。
+- **辅助功能授权稳定性（2026-10-07 踩过）**：TCC 授权是绑定签名的——ad-hoc 签名（`CODE_SIGN_IDENTITY = "-"`）下存的是 cdhash，每次重新构建 cdhash 变化导致授权失效；且 macOS 15 无 AX 权限时 `CGEvent.tapCreate` 也会成功（收不到事件），曾让芯片假绿。现已改为用 Apple Development 证书签名（team `EHBQV2H8YV`，`CODE_SIGN_IDENTITY` 用证书 SHA-1 hash），授权绑定到证书身份，重建不再掉（**待确认**：2026-10-24 Rei 本地重建后授权仍然失效，可能当前这台机器上没有这张证书；CI 和 Release 包一律是 ad-hoc 签名，每个新版本都要重新勾选）；`startKeyHook` 里显式用 `AXIsProcessTrusted()` 门控。改动签名配置后需手动删掉 TCC 里的旧 cdhash 记录（`tccutil reset Accessibility dev.melodykeeeys.melodyKeeeys`）并重新勾选一次。
 - **tap 必须是 active tap 不能是 listenOnly（2026-10-07 第二课）**：listen-only tap 在最近的 macOS 上要「输入监控」权限，且该 TCC 记录同样绑定签名、重建即失效，失效时 tap 创建"成功"但零事件（症状：所有键无声、引擎芯片假绿、无任何报错）。改为 `options: .defaultTap`（事件原样透传不拦截）后只依赖稳定的辅助功能授权。验证方法：debug 构建看 `[melody] key code=...` 日志是否随按键输出。
 - **桌面多窗口子窗口插件注册**：desktop_multi_window 的每个子窗口跑独立 Flutter engine，插件不会自动注册——必须在 `macos/Runner/MainFlutterWindow.swift` 里 `FlutterMultiWindowPlugin.setOnWindowCreatedCallback { RegisterGeneratedPlugins(registry: $0) }`，否则 HUD 里 window_manager 等全部 MissingPluginException（曾导致点托盘 HUD 完全弹不出来）。
 - **HUD 定位**：托盘 bounds 随 `WindowConfiguration.arguments` 一起传给 HUD，在 `runHudWindow()` 启动时立即定位（首开时发 `place` 消息会与引擎启动竞态导致丢失，HUD 曾弹在屏幕中间）；屏幕尺寸必须用 `view.display.size / devicePixelRatio`，**不能用 `view.physicalSize`**（那是 HUD 自己窗口的尺寸，clamp 会全错）。`hudTopLeft()` 是纯函数，可单测。
 - **HUD 显示流程（黑窗/反复重建的坑）**：主窗口**不要**远程 `controller.show()` 一个还没启动完的 HUD 引擎——会先在默认位置闪黑窗再跳位。正确流程：HUD 隐藏创建（`hiddenAtLaunch`）→ HUD 自己首帧后 `windowManager.show()` 并 `_command('ready')` 通知主窗口 → 主窗口 `markHudReady()` 后走「reuse + place + show」。另：`_pushStateToHud` 的 catch 里**不能直接丢弃 controller**——引擎启动期 `CHANNEL_UNREGISTERED` 是暂时的，误删会导致每次点击新建一个窗口（黑窗累积）；要先 `WindowController.getAll()` 确认窗口真的没了才丢，且 push 成功本身可当作 ready 兜底。
 - **Impeller 渲染问题**：Intel Mac（UHD 630）上 Impeller 会渲染字形损坏（文字变噪点/沙子），Info.plist 里 `FLTEnableImpeller=false` 强制回 Skia。修改 plist 后必须重新构建才生效。
 
-## 会话收尾清单（用户固定要求）
+## 会话收尾清单
 
-每次开发工作结束后必须：
-1. `flutter build macos --release` 重新打包，并告知用户 .app 路径（`build/macos/Build/Products/Release/Melody Keeeys.app`）；
-2. 同步文档（AGENTS.md / DESIGN.md / README.md / PLAN.md），保持代码与文档一致；
-3. `git add -A && git commit && git push`（用户已授权每次提交+推送）。
+每次开发工作结束后：
+1. `flutter analyze` 通过；能跑的测试跑一遍（`flutter test`）。macOS 编译看 push 后的「macOS build check」CI（沙箱编不了 macOS），真机效果请 Rei 本地 `flutter build macos --release` 验证；
+2. 同步文档（`.agent/status.md` / AGENTS.md / DESIGN.md / README.md / PLAN.md），保持代码与文档一致；
+3. `git commit && git push` 到 main（已授权）。**打 tag / 发 Release 必须先问 Rei。**
 
-### 已知环境问题（2026-10-07）
+### 已知环境问题（2026-10-07，Rei 本机当时的情况，现状未确认）
 
 - **SSH 推送故障**：1Password SSH agent 报 `communication with agent failed`，SSH 推送/拉取全部失败。已把 origin 切到 HTTPS（`https://github.com/reiy-leo/melody-keeeys.git`），并用 `gh auth setup-git` 配好凭据助手（gh token 走 keyring），`git push`/`git fetch` 现在直接可用。若 1Password 修复后可自行决定是否切回 SSH。
 - **提交签名故障**：全局 `commit.gpgsign=true` 走 1Password `op-ssh-sign`，同样因 agent 故障报 `error: 1Password: agent returned an error`。临时绕过：`git -c commit.gpgsign=false commit`。1Password 修复后签名会自动恢复，无需改配置。

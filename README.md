@@ -6,6 +6,8 @@
 
 ## 截图
 
+> 下面的截图拍于 2026-10-08，之后界面改过（说明文字收进 tooltip、macOS 托盘面板换成原生、新增多语言），待重拍。
+
 设置窗口 · 通用页（引擎、热键、防冲突与测试跳线）：
 
 ![通用页](docs/screenshots/01-general.png)
@@ -33,7 +35,7 @@
 - **M3 设置窗口** ✅ 侧边栏四页（通用 / 音效 / 菜单栏 / 关于），设置持久化，开机自启，启动仅驻留菜单栏（关窗不退出），全局热键（静音、轮换）
 - **主题** ✅ 浅色 / 深色 / 跟随系统三态，通用页切换即时生效，HUD 跟随；双色板 ThemeExtension（见 [DESIGN.md](DESIGN.md)）
 - **托盘图标** ✅ Lucide 图标 7 选 1（keyboard / keyboard-music / command / line-squiggle / gamepad-directional / tv / balloon，默认 keyboard-music），菜单栏页选择即时生效
-- **M4 HUD 与打包** ✅ 托盘 HUD 弹窗（第二窗口，失焦自动隐藏）、Windows Inno Setup 脚本；⏳ 智能静音应用名单（二期）、应用图标打磨、macOS 公证
+- **M4 HUD 与打包** ✅ 托盘 HUD 弹窗（第二窗口，失焦自动隐藏）、Windows Inno Setup 脚本；⏳ 智能静音应用名单（二期）、macOS 公证
 
 ## 各平台构建
 
@@ -48,11 +50,11 @@ flutter run -d linux     # Linux
 
 | 平台 | 要求 |
 |---|---|
-| macOS 10.15+ | 首次使用需在「系统设置 → 隐私与安全性 → 辅助功能」中勾选应用（应用内有一键引导；应用用开发证书签名，辅助功能授权跨重新构建保持有效） |
+| macOS 12+ | 首次使用需在「系统设置 → 隐私与安全性 → 辅助功能」中勾选应用（没授权时托盘面板会提醒，并有「去开启权限」按钮）。Release 包是 ad-hoc 签名，未公证：首次打开右键 → 打开，每个新版本都要重新勾选辅助功能 |
 | Windows 10+ | 无需管理员权限 |
 | Linux | 需要 `libgtk-3-dev libx11-dev libxi-dev` 构建依赖；运行时需将用户加入 `input` 组（`sudo usermod -aG input $USER` 后重新登录） |
 
-> 本机（Intel macOS）构建注意：CocoaPods 需通过 `brew install ruby` + `gem install cocoapods` 安装，构建前把 `/usr/local/lib/ruby/gems/4.0.0/bin` 加入 PATH，详见 [AGENTS.md](AGENTS.md)。
+> macOS 构建需要 CocoaPods。Intel Mac 建议用 MacPorts 的 Ruby 安装（`sudo port install ruby33` 后 `gem install cocoapods`），详见 [AGENTS.md](AGENTS.md)。
 
 ### 打包
 
@@ -83,6 +85,8 @@ plugins/native_core/   # 本地插件：C 音频引擎 + 三平台键盘钩子
 assets/sounds/         # 真实音效素材（22 包 × 6 层，导入脚本见 tool/，授权见 CREDITS.md）
 ```
 
+- **macOS 原生宿主**：macOS 上菜单栏、键盘钩子、音频、热键和托盘面板都由 Swift 常驻（`plugins/native_core/macos/Classes/MelodyHost.swift`、`HudView.swift`），Flutter 只在打开设置窗时启动，关窗即销毁，以降低常驻内存。Windows / Linux 仍由 Dart 常驻。详见 [AGENTS.md](AGENTS.md)「macOS 原生宿主」。
+- **多语言**：9 种界面语言，默认跟随系统；源头 `tool/i18n_source.py`。
 - **音频**：`plugins/native_core/macos/Classes/src/audio_engine.c`（miniaudio 单头库）编译为独立动态库，Dart 通过 `dart:ffi` 调用；槽位 = 包序号 × 6 + 层序号。
 - **键盘钩子**：原生层只上报 `{code, down, repeat, ts}`，分类与调参全部在 Dart（`lib/core/hooks/keymap_classifier.dart`）。
 - **音效素材**：全部为真实录音（kbsim 机械键盘录音 / Kenney 科幻音效 / Tickeys 素材），已统一响度归一化；授权与来源见 [assets/sounds/CREDITS.md](assets/sounds/CREDITS.md)。
