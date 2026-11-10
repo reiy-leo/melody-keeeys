@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build every app icon from assets/icons/source/app_icon_source.webp.
+"""Build every app icon from assets/icons/source/app_icon_source.png.
 
-The source is a 1254px render whose "transparent" background is a baked-in
-checkerboard, so the rounded square is cut out with a clean supersampled
-mask (measured: square x 98..1155, y 102..1149, corner radius ~248px).
+The source is a 1254px PNG with real transparency (a rounded square plus a
+soft drop shadow). The rounded square is found from the opaque pixels
+(alpha > 128) and cropped to a centered square, keeping the alpha as is.
 
 Outputs: macOS AppIcon.appiconset (Big Sur grid: 824px square on a 1024
 canvas), Windows app_icon.ico (full bleed), assets/icons/app_icon.png
@@ -11,19 +11,15 @@ canvas), Windows app_icon.ico (full bleed), assets/icons/app_icon.png
 Usage: python3 tool/make_app_icons.py
 """
 import pathlib
-from PIL import Image, ImageDraw
+from PIL import Image
 
 root = pathlib.Path(__file__).resolve().parent.parent
-src = Image.open(root / 'assets/icons/source/app_icon_source.webp').convert('RGB')
-X0, Y0, X1, Y1, R = 102, 106, 1152, 1146, 244  # 4px inside the edge: no checkerboard fringe
-SS = 4
-mask = Image.new('L', (src.width * SS, src.height * SS), 0)
-ImageDraw.Draw(mask).rounded_rectangle(
-    (X0 * SS, Y0 * SS, X1 * SS - 1, Y1 * SS - 1), radius=R * SS, fill=255)
-mask = mask.resize(src.size, Image.LANCZOS)
-rgba = src.copy()
-rgba.putalpha(mask)
-square = rgba.crop((X0, Y0, X1, Y1))  # full-bleed rounded square, ~1058px
+src = Image.open(root / 'assets/icons/source/app_icon_source.png').convert('RGBA')
+x0, y0, x1, y1 = src.split()[3].point(lambda v: 255 if v > 128 else 0).getbbox()
+side = max(x1 - x0, y1 - y0)
+cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+square = src.crop((round(cx - side / 2), round(cy - side / 2),
+                   round(cx + side / 2), round(cy + side / 2)))  # full-bleed rounded square
 
 def fitted(size, inset):
     """Square of `size` px with the icon scaled to size*inset, centered."""
