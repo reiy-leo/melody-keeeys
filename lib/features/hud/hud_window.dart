@@ -56,6 +56,10 @@ Size _screenSize(FlutterView view) {
 /// Entry for the second window process created by desktop_multi_window.
 Future<void> runHudWindow() async {
   await windowManager.ensureInitialized();
+  // On Windows this creates the ITaskbarList that setSkipTaskbar uses; skip it
+  // and setSkipTaskbar dereferences a null pointer (the whole app crashed on
+  // the first tray click).
+  await windowManager.waitUntilReadyToShow();
   await windowManager.setAsFrameless();
   await windowManager.setSize(_hudSize);
   await windowManager.setMinimumSize(_hudSize);
