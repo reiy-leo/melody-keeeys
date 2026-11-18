@@ -9,7 +9,11 @@ extern "C" {
 
 /* Keep ae_* symbols alive and visible: Dart loads them via dlsym at runtime,
  * so nothing inside the binary references them statically. */
+#if defined(_WIN32)
+#define AE_API __declspec(dllexport)
+#else
 #define AE_API __attribute__((used)) __attribute__((visibility("default")))
+#endif
 
 /* Latency presets for ae_create(). */
 #define AE_PRESET_ULTRA  0
