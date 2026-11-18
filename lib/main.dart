@@ -41,7 +41,9 @@ Future<void> main(List<String> args) async {
       minimumSize: Size(880, 580),
       center: true,
       title: 'Melody Keeeys',
-      titleBarStyle: TitleBarStyle.hidden,
+      // Windows / Linux only (macOS returns above): keep the system title
+      // bar, it carries the close button and lets the window be dragged.
+      titleBarStyle: TitleBarStyle.normal,
     ),
     () async {
       // Window stays hidden until settings load decides (silent start).

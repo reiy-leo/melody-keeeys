@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:ui' show Rect;
+import 'dart:ui' show PlatformDispatcher, Rect;
 
 import 'package:flutter/foundation.dart'
     show VoidCallback, debugPrint, kDebugMode;
@@ -29,8 +29,21 @@ class TrayService {
   String? _lastMenuSignature;
   String? _lastIconId;
 
-  /// Screen-space bounds of the tray icon (used to position the HUD).
-  Rect? get bounds => _icon?.getBounds();
+  /// Screen-space bounds of the tray icon in logical pixels (used to position
+  /// the HUD). nativeapi reports physical pixels on Windows.
+  Rect? get bounds {
+    final raw = _icon?.getBounds();
+    if (raw == null || !Platform.isWindows) return raw;
+    final views = PlatformDispatcher.instance.views;
+    final dpr = views.isEmpty ? 1.0 : views.first.display.devicePixelRatio;
+    if (dpr <= 0 || dpr == 1.0) return raw;
+    return Rect.fromLTWH(
+      raw.left / dpr,
+      raw.top / dpr,
+      raw.width / dpr,
+      raw.height / dpr,
+    );
+  }
 
   /// Resolves a Flutter asset to a real file path across debug/release and
   /// platforms; nativeapi's ImageAsset.fromAsset only knows the release layout.

@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "desktop_multi_window/desktop_multi_window_plugin.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -25,6 +26,14 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  // Each desktop_multi_window sub-window (the tray HUD) runs its own engine,
+  // which gets no plugins unless registered here. Without this the HUD's
+  // window_manager calls throw and the panel never shows.
+  DesktopMultiWindowSetWindowCreatedCallback([](void* controller) {
+    auto* view_controller =
+        reinterpret_cast<flutter::FlutterViewController*>(controller);
+    RegisterPlugins(view_controller->engine());
+  });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   // Menu-bar app: the window stays hidden until Dart calls
