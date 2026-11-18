@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:window_manager/window_manager.dart';
 
+import '../../shared/diag_log.dart';
+
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../core/audio/sound_pack.dart';
@@ -129,10 +131,13 @@ class HudApp extends StatelessWidget {
       theme: buildAppTheme(Brightness.light),
       darkTheme: buildAppTheme(Brightness.dark),
       themeMode: initialSettings.uiTheme.themeMode,
-      home: HudWindow(
-        controller: controller,
-        initialSettings: initialSettings,
-        initialLatencyMs: initialLatencyMs,
+      home: Listener(
+        onPointerDown: (e) => diag('hud pointer down ${e.position}'),
+        child: HudWindow(
+          controller: controller,
+          initialSettings: initialSettings,
+          initialLatencyMs: initialLatencyMs,
+        ),
       ),
     );
   }
@@ -220,16 +225,23 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
         (w) => w.windowId != widget.controller.windowId,
         orElse: () => all.first,
       );
-    } catch (_) {
+      diag('hud windows=${all.map((w) => w.windowId).toList()} '
+          'main=${_mainWindow?.windowId}');
+    } catch (e) {
+      diag('hud getAll failed: $e');
       _mainWindow = null;
     }
   }
 
   Future<void> _command(String action, [Map<String, dynamic>? extra]) async {
     final payload = jsonEncode({'action': action, ...?extra});
+    diag('hud command $action -> main=${_mainWindow?.windowId} '
+        'self=${widget.controller.windowId}');
     try {
       await _mainWindow?.invokeMethod('hudCommand', payload);
-    } catch (_) {}
+    } catch (e) {
+      diag('hud command $action failed: $e');
+    }
   }
 
   /// Previews play through the main window's engine: the HUD used to boot a
@@ -241,6 +253,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
 
   @override
   void onWindowBlur() {
+    diag('hud blur');
     // Tray-HUD convention: dismiss on losing focus.
     widget.controller.hide();
     _disposeTimer?.cancel();
@@ -249,6 +262,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
 
   @override
   void onWindowFocus() {
+    diag('hud focus');
     _disposeTimer?.cancel();
     _disposeTimer = null;
   }

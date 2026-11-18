@@ -51,7 +51,8 @@ ThemeData buildAppTheme(Brightness brightness) {
     brightness: brightness,
     colorScheme: scheme,
     scaffoldBackgroundColor: c.surface,
-    fontFamily: 'Plus Jakarta Sans',
+    fontFamily: AppFonts.windowsFamily ?? 'Plus Jakarta Sans',
+    fontFamilyFallback: AppFonts.fallback,
     splashFactory: InkSparkle.splashFactory,
   );
 

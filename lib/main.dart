@@ -16,6 +16,7 @@ import 'core/system/hotkey_service.dart';
 import 'core/tray/tray_service.dart';
 import 'features/hud/hud_window.dart';
 import 'shared/debug_screenshot.dart';
+import 'shared/diag_log.dart';
 
 const _kMultiWindowArg = 'multi_window';
 
@@ -73,6 +74,7 @@ Future<void> main(List<String> args) async {
     try {
       final controller = await WindowController.fromCurrentEngine();
       controller.setWindowMethodHandler((call) async {
+        diag('main got ${call.method} ${call.arguments}');
         if (call.method != 'hudCommand') return null;
         final payload = jsonDecode(
           call.arguments as String? ?? '{}',
@@ -93,8 +95,10 @@ Future<void> main(List<String> args) async {
         }
         return null;
       });
-    } catch (_) {
+      diag('main handler registered on ${controller.windowId}');
+    } catch (e) {
       // Cross-window channel unavailable; HUD still works read-only.
+      diag('main handler registration failed: $e');
     }
   });
 
