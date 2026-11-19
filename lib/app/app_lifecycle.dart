@@ -24,6 +24,11 @@ class AppLifecycle with WindowListener {
 
   WindowController? _hudController;
 
+  /// In-flight HUD creation. Two tray clicks (or a click plus a hotkey) that
+  /// land before WindowController.create returns used to build two HUD
+  /// windows stacked on each other.
+  Future<WindowController>? _hudCreating;
+
   /// Whether the settings UI is mounted. While the window is hidden the whole
   /// MaterialApp is swapped for an empty box (see SettingsApp), so a
   /// menu-bar-only session doesn't keep the widget/render trees, text layout
@@ -127,7 +132,17 @@ class AppLifecycle with WindowListener {
     debugPrint(
       '[melody] showHud: ${existing == null ? 'no controller, creating' : 'reusing ${existing.windowId}'}, ready=$_hudReady',
     );
-    final controller = _hudController ?? await _createHud();
+    final WindowController controller;
+    if (_hudController != null) {
+      controller = _hudController!;
+    } else {
+      final creating = _hudCreating ??= _createHud();
+      try {
+        controller = await creating;
+      } finally {
+        if (identical(_hudCreating, creating)) _hudCreating = null;
+      }
+    }
     // The HUD shows itself once its engine is up ('ready'); showing it from
     // here before that flashes a black window at the default position.
     if (_hudReady) {
