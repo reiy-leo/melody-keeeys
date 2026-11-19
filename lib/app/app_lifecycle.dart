@@ -148,6 +148,14 @@ class AppLifecycle with WindowListener {
     if (_hudReady) {
       await _placeHud(controller);
       await controller.show();
+      try {
+        await controller.invokeMethod(
+          'hudState',
+          jsonEncode({'kind': 'shown'}),
+        );
+      } catch (e) {
+        debugPrint('[melody] HUD shown notice failed: $e');
+      }
     }
     await _pushStateToHud(force: true);
   }

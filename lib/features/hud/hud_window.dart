@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:ui' show FlutterView;
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
@@ -182,6 +183,11 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
           case 'place':
             final b = data['bounds'] as Map<String, dynamic>?;
             if (b != null) await _place(b);
+          case 'shown':
+            // Re-shown from the main window (tray click on a live HUD).
+            _disposeTimer?.cancel();
+            _disposeTimer = null;
+            await _activate();
           case 'applyState':
             setState(() {
               _settings = AppSettings.fromJson(
@@ -205,6 +211,7 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
     _announced = true;
     if (_mainWindow == null) await _findMainWindow();
     await windowManager.show();
+    await _activate();
     _command('ready');
   }
 
@@ -225,8 +232,10 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
         (w) => w.windowId != widget.controller.windowId,
         orElse: () => all.first,
       );
-      diag('hud windows=${all.map((w) => w.windowId).toList()} '
-          'main=${_mainWindow?.windowId}');
+      diag(
+        'hud windows=${all.map((w) => w.windowId).toList()} '
+        'main=${_mainWindow?.windowId}',
+      );
     } catch (e) {
       diag('hud getAll failed: $e');
       _mainWindow = null;
@@ -235,8 +244,10 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
 
   Future<void> _command(String action, [Map<String, dynamic>? extra]) async {
     final payload = jsonEncode({'action': action, ...?extra});
-    diag('hud command $action -> main=${_mainWindow?.windowId} '
-        'self=${widget.controller.windowId}');
+    diag(
+      'hud command $action -> main=${_mainWindow?.windowId} '
+      'self=${widget.controller.windowId}',
+    );
     try {
       await _mainWindow?.invokeMethod('hudCommand', payload);
     } catch (e) {
@@ -249,11 +260,30 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
   /// PCM memory, a second output stream) and then played every preview twice.
   void _preview(SoundPack pack) => _command('preview', {'packId': pack.id});
 
+  /// Take the foreground so a click anywhere else deactivates the HUD and
+  /// [onWindowBlur] dismisses it. On Windows a background process cannot just
+  /// call SetForegroundWindow, so the runner does it natively.
+  Future<void> _activate() async {
+    _visible = true;
+    if (!Platform.isWindows) return;
+    try {
+      await _hudWindowChannel.invokeMethod('activate');
+    } catch (e) {
+      diag('hud activate failed: $e');
+    }
+  }
+
   Timer? _disposeTimer;
+
+  /// Blur also fires while the hidden window is still booting; only a blur
+  /// after it was shown means the user clicked elsewhere.
+  bool _visible = false;
 
   @override
   void onWindowBlur() {
-    diag('hud blur');
+    diag('hud blur visible=$_visible');
+    if (!_visible) return;
+    _visible = false;
     // Tray-HUD convention: dismiss on losing focus.
     widget.controller.hide();
     _disposeTimer?.cancel();
@@ -305,7 +335,9 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
         body: Container(
           decoration: BoxDecoration(
             color: context.colors.containerHigh,
-            borderRadius: AppRadii.lg,
+            // Windows 11 rounds the window itself at 8 px; match it so the
+            // border follows the window edge.
+            borderRadius: Platform.isWindows ? AppRadii.sm : AppRadii.lg,
             border: Border.all(color: context.colors.ghostBorder),
           ),
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -349,7 +381,9 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                     Expanded(
                       child: Text(
                         _settings.engineEnabled
-                            ? tr('hud.engineRunning', {'latency': _latencyMs?.toStringAsFixed(1)})
+                            ? tr('hud.engineRunning', {
+                                'latency': _latencyMs?.toStringAsFixed(1),
+                              })
                             : tr('hud.engineMuted'),
                         style: AppText.labelMd.copyWith(
                           color: context.colors.tertiary,
@@ -425,7 +459,10 @@ class _HudWindowState extends State<HudWindow> with WindowListener {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
                         icon: const Icon(Icons.graphic_eq, size: 14),
-                        label: Text(tr('common.preview'), style: AppText.labelMd),
+                        label: Text(
+                          tr('common.preview'),
+                          style: AppText.labelMd,
+                        ),
                       ),
                     ),
                   ],

@@ -2,8 +2,73 @@
 
 #include <optional>
 
+#include <dwmapi.h>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
+
+#include <map>
+
 #include "flutter/generated_plugin_registrant.h"
 #include "desktop_multi_window/desktop_multi_window_plugin.h"
+
+namespace {
+
+#ifndef DWMWA_WINDOW_CORNER_PREFERENCE
+#define DWMWA_WINDOW_CORNER_PREFERENCE 33
+#endif
+constexpr DWORD kDwmCornerRound = 2;  // DWMWCP_ROUND
+
+// The frameless HUD loses its top corners to window_manager's WM_NCCALCSIZE
+// handling on Windows 11; ask DWM to round all four (no-op on Windows 10).
+void RoundCorners(HWND hwnd) {
+  DWORD pref = kDwmCornerRound;
+  ::DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &pref,
+                          sizeof(pref));
+}
+
+// Bring the HUD to the foreground so clicking anywhere else deactivates it
+// (and the Dart side hides it on blur). A plain SetForegroundWindow from a
+// background process is refused, so borrow the foreground thread's input
+// state for the call.
+void ForceForeground(HWND hwnd) {
+  HWND fg = ::GetForegroundWindow();
+  if (fg == hwnd) return;
+  DWORD fg_thread = fg ? ::GetWindowThreadProcessId(fg, nullptr) : 0;
+  DWORD self_thread = ::GetCurrentThreadId();
+  bool attached = fg_thread != 0 && fg_thread != self_thread &&
+                  ::AttachThreadInput(self_thread, fg_thread, TRUE);
+  ::BringWindowToTop(hwnd);
+  ::SetForegroundWindow(hwnd);
+  ::SetFocus(hwnd);
+  if (attached) ::AttachThreadInput(self_thread, fg_thread, FALSE);
+}
+
+// One 'melody/hud_window' channel per sub-window engine. HUD engines are
+// never torn down on Windows, so these live for the process.
+std::map<void*, std::unique_ptr<flutter::MethodChannel<>>> g_hud_channels;
+
+void AttachHudChannel(flutter::FlutterViewController* controller) {
+  HWND root = ::GetAncestor(controller->view()->GetNativeWindow(), GA_ROOT);
+  RoundCorners(root);
+  auto channel = std::make_unique<flutter::MethodChannel<>>(
+      controller->engine()->messenger(), "melody/hud_window",
+      &flutter::StandardMethodCodec::GetInstance());
+  channel->SetMethodCallHandler(
+      [root](const flutter::MethodCall<>& call,
+             std::unique_ptr<flutter::MethodResult<>> result) {
+        if (call.method_name() == "activate") {
+          ForceForeground(root);
+          result->Success();
+        } else {
+          // 'dispose' stays unimplemented here: closing a sub-window that
+          // window_manager is attached to has crashed on Windows before.
+          result->NotImplemented();
+        }
+      });
+  g_hud_channels[controller] = std::move(channel);
+}
+
+}  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -33,6 +98,7 @@ bool FlutterWindow::OnCreate() {
     auto* view_controller =
         reinterpret_cast<flutter::FlutterViewController*>(controller);
     RegisterPlugins(view_controller->engine());
+    AttachHudChannel(view_controller);
   });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
