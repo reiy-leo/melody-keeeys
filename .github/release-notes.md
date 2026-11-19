@@ -1,11 +1,10 @@
-Melody Keeeys（旋律键音）v0.2.1-alpha.1 测试版，主要是 Windows 版第一次能用。
+Melody Keeeys（旋律键音）v0.2.1-alpha.2 测试版，主要修 Windows 托盘面板。
 
 **这一版改了什么**
-- Windows 版终于能出包了：之前音频引擎在 MSVC 下编不过，CI 一直失败
-- Windows 托盘左键能打开托盘面板了：之前面板窗口没注册插件，点了没反应；修好后又碰到首次点击闪退，一并修了
-- Windows 设置窗口恢复系统标题栏，有关闭按钮，也能拖动；关闭只是收回托盘，不会退出
-- Windows 高分屏下托盘面板贴着托盘图标弹出，不再跑偏
-- 换了新的应用图标
+- Windows 托盘面板里的按钮点了没反应：原因是同时开了两个实例、连点托盘叠出两个面板。现在只允许运行一个实例，面板也只会有一个
+- Windows 托盘面板点别处就收起，不再一直挂在桌面上
+- Windows 托盘面板四个角都是圆角，之前上面两个角是直角
+- Windows 下界面字体跟着语言走：中文用微软雅黑 UI，日文用 Yu Gothic UI，其他语言用 Segoe UI Variable
 
 **安装须知**
 - Windows（x64）：解压后运行 `melody_keeeys.exe`，SmartScreen 提示时选「仍要运行」。
@@ -14,4 +13,4 @@ Melody Keeeys（旋律键音）v0.2.1-alpha.1 测试版，主要是 Windows 版�
 
 ---
 
-**English** — Melody Keeeys v0.2.1-alpha.1: the first working Windows build. Left-clicking the tray icon opens the tray panel, the settings window has a normal title bar with a close button, and the panel sits next to the tray icon on high-DPI screens. New app icon. No Linux build yet.
+**English** — Melody Keeeys v0.2.1-alpha.2: Windows tray panel fixes. Only one app instance runs and the tray no longer stacks duplicate panels, so buttons in the panel respond again. The panel now closes when you click elsewhere and has all four corners rounded. On Windows the UI font follows the language (Microsoft YaHei UI, Yu Gothic UI, Segoe UI Variable). No Linux build yet.

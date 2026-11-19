@@ -32,7 +32,7 @@ class AboutPage extends StatelessWidget {
                 Text('${tr('app.name')} · ${tr('about.tagline')}',
                     style: AppText.bodyLg.copyWith(color: context.colors.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.md),
-                MetricChip(label: 'v0.2.1-alpha.1', color: context.colors.primary),
+                MetricChip(label: 'v0.2.1-alpha.2', color: context.colors.primary),
               ],
             ),
           ),
